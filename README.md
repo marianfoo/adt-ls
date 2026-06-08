@@ -39,8 +39,12 @@ await adt.lifecycle.activate({ name: 'ZCL_BAR', objectType: 'CLAS/OC' });
 await adt.dispose();
 ```
 
-See the **[capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)**
-for the full method surface and the object-type support boundary.
+## Documentation
+
+- **[Usage guide](https://github.com/marianfoo/adt-ls/blob/main/docs/usage.md)** — connecting, auth, the full API with examples, resilience, logging.
+- **[API reference](https://github.com/marianfoo/adt-ls/blob/main/docs/api/README.md)** — generated from the types via TypeDoc (`npm run docs:api`).
+- **[Capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)** — the method surface + the object-type support boundary.
+- **[ADRs](https://github.com/marianfoo/adt-ls/tree/main/docs/adr)** — the architecture decisions (0001–0013).
 
 ---
 
@@ -74,16 +78,6 @@ Proven hands-on against the freshly-downloaded 1.0.0 VSIX and the live a4h syste
 - **Full `create → update → read → activate → run-tests → delete` GREEN against a4h** — exercising auth (reentrance + TLS proxy), the LSP channel, the MCP channel, and the resilience layer end-to-end.
 
 → **No design or protocol blockers remain.**
-
-## Design & decisions
-
-The full design lives in [`docs/`](https://github.com/marianfoo/adt-ls/tree/main/docs): the
-[implementation plan](https://github.com/marianfoo/adt-ls/blob/main/docs/plan.md), the
-[capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md),
-and **[13 ADRs](https://github.com/marianfoo/adt-ls/tree/main/docs/adr)** — scope (adt-ls only),
-the dual-channel unified API, auth strategies, BYO discovery, cross-platform transport,
-TLS/trust, resilience, packaging, version pinning, process isolation, license, API coverage,
-and typing.
 
 ## Consumers
 

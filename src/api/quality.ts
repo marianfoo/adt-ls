@@ -29,7 +29,17 @@ async function withTimeout<T>(label: string, p: Promise<T>, timeoutMs: number, h
   }
 }
 
-export function createQuality(deps: QualityDeps) {
+/** Quality & test surface (the `quality` namespace). All reads. */
+export interface Quality {
+  /** List the ATC check variants on the system (retrieved in the object's context). */
+  listAtcVariants(ref: ObjectRef, opts?: { query?: string }): Promise<unknown>;
+  /** Run ABAP Test Cockpit static analysis — empty `checkVariant` = system default. Report-only, timeout-guarded. */
+  runAtc(ref: ObjectRef, opts?: { checkVariant?: string; timeoutMs?: number }): Promise<unknown>;
+  /** Run ABAP Unit tests WITH code coverage → `{ status, result, coverage }`. */
+  runUnitTestsWithCoverage(ref: ObjectRef, opts?: { timeoutMs?: number }): Promise<unknown>;
+}
+
+export function createQuality(deps: QualityDeps): Quality {
   const { lsp, lifecycle } = deps;
 
   return {
@@ -88,5 +98,3 @@ export function createQuality(deps: QualityDeps) {
     },
   };
 }
-
-export type Quality = ReturnType<typeof createQuality>;

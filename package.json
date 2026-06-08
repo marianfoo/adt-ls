@@ -1,23 +1,35 @@
 {
   "name": "@marianfoo/adt-ls",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Generic TypeScript SDK over SAP's headless adt-ls (adt-lsc, from the sapse.adt-vscode extension).",
   "type": "module",
   "license": "Apache-2.0",
   "author": "marianfoo",
-  "repository": { "type": "git", "url": "git+https://github.com/marianfoo/adt-ls.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marianfoo/adt-ls.git"
+  },
   "homepage": "https://github.com/marianfoo/adt-ls#readme",
-  "bugs": { "url": "https://github.com/marianfoo/adt-ls/issues" },
+  "bugs": {
+    "url": "https://github.com/marianfoo/adt-ls/issues"
+  },
   "keywords": ["sap", "abap", "adt", "adt-ls", "sdk"],
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "sideEffects": false,
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": ["dist", "README.md", "LICENSE"],
-  "publishConfig": { "access": "public" },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsup",
     "typecheck": "tsc --noEmit",
@@ -25,6 +37,7 @@
     "test:watch": "vitest",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "docs:api": "typedoc",
     "prepack": "tsup",
     "prepublishOnly": "npm run lint && npm run typecheck"
   },
@@ -35,6 +48,8 @@
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.9.0",
     "tsup": "^8.3.5",
+    "typedoc": "^0.28.19",
+    "typedoc-plugin-markdown": "^4.12.0",
     "typescript": "^5.6.3",
     "vitest": "^2.1.9"
   }

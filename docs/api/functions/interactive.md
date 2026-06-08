@@ -1,0 +1,17 @@
+# Function: interactive()
+
+> **interactive**(`cb`): [`LogonStrategy`](../interfaces/LogonStrategy.md)
+
+Defined in: [auth/strategy.ts:98](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L98)
+
+Interactive — the consumer supplies the UX (no hardcoded browser/TTY).
+
+## Parameters
+
+### cb
+
+[`InteractiveCallbacks`](../interfaces/InteractiveCallbacks.md)
+
+## Returns
+
+[`LogonStrategy`](../interfaces/LogonStrategy.md)

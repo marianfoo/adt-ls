@@ -35,7 +35,38 @@ export interface NavigationDeps {
   lifecycle: Pick<Lifecycle, 'resolveAffUri'>;
 }
 
-export function createNavigation(deps: NavigationDeps) {
+/** LSP code-intelligence surface (the `navigation` namespace). Positions are a declared
+ * `symbol` name or explicit 1-based `line` + `character`. */
+export interface Navigation {
+  /** Object outline (LSP `DocumentSymbol[]` — kinds + ranges + children). */
+  documentSymbols(ref: ObjectRef): Promise<unknown>;
+  /** ABAP syntax check WITHOUT activating (pull diagnostics). */
+  checkSyntax(ref: ObjectRef): Promise<unknown>;
+  /** Go to a symbol's definition (the implementation). */
+  goToDefinition(ref: ObjectRef, locator: Locator): Promise<unknown>;
+  /** Go to a symbol's declaration (the signature). */
+  goToDeclaration(ref: ObjectRef, locator: Locator): Promise<unknown>;
+  /** Hover info — ABAP signature + ABAP-Doc, or CDS element info. */
+  hover(ref: ObjectRef, locator: Locator): Promise<unknown>;
+  /** Read/write/text occurrences of the symbol within the document. */
+  documentHighlight(ref: ObjectRef, locator: Locator): Promise<unknown>;
+  /** Where-used (`Location[]`). Timeout-guarded — heavily-used globals can hang. */
+  findReferences(
+    ref: ObjectRef,
+    locator: Locator,
+    opts?: { includeDeclaration?: boolean; timeoutMs?: number },
+  ): Promise<unknown>;
+  /** Inheritance / implementation tree (prepare → super/sub). */
+  typeHierarchy(
+    ref: ObjectRef,
+    locator: Locator,
+    opts?: { direction?: 'supertypes' | 'subtypes' | 'both' },
+  ): Promise<unknown>;
+  /** Code completion at a position (capped — lists are huge). */
+  completion(ref: ObjectRef, locator: Locator, opts?: { maxItems?: number }): Promise<unknown>;
+}
+
+export function createNavigation(deps: NavigationDeps): Navigation {
   const { lsp, lifecycle } = deps;
 
   // Per-URI serialization: didOpen/didClose share ONE LSP connection, so two concurrent
@@ -283,5 +314,3 @@ export function createNavigation(deps: NavigationDeps) {
     },
   };
 }
-
-export type Navigation = ReturnType<typeof createNavigation>;

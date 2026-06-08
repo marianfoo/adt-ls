@@ -1,0 +1,17 @@
+# Type Alias: ServerRequestHandler
+
+> **ServerRequestHandler** = (`params`) => `unknown` \| `Promise`\<`unknown`\>
+
+Defined in: [driver.ts:45](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L45)
+
+Handler for a server→client LSP request (e.g. requestBrowserBasedLogon).
+
+## Parameters
+
+### params
+
+`unknown`
+
+## Returns
+
+`unknown` \| `Promise`\<`unknown`\>

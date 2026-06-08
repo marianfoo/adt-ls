@@ -19,8 +19,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { createLifecycle } from './api/lifecycle.js';
+import type { ActivateResult, CreateResult, ObjectRef } from './api/lifecycle.js';
 import { createNavigation } from './api/navigation.js';
+import type { Navigation } from './api/navigation.js';
 import { createQuality } from './api/quality.js';
+import type { Quality } from './api/quality.js';
 import {
   deleteFile,
   getInactiveObjects,
@@ -30,7 +33,9 @@ import {
   readFile,
   writeFile,
 } from './api/repository.js';
+import type { QuickSearchResult, UserRef } from './api/repository.js';
 import { createServices } from './api/services.js';
+import type { Services } from './api/services.js';
 import { createDestination, ensureLoggedOn, getLogonInfo, initializeDestinationsService } from './auth/reentrance.js';
 import type { LogonStrategy } from './auth/strategy.js';
 import { AdtLsMcpClient } from './channels/mcp-federation.js';
@@ -43,7 +48,7 @@ import { logger } from './log.js';
 import { makeRelogon, makeReviveIfDead } from './resilience/session-retry.js';
 
 const execFileP = promisify(execFile);
-const VERSION = '0.1.0';
+const VERSION = '0.1.1';
 const CLIENT_INFO = { name: '@marianfoo/adt-ls', version: VERSION };
 /** Keep-alive heartbeat cadence + activity window (ADR-0007). */
 const KEEPALIVE_INTERVAL_MS = 180_000;
@@ -105,7 +110,7 @@ async function importCaCert(keytool: string, store: string, certPath: string, al
   ]);
 }
 
-export async function createAdtLs(opts: CreateAdtLsOptions) {
+export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient> {
   const conn = opts.connection;
   const auth = opts.auth;
   const probe = conn?.probe ?? { pattern: 'CL_ABAP_TYPEDESCR', types: ['CLAS/OC'] };
@@ -336,4 +341,112 @@ export async function createAdtLs(opts: CreateAdtLsOptions) {
   };
 }
 
-export type AdtLsClient = Awaited<ReturnType<typeof createAdtLs>>;
+/**
+ * The unified adt-ls client returned by {@link createAdtLs}. One coherent surface over
+ * both adt-ls channels (LSP + adt-ls's own MCP) — the channel split is hidden. Always
+ * call {@link AdtLsClient.dispose | dispose()} when finished.
+ */
+export interface AdtLsClient {
+  /** Repository queries + file operations + the name→URI resolver. */
+  repository: {
+    /** Search ABAP repository objects by name pattern (e.g. `"CL_ABAP*"`), optionally filtered by ADT type. `cold` retries the cold-index window. */
+    search(
+      pattern: string,
+      opts?: { maxResults?: number; types?: string[]; cold?: boolean },
+    ): Promise<QuickSearchResult>;
+    /** List user master records visible to the logged-on user. */
+    getUsers(): Promise<UserRef[]>;
+    /** Resolve an ADT object path to the canonical repotree AFF URI used by file ops. */
+    getLsUri(adtUri: string): Promise<string>;
+    /** Read an AFF file's content by repotree URI. */
+    readFile(uri: string): Promise<string>;
+    /** Write an AFF file (plain multi-line source) by repotree URI. */
+    writeFile(uri: string, content: string): Promise<unknown>;
+    /** Delete by AFF URI (use the `.json` metadata URI for objects). */
+    delete(uri: string): Promise<unknown>;
+    /** List inactive (draft) objects on the connected destination. */
+    listInactive(): Promise<unknown[]>;
+  };
+  /** Read object source by name. */
+  source: {
+    /** Read an object's source (per include for classes, e.g. `include: 'testclasses'`). */
+    read(args: ObjectRef & { include?: string }): Promise<string>;
+  };
+  /** The authoring lifecycle (modern ABAP-Cloud / RAP types; classic types throw a clear error). */
+  lifecycle: {
+    /** Resolve `{name, objectType}` → repotree AFF URI (search → getLsUri). */
+    resolveAffUri(ref: ObjectRef): Promise<string>;
+    /** Create an object. `transportRequestNumber` is `''` for `$TMP`/local packages. */
+    create(args: {
+      objectType: string;
+      name: string;
+      packageName: string;
+      description: string;
+      transportRequestNumber?: string;
+    }): Promise<CreateResult>;
+    /** Update an object's source (optionally a specific include). */
+    update(args: ObjectRef & { source: string; include?: string }): Promise<void>;
+    /** Activate; on failure `success:false` with structured `diagnostics` (ranges). */
+    activate(args: ObjectRef): Promise<ActivateResult>;
+    /** Run the object's ABAP Unit tests. */
+    runUnitTests(args: ObjectRef): Promise<unknown>;
+    /** Delete the object (targets its `.json` metadata). */
+    delete(args: ObjectRef): Promise<void>;
+    /** Run a RAP generator → a full object set (table/CDS/BDEF/SRVD/SRVB). */
+    generate(args: {
+      generatorId: string;
+      content: string;
+      packageName: string;
+      transportRequestNumber?: string;
+      referencedObjectType?: string;
+      referencedObjectName?: string;
+    }): Promise<unknown>;
+    /** Validate creation input before create (read-only verdict). */
+    validate(args: { objectType: string; name: string; packageName: string; description: string }): Promise<unknown>;
+  };
+  /** LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, completion, syntax check). */
+  navigation: Navigation;
+  /** Quality: ATC static analysis + ABAP Unit code coverage. */
+  quality: Quality;
+  /** Runtime + business services: run a console app, service-binding details/publish. */
+  services: Services;
+  /** CTS transport + lock operations. */
+  transport: {
+    /** Object-scoped transport lookup (read-only). */
+    find(args: {
+      objectName: string;
+      objectType: string;
+      developmentPackage: string;
+      isCreation: boolean;
+    }): Promise<unknown>;
+    /** Create a CTS transport request (refuses local `$`-packages). */
+    create(args: {
+      developmentPackage: string;
+      transportDescription: string;
+      isCreation: boolean;
+      objectName?: string;
+      objectType?: string;
+    }): Promise<unknown>;
+    /** Assign an existing transport to an object. */
+    assign(
+      args: ObjectRef & { transport: string },
+    ): Promise<{ assigned: boolean; object: string; objectType: string; transport: string }>;
+    /** List your modifiable transports (capped + filterable). */
+    list(opts?: { limit?: number; query?: string }): Promise<unknown>;
+    /** Read an object's lock status. */
+    getLockStatus(args: ObjectRef): Promise<{ lockingSupported: boolean; lockId: string | null }>;
+  };
+  /** Escape hatches for the long tail (ADR-0002). */
+  raw: {
+    /** Raw LSP / `adtLs/*` request. */
+    lsp<T = unknown>(method: string, params?: unknown): Promise<T>;
+    /** Raw call to a tool on adt-ls's own MCP server (e.g. a backend-dynamic tool). */
+    tool(name: string, args?: Record<string, unknown>): Promise<unknown>;
+  };
+  /** Force a SAP re-logon; `true` when the session is live afterwards (also auto-heals on dead-session detection). */
+  reconnect(): Promise<boolean>;
+  /** Connection + liveness snapshot. */
+  health(): HealthInfo;
+  /** Shut down: stop the keep-alive, kill adt-ls, close the proxy, and clean temp dirs. */
+  dispose(): Promise<void>;
+}

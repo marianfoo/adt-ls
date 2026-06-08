@@ -16,7 +16,17 @@ export interface ServicesDeps {
   lifecycle: Pick<Lifecycle, 'resolveAffUri'>;
 }
 
-export function createServices(deps: ServicesDeps) {
+/** Runtime + business-service surface (the `services` namespace). */
+export interface Services {
+  /** Run an executable object (classrun / program) and return its console output. */
+  runApplication(ref: ObjectRef): Promise<{ output: string }>;
+  /** Read a service binding's details (binding type, OData version, service list). */
+  serviceBindingDetails(ref: ObjectRef): Promise<unknown>;
+  /** Publish (or unpublish) a service binding — mutating. */
+  publishServiceBinding(ref: ObjectRef): Promise<unknown>;
+}
+
+export function createServices(deps: ServicesDeps): Services {
   const { lsp, lifecycle } = deps;
 
   // The srvb segment loads the binding from the SFS; on an object not yet touched this
@@ -58,5 +68,3 @@ export function createServices(deps: ServicesDeps) {
     },
   };
 }
-
-export type Services = ReturnType<typeof createServices>;
