@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { searchWithRevive } from '../src/api/repository.js';
 import {
   isLoggedOffFederatedResult,
   isLoggedOffMessage,
@@ -93,5 +94,42 @@ describe('makeReviveIfDead', () => {
     const revive = makeReviveIfDead(async () => false, relogon);
     expect(await revive()).toBe(true);
     expect(relogon).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('searchWithRevive', () => {
+  const empty = { references: [] };
+  const hit = { references: [{ name: 'ZCL_X', uri: '/x' }] };
+
+  it('retries once when an empty result is caused by a dead (then revived) session', async () => {
+    const run = vi.fn().mockResolvedValueOnce(empty).mockResolvedValueOnce(hit);
+    const reviveIfDead = vi.fn(async () => true); // dead → revived
+    const r = await searchWithRevive(run, reviveIfDead);
+    expect(r).toBe(hit);
+    expect(run).toHaveBeenCalledTimes(2);
+    expect(reviveIfDead).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT retry when the session is alive (a genuine no-match)', async () => {
+    const run = vi.fn().mockResolvedValue(empty);
+    const reviveIfDead = vi.fn(async () => false); // alive → no relogon
+    const r = await searchWithRevive(run, reviveIfDead);
+    expect(r).toBe(empty);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(reviveIfDead).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not probe when the first result already has hits', async () => {
+    const run = vi.fn().mockResolvedValue(hit);
+    const reviveIfDead = vi.fn(async () => true);
+    await searchWithRevive(run, reviveIfDead);
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(reviveIfDead).not.toHaveBeenCalled();
+  });
+
+  it('is a no-op passthrough when no reviveIfDead is given', async () => {
+    const run = vi.fn().mockResolvedValue(empty);
+    expect(await searchWithRevive(run)).toBe(empty);
+    expect(run).toHaveBeenCalledTimes(1);
   });
 });

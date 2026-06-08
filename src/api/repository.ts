@@ -49,6 +49,24 @@ export function quickSearch(
   });
 }
 
+/**
+ * Run a search; if it comes back empty AND `reviveIfDead` resurrects a dead SAP session,
+ * retry once. An idle-expired session returns `[]` (not "logged off"), so a first search
+ * after idle can be a false negative; `reviveIfDead` probes a known object and only
+ * re-logs-on if the session is actually dead (a genuine no-match leaves it alone). Pure
+ * orchestration — the same self-heal `lifecycle.resolveAffUri` applies to name lookups.
+ */
+export async function searchWithRevive(
+  run: () => Promise<QuickSearchResult>,
+  reviveIfDead?: () => Promise<boolean>,
+): Promise<QuickSearchResult> {
+  let r = await run();
+  if ((r.references?.length ?? 0) === 0 && reviveIfDead && (await reviveIfDead())) {
+    r = await run();
+  }
+  return r;
+}
+
 /** List inactive (draft) objects on a destination. Uses `destinationId`. */
 export function getInactiveObjects(driver: LspRequester, destinationId: string): Promise<unknown[]> {
   return driver.sendRequest<unknown[]>('adtLs/activation/getInactiveObjects', { destinationId });

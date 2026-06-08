@@ -31,6 +31,7 @@ import {
   getUsers,
   quickSearch,
   readFile,
+  searchWithRevive,
   writeFile,
 } from './api/repository.js';
 import type { QuickSearchResult, UserRef } from './api/repository.js';
@@ -46,7 +47,12 @@ import { type TlsReverseProxy, startTlsReverseProxy } from './connection/tls-pro
 import { resolveAdtLsPath } from './discovery.js';
 import { AdtLsDriver, type LspClient } from './driver.js';
 import { logger } from './log.js';
-import { makeRelogon, makeReviveIfDead } from './resilience/session-retry.js';
+import {
+  isLoggedOffFederatedResult,
+  makeRelogon,
+  makeReviveIfDead,
+  makeWithRelogon,
+} from './resilience/session-retry.js';
 
 const execFileP = promisify(execFile);
 const VERSION = '0.4.0'; // x-release-please-version
@@ -205,19 +211,23 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
   logger.info(`adt-ls MCP federated on http://localhost:${started.port}/mcp`);
 
   // 5. Resilience: relogon (deduped) + revive-if-dead (probe a known object). Guarded on destId.
+  //    `backendLive` is tracked HONESTLY — set true on a successful probe/relogon, AND false
+  //    on a failed one — so `health().backendLive` never reports a stale "alive" after a
+  //    failed recovery (it is the real readiness signal).
   let backendLive = false;
   const relogon = makeRelogon(async () => {
     if (!destId) return false;
     try {
       const r = await ensureLoggedOn(driver, destId);
       await setMcpDestination(driver, destId);
-      const ok = r.logonState === 'connected';
-      if (ok) backendLive = true;
-      return ok;
+      backendLive = r.logonState === 'connected';
+      return backendLive;
     } catch {
+      backendLive = false;
       return false;
     }
   });
+  const withRelogon = makeWithRelogon(relogon);
   const probeLive = async (): Promise<boolean> => {
     if (!destId) return false;
     try {
@@ -226,12 +236,11 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
         { destination: destId, pattern: probe.pattern, maxResults: 1, types: probe.types ?? [] },
         {},
       );
-      const alive = (r.references?.length ?? 0) > 0;
-      if (alive) backendLive = true;
-      return alive;
+      backendLive = (r.references?.length ?? 0) > 0;
     } catch {
-      return false;
+      backendLive = false;
     }
+    return backendLive;
   };
   const reviveIfDead = makeReviveIfDead(probeLive, relogon, (m) => logger.warn(m));
 
@@ -241,10 +250,13 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
   const touch = (): void => {
     lastActivity = Date.now();
   };
+  // Both channels self-heal a lost session: `withRelogon` detects a "logged off" throw
+  // (LSP) or an `isError` federated result (MCP) → re-logs-on once → retries. Combined with
+  // the empty-search `reviveIfDead` below, this covers BOTH faces of session death (ADR-0008).
   const active: LspClient = {
     sendRequest<T = unknown>(m: string, p?: unknown): Promise<T> {
       touch();
-      return driver.sendRequest<T>(m, p);
+      return withRelogon<T>(() => driver.sendRequest<T>(m, p));
     },
     sendNotification(m: string, p?: unknown): Promise<void> {
       touch();
@@ -253,7 +265,7 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
   };
   const activeCallTool = (name: string, args: Record<string, unknown>): Promise<unknown> => {
     touch();
-    return mcp.callTool(name, args);
+    return withRelogon(() => mcp.callTool(name, args), isLoggedOffFederatedResult);
   };
   const requireDest = (): string => {
     if (!destId) throw new Error('No ABAP destination is connected.');
@@ -303,12 +315,19 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
 
   return {
     repository: {
-      search: (pattern: string, o: { maxResults?: number; types?: string[]; cold?: boolean } = {}) =>
-        quickSearch(
-          active,
-          { destination: requireDest(), pattern, maxResults: o.maxResults, types: o.types },
-          { cold: o.cold },
-        ),
+      search: async (pattern: string, o: { maxResults?: number; types?: string[]; cold?: boolean } = {}) => {
+        // Self-heal: an idle-expired session returns [] (not "logged off"), so retry once if
+        // reviveIfDead resurrects it. A hit confirms liveness.
+        const run = () =>
+          quickSearch(
+            active,
+            { destination: requireDest(), pattern, maxResults: o.maxResults, types: o.types },
+            { cold: o.cold },
+          );
+        const r = await searchWithRevive(run, reviveIfDead);
+        if ((r.references?.length ?? 0) > 0) backendLive = true;
+        return r;
+      },
       getUsers: () => getUsers(active, requireDest()),
       getLsUri: (adtUri: string) => getLsUri(active, requireDest(), adtUri),
       readFile: (uri: string) => readFile(active, uri),
