@@ -165,6 +165,9 @@ await adt.navigation.hover(ref, { line: 12, character: 8 }); // 1-based; or { sy
 await adt.navigation.typeHierarchy(ref, { symbol: 'CL_ABAP_TYPEDESCR' }, { direction: 'both' });
 await adt.navigation.checkSyntax(ref); // syntax check WITHOUT activating
 await adt.navigation.completion(ref, { symbol: 'describe_by_data' });
+await adt.navigation.completion(ref, { line: 20, character: 9 }, { resolve: true }); // enrich items: ABAP signatures + ABAP-Doc
+const { formatted } = await adt.navigation.format(ref);     // ABAP Pretty-Printer (whole document)
+const { tokens } = await adt.navigation.semanticTokens(ref); // decoded [{ line, character, length, tokenType, tokenModifiers[] }]
 ```
 
 Position locators are a declared `symbol` name, or explicit 1-based `line` + `character`.
@@ -191,9 +194,14 @@ await adt.services.publishServiceBinding({ name: 'ZSB_FOO', objectType: 'SRVB/SV
 await adt.transport.find({ objectName: 'ZCL_FOO', objectType: 'CLAS/OC', developmentPackage: 'ZPKG', isCreation: false });
 await adt.transport.list({ limit: 50, query: 'me' });
 await adt.transport.getLockStatus(ref);
+// decision oracle: needs a transport? which are assignable? already locked? ($TMP → isRecordingRequired:false)
+await adt.transport.check({ name: 'ZCL_FOO', objectType: 'CLAS/OC' }); // { operation: 'CREATE' | 'MODIFY' | 'DELETE' }
 const tr = await adt.transport.create({ developmentPackage: 'ZPKG', transportDescription: 'feat', isCreation: true });
 await adt.transport.assign({ name: 'ZCL_FOO', objectType: 'CLAS/OC', transport: 'DEVK900123' });
 ```
+
+`lifecycle.activate` returns per-phase detail (`checkExecuted` / `activationExecuted` / `generationExecuted` /
+`forceSupported` / `refreshedUris`) and accepts `{ forceActivation: true }`.
 
 ### raw — escape hatches
 

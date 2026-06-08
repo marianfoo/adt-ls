@@ -23,9 +23,9 @@ Legend: ✅ wrapped · 🟡 reachable but **not wrapped** (candidate) · ⛔ pre
 | --- | --- | --- |
 | `repository` | getUsers, getLsUri, quickSearch | ✅ `repository.{getUsers,getLsUri,search}` |
 | `fileSystem` | readFile, writeFile, delete, getFileLockStatus, lockFile, unlockFile, **toggleVersion**, stat, abapStat, readDirectory, getObjectName, getPackageName, forceRefresh, getFolderUri, **getExternalLinks** | ✅ read/write/delete/getFileLockStatus · 🟡 toggleVersion (active⇄inactive draft), getExternalLinks, stat/readDirectory, explicit lock/unlock |
-| `activation` | **activate**, getInactiveObjects | ✅ `repository.listInactive` · 🟡 **native `activate`** (lib uses the MCP wrapper → no `forceActivation`, capped at 15 objects) |
+| `activation` | **activate**, getInactiveObjects | ✅ `repository.listInactive` · ✅ **native `activate`** (0.4.0 — `lifecycle.activate` uses `adtLs/activation/activate`: per-phase flags, `forceActivation`, no 15-object cap) |
 | `objectCreation` | getCreatableObjectTypes, **getCreationUiModelAndContent, sideEffects, validate, create** | 🟡 lib creates via the MCP `abap_creation-*` tools; the **native 4-step pipeline** (UI-model → validate → create, with transport-check + starter source) is richer |
-| `cts/transport` | searchTransports(Simple), createTransportForObjectLock, assignTransportToObject, **checkTransportForObjectLock** | ✅ `transport.{list,create,assign,find}` · 🟡 `checkTransportForObjectLock` (the transport "decision oracle") |
+| `cts/transport` | searchTransports(Simple), createTransportForObjectLock, assignTransportToObject, **checkTransportForObjectLock** | ✅ `transport.{list,create,assign,find,check}` (0.4.0 added `check` = `checkTransportForObjectLock`, the decision oracle) |
 | `cts/solman` | getConfiguration, check, requestObjectAllowlistApproval | 🟡 **none** — Solution Manager / ChaRM transport |
 | `atc` | runCheck, getCheckVariants | ✅ `quality.{runAtc,listAtcVariants}` |
 | `abapUnit` | runTests, capabilities, validateRunParams | ✅ `lifecycle.runUnitTests` |
@@ -34,7 +34,7 @@ Legend: ✅ wrapped · 🟡 reachable but **not wrapped** (candidate) · ⛔ pre
 | `run` | runApplication | ✅ `services.runApplication` |
 | `destinations` | initializeService, list, listSystemConfigurations, create, createProject, deleteProject, getLogonInfo, ensureLoggedOn, stopLogonAttempt, getStorePath | ✅ used internally for logon; `listDestinations()` (0.3.0) via the MCP equivalent · 🟡 native `list`/`listSystemConfigurations`/`deleteProject` not surfaced |
 | `mcp` | startMCPServer, setDestination, stopMCPServer | ✅ exported (0.2.0) |
-| `textDocument` | (standard LSP — see §2) + **insertProposal, notifyDirtyState** | ✅ standard features via `navigation.*` · 🟡 `insertProposal`, `notifyDirtyState` |
+| `textDocument` | (standard LSP — see §2) + **insertProposal, notifyDirtyState** | ✅ standard features via `navigation.*` (0.4.0 added `format`, `semanticTokens`, completion `resolve`) · 🟡 `insertProposal`, `notifyDirtyState` |
 | **`codePrediction`** | getCodePredictions, reportCodePredictionInsertion | 🟡 **none** — ML/AI next-code prediction |
 | **`modelDriven`** | content, schema, viewDescription, modelDrivenDescriptor, valueHelp, sideEffect, action, actionInput | 🟡 **none** — model-driven (form/metadata) object editing (value-helps, actions, side-effects) |
 | **`support`** | getSupportFileOptions, createSupportFile | 🟡 **none** — supportability bundle generation |
@@ -53,11 +53,11 @@ form-based editing, support bundles, AI hook); `debugger` is real but interactiv
 | Provider | Offered? | Wrapped? | Note |
 | --- | --- | --- | --- |
 | definition / declaration / references / hover / documentHighlight / documentSymbol / typeHierarchy | ✅ | ✅ | `navigation.*` |
-| `completionProvider` (`resolveProvider:true`) | ✅ | ⚠️ partial | `navigation.completion` — **no `completionItem/resolve`** |
+| `completionProvider` (`resolveProvider:true`) | ✅ | ✅ (0.4.0) | `navigation.completion(…, { resolve:true })` → `completionItem/resolve` enriches member items with the full ABAP signature + ABAP-Doc as markdown (keywords carry no `data` → no-op) |
 | `diagnosticProvider` | ✅ | ✅ | `navigation.checkSyntax` |
-| `codeLensProvider` | ✅ | 🟡 **GAP** | `textDocument/codeLens` — not wrapped |
-| `semanticTokensProvider` | ✅ | 🟡 **GAP** | fetched internally to prime the cache, never returned |
-| `documentFormatting` / `documentRangeFormatting` | ❌ `false` at init | — | **but** a per-type `*FormatService` may register dynamically on `didOpen` — **unverified** (see §4) |
+| `codeLensProvider` | ✅ | 🟡 skip | `textDocument/codeLens` — only SRVB/AFF-JSON lenses + client-side commands → low headless value |
+| `semanticTokensProvider` | ✅ | ✅ (0.4.0) | `navigation.semanticTokens` → decoded `[{line,character,length,tokenType,tokenModifiers[]}]` via the 23-type/10-modifier legend (same pass that primes hover/highlight) |
+| `documentFormatting` / `documentRangeFormatting` | ❌ `false` at init **but registered live** | ✅ (0.4.0) | **CONFIRMED:** `textDocument/{formatting,rangeFormatting}` are dynamically registered on `didOpen` (captured the `client/registerCapability` live); `navigation.format` → ABAP Pretty-Printer output. The prior "unverified" is now resolved. |
 
 Not advertised at all → correctly absent: `rename`, `codeAction` (quick-fix), `signatureHelp`,
 `foldingRange`, `inlayHint`, `callHierarchy`.
@@ -71,20 +71,29 @@ and coverage all go through native `adtLs/*` LSP methods, not MCP tools.
 
 ---
 
-## 4. What's worth wrapping next (candidates, prioritized)
+## 4. Candidate wrapping — status
 
-| # | Candidate | adt-ls method | Effort / payoff |
-| --- | --- | --- | --- |
-| 1 | `completionItem/resolve` (rich completion detail) | `completionItem/resolve` | tiny / sidesteps the hover cache gate |
-| 2 | `semanticTokens` + `codeLens` (already-fetched / advertised) | `textDocument/{semanticTokens,codeLens}` | small / editor highlighting + inline actions |
-| 3 | **Native `activation/activate`** | `adtLs/activation/activate` | small / `forceActivation`, no 15-object cap (vs the lossy MCP wrapper) |
-| 4 | **`objectCreation` pipeline** | `adtLs/objectCreation/{getCreationUiModelAndContent,validate,create}` | larger / canonical create with transport-check + starter source |
-| 5 | `fileSystem/toggleVersion` (active⇄inactive draft) | `adtLs/fileSystem/toggleVersion` | small / proper object-state control |
-| 6 | `cts/transport/checkTransportForObjectLock` | (same) | small / the transport decision oracle |
-| 7 | SRVB `getPreviewURL` / `getServiceEntitySet` | `adtLs/businessservice/srvb/*` | small / live OData preview |
-| 8 | `objectGenerator` dry-run preview | `serverExtension/objectGenerator/getListOfObjectsToBeGenerated` | small / preview before mass-generate |
-| 9 | **Pretty-print / formatting** | dynamic per-type `*FormatService` | **needs a `didOpen` dynamic-registration probe** — highest ambiguity; formatting is `false` at init but may register live |
-| 10 | `codePrediction`, `modelDriven`, `support`, `joule` | respective segments | bigger / niche — AI completion, form editing, support bundles |
+### 4a. Wrapped in 0.4.0 (live-verified against a4h `1.0.0.202605281240`)
+
+Each was probed live; the **exact verified call** is recorded as durable evidence.
+
+| Capability | API | Verified call → observed result |
+| --- | --- | --- |
+| **ABAP Pretty-Printer formatting** | `navigation.format(ref, {tabSize?,insertSpaces?})` | open doc → `textDocument/formatting {textDocument:{uri}, options:{tabSize:2,insertSpaces:true}}` → **one full-document `TextEdit`** with pretty-printed source (CRLF). `formatting`+`rangeFormatting` arrive via `client/registerCapability` on `didOpen`. |
+| **Native activation** | `lifecycle.activate(ref, {forceActivation?})` | `adtLs/activation/activate {destination, lsUris:[uri], references:[], forceActivation:false}` → `{isCheckExecuted,isActivationExecuted,isGenerationExecuted,isForceSupported,refreshLsUris[],objectDiagnostics[]}`. Errors nest as `objectDiagnostics[].diagnostic[].severity:1` (`source:"abapActivation"`). |
+| **Transport decision oracle** | `transport.check(ref, {operation?,transportLayer?,recordChanges?})` | `adtLs/cts/transport/checkTransportForObjectLock {operationType:'MODIFY', objectInfo:{objectUri:uri}, transportLayer:'', isRecordChanges:true}` → `{isTransportCheckSuccessful,isRecordingRequired,isLockedInRequests,transportCreationConfiguration{…},checkMessages{…}}`. `$TMP` → `isRecordingRequired:false`. |
+| **Completion resolve** | `navigation.completion(ref, locator, {resolve:true})` | member position (e.g. `out->`) → items carry `data` → `completionItem/resolve` returns `documentation.value` = markdown ABAP signature (`importing/returning/…`). Keyword positions carry no `data` (no-op). |
+| **Decoded semantic tokens** | `navigation.semanticTokens(ref)` | `textDocument/semanticTokens/full` → `{data:[…5-int tuples]}`; decoded with the `initialize` legend (23 types / 10 modifiers) into absolute `{line,character,length,tokenType,tokenModifiers[]}`. |
+
+### 4b. Probed but **deferred** (evidence-backed)
+
+| Candidate | Why deferred |
+| --- | --- |
+| SRVB `getServiceEntitySet` / `getPreviewURL` | `ServiceBindingPreviewData` shape decompiled (`{bindingType,entity,lsuri,service,serviceDefinationName,serviceName,serviceVersion}` — note lowercase `lsuri`); even fully populated, returns **`"Internal error"`** on a4h (needs a *published* binding + gateway activation). Medium value, not reliably reachable. |
+| `objectGenerator` native dry-run (`getListOfObjectsToBeGenerated`) | `fetchAllGenerators` needs a project-qualified ref URI; class lsUri → `"Internal error"`, package ADT URI → `"URI does not contain a AFF file name"`. The **MCP** `abap_generators-*` path already covers generation; native dry-run is a finicky, low-marginal-value extra. |
+| `objectCreation/{getCreationUiModelAndContent,validate}` | Both work (`validate` needs `fieldGroup:` **integer**, e.g. `1`), but **duplicate** the library's existing MCP `getObjectTypeDetails` / `validateObject`. |
+| `fileSystem/toggleVersion` | `adtLs/fileSystem/toggleVersion {uri}` → `null` (works) but it's a UI active/inactive **view** toggle — unclear value for a headless/programmatic consumer. |
+| `codePrediction`, `modelDriven`, `support`, `joule`, `cts/solman` | Niche / interactive / backend-gated (AI completion, form-UI protocol, support bundles, ChaRM). |
 
 ## 5. Hard boundaries — NOT in adt-ls (don't build; main-arc-1 territory)
 
