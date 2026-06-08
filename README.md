@@ -62,6 +62,7 @@ await driver.dispose();
 
 - **[📖 API reference (hosted)](https://marianfoo.github.io/adt-ls/)** — the full TypeDoc site, auto-published to GitHub Pages on every push to `main`.
 - **[Usage guide](https://github.com/marianfoo/adt-ls/blob/main/docs/usage.md)** — connecting, auth, the full API with examples, resilience, logging.
+- **[Use cases](https://github.com/marianfoo/adt-ls/blob/main/docs/use-cases.md)** — dev-tool & CI/CD recipes (ABAP Unit gate, ATC, syntax check, MCP server, scaffolding) with the API to use.
 - **[API reference (Markdown)](https://github.com/marianfoo/adt-ls/blob/main/docs/api/README.md)** — the same reference rendered in-repo (`npm run docs:api`).
 - **[Capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)** — the method surface + the object-type support boundary.
 - **[ADRs](https://github.com/marianfoo/adt-ls/tree/main/docs/adr)** — the architecture decisions (0001–0013).
