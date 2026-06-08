@@ -93,6 +93,7 @@ Each was probed live; the **exact verified call** is recorded as durable evidenc
 | **Completion resolve** | `navigation.completion(ref, locator, {resolve:true})` | member position (e.g. `out->`) → items carry `data` → `completionItem/resolve` returns `documentation.value` = markdown ABAP signature (`importing/returning/…`). Keyword positions carry no `data` (no-op). |
 | **Decoded semantic tokens** | `navigation.semanticTokens(ref)` | `textDocument/semanticTokens/full` → `{data:[…5-int tuples]}`; decoded with the `initialize` legend (23 types / 10 modifiers) into absolute `{line,character,length,tokenType,tokenModifiers[]}`. |
 | **SRVB service info (URL + entity sets)** | `services.listServices(ref)` / `services.getServiceInfo(ref)` | chain the MCP tools `abap_business_services-fetch_services` (→ `{odataVersion, odataInfoUri, services:[{name, content:[{serviceDefinition, serviceVersion}], isPublished}]}`) then `fetch_service_information` (all 7 fields required) → `{serviceUrl:"…/sap/opu/odata/…?sap-client=001", entitySets:[{name, navigations[]}]}`. Verified V2 **and** V4 (published). **NOT** the raw LSP `getServiceEntitySet`/`getPreviewURL` (editor-only → see §4b). |
+| **Creation form contract (legal values per field)** | `lifecycle.getCreationForm(objectType)` | `adtLs/objectCreation/getCreationUiModelAndContent` → parses the UI model into `fields:[{path, label, required, maxLength?, pattern?, valueHelpTypes?}]`. Distinct from `getObjectTypeDetails` (see §4d): adds the **value-help target types** (`superclass`→`["CLAS/OC"]`, `referencedObject`→`["TABL/DT","STOB"]`) + name regex `^[A-Z0-9_/]*$`. |
 
 ### 4b. Probed and **confirmed NOT usable headless** (live evidence)
 
@@ -112,10 +113,21 @@ Each was probed live; the **exact verified call** is recorded as durable evidenc
 
 | Candidate | Why not wrapped |
 | --- | --- |
-| `objectCreation/{getCreationUiModelAndContent,validate}` | Both work (`validate` needs `fieldGroup:` **integer**, e.g. `1`), but **duplicate** the library's existing MCP `getObjectTypeDetails` / `validateObject`. |
+| `objectCreation/validate` (native) | Near-duplicate of the wrapped MCP `validateObject` — see §4d. |
 | `fileSystem/toggleVersion` | `adtLs/fileSystem/toggleVersion {uri}` → `null` (works) but it's a UI active/inactive **view** toggle — unclear value for a headless/programmatic consumer. |
 | `codeLens` | Advertised, but only SRVB/AFF-JSON lenses with client-side commands → no headless value. |
 | `codePrediction`, `modelDriven`, `support`, `joule`, `cts/solman` | Niche / interactive / backend-gated (AI completion, form-UI protocol, support bundles, ChaRM). |
+
+### 4d. Similar-API audit — too-similar (skip) vs different purpose (keep both)
+
+Four overlapping pairs, decided by a **live side-by-side** of their actual outputs:
+
+| Pair | Outputs compared | Verdict |
+| --- | --- | --- |
+| `getObjectTypeDetails` (MCP) **vs** `getCreationForm` (native) | MCP: flat `{fields:[{tag, required, maxLength}]}`. Native: per-field `{path, label, required, maxLength, pattern, valueHelpTypes}` — i.e. the **legal values** (value-help target types + name regex). | **Different purpose → both kept.** MCP = "which fields"; native = "which fields + what values are legal". `getCreationForm` wrapped in 0.4.0. |
+| `validateObject` (MCP `run_validation`) **vs** `objectCreation/validate` (native) | MCP: `{message:"… validated successfully"}`. Native: `{status:{message, severity:1}, objectContent, fieldGroupSections}`. | **Too similar → skip native.** Both answer "is this creation input valid". Native's only edge is a numeric `severity` (vs a string) + the echoed form — marginal; the wrapped MCP suffices. |
+| `services.serviceBindingDetails` (LSP) **vs** `services.listServices` (MCP) | Details: binding **metadata** (description, package, created-by, links, service *names*). listServices: the **service structure** (serviceDefinition + serviceVersion + isPublished + odataInfoUri) feeding `getServiceInfo`. | **Different purpose → both kept.** Metadata-about-the-object vs services-it-exposes. |
+| `transport.find` (MCP `abap_transport-get`) **vs** `transport.check` (native) | find: `{isRecordingRequired, transportRequests:[{number, description, owner}]}`. check: that **plus** `isLockedInRequests`, `isRecordingOnlyInLockedRequest`, `transportCreationConfiguration{supportsCtsProject, supportsChangeDocument}`, `checkMessages`. | **Overlap; `check` is a superset → both kept, documented.** `find` = quick "which transports apply"; `check` = full pre-write decision incl. **lock state** + creation config (use before the lock→assign round-trip). |
 
 ## 5. Hard boundaries — NOT in adt-ls (don't build; main-arc-1 territory)
 
