@@ -18,7 +18,8 @@ npm install @marianfoo/adt-ls
 
 You **bring adt-ls** (SAP Developer License — not redistributable): install the
 `sapse.adt-vscode` extension (VS Code / Cursor) and the library auto-discovers it, or
-run `node scripts/setup-adt-ls.mjs <path-to.vsix>` to extract it into `vendor/`.
+vendor the per-platform VSIX for CI. **New here → [docs/setup.md](https://github.com/marianfoo/adt-ls/blob/main/docs/setup.md)**:
+which platform build to download, CI vendoring, and connecting with auth.
 
 ## Quickstart
 
@@ -60,6 +61,7 @@ await driver.dispose();
 
 ## Documentation
 
+- **[Setup guide](https://github.com/marianfoo/adt-ls/blob/main/docs/setup.md)** — **start here**: where to get the binary, which platform build, CI vendoring, and connecting with auth.
 - **[📖 API reference (hosted)](https://marianfoo.github.io/adt-ls/)** — the full TypeDoc site, auto-published to GitHub Pages on every push to `main`.
 - **[Usage guide](https://github.com/marianfoo/adt-ls/blob/main/docs/usage.md)** — connecting, auth, the full API with examples, resilience, logging.
 - **[Use cases](https://github.com/marianfoo/adt-ls/blob/main/docs/use-cases.md)** — dev-tool & CI/CD recipes (ABAP Unit gate, ATC, syntax check, MCP server, scaffolding) with the API to use.

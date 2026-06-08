@@ -41,6 +41,9 @@ Every object is addressed by `{ name, objectType }` (e.g. `{ name: 'ZCL_FOO', ob
 
 ## Getting `adt-lsc` available (including in CI)
 
+> **Full walkthrough:** [docs/setup.md](./setup.md) — which platform build to download, CI
+> vendoring, the bundled JRE, and connecting with auth. (Summary below.)
+
 The `adt-lsc` binary ships inside SAP's `sapse.adt-vscode` extension and is **not
 redistributable** (SAP Developer License) — so the library never bundles it; you provide it.
 
