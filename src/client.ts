@@ -19,7 +19,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { createLifecycle } from './api/lifecycle.js';
-import type { ActivateResult, CreateResult, ObjectRef } from './api/lifecycle.js';
+import type { ActivateResult, CreateResult, CreationField, ObjectRef } from './api/lifecycle.js';
 import { createNavigation } from './api/navigation.js';
 import type { Navigation } from './api/navigation.js';
 import { createQuality } from './api/quality.js';
@@ -328,6 +328,7 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
       validate: lifecycle.validateObject,
       listCreatableObjects: lifecycle.listCreatableObjects,
       getObjectTypeDetails: lifecycle.getObjectTypeDetails,
+      getCreationForm: lifecycle.getCreationForm,
       listGenerators: lifecycle.listGenerators,
       getGeneratorSchema: lifecycle.getGeneratorSchema,
     },
@@ -427,8 +428,14 @@ export interface AdtLsClient {
     validate(args: { objectType: string; name: string; packageName: string; description: string }): Promise<unknown>;
     /** List the object types creatable on this system (ABAP-Cloud / RAP catalog). */
     listCreatableObjects(): Promise<unknown>;
-    /** Creation details (required fields) for one object type, e.g. `"CLAS/OC"`. */
+    /** Creation details (flat MCP field list) for one object type, e.g. `"CLAS/OC"`. */
     getObjectTypeDetails(objectType: string, opts?: { name?: string }): Promise<unknown>;
+    /** Full creation form contract — each field's value-help target types, name regex, label,
+     * required — parsed from the native UI model (richer than `getObjectTypeDetails`). */
+    getCreationForm(
+      objectType: string,
+      opts?: { name?: string },
+    ): Promise<{ objectType: string; fields: CreationField[] }>;
     /** List the available RAP generators (feed an id to `generate` / `getGeneratorSchema`). */
     listGenerators(): Promise<unknown>;
     /** The JSON input schema a generator's `content` must satisfy. */

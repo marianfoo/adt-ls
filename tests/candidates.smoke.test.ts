@@ -120,6 +120,14 @@ describe('candidate capabilities (live — needs adt-ls + ADTLS_TEST_PASSWORD)',
       expect(check.isTransportCheckSuccessful).toBe(true);
       expect(check.isRecordingRequired).toBe(false);
 
+      // ── Creation form contract: legal values per field (value-help types + name regex) ──
+      const form = await adt.lifecycle.getCreationForm('CLAS/OC');
+      expect(form.fields.length).toBeGreaterThan(0);
+      const nameField = form.fields.find((f) => f.path === 'name');
+      expect(nameField?.pattern).toBeTruthy(); // e.g. ^[A-Z0-9_/]*$
+      const superclass = form.fields.find((f) => f.path === 'superclass');
+      expect(superclass?.valueHelpTypes).toContain('CLAS/OC'); // the legal-values info MCP flattens away
+
       // ── SRVB service info via the business-services MCP tools (a published DMO V2 binding) ──
       const svcList = (await adt.services.listServices({ name: '/DMO/UI_FLIGHT_R_V2', objectType: 'SRVB/SVB' })) as {
         odataVersion?: string;

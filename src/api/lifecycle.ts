@@ -70,6 +70,22 @@ export interface CreateResult {
   filePath?: string;
 }
 
+/** One field of an object type's creation form (from the native UI model). Unlike the MCP
+ * `getObjectTypeDetails` (just field names + required), this carries the **legal values**:
+ * the value-help target object types, the name regex, and labels. */
+export interface CreationField {
+  /** Field key (the bindingPath, e.g. `packageName`, `superclass`, `referencedObject`). */
+  path: string;
+  label?: string;
+  required: boolean;
+  maxLength?: number;
+  /** Validation regex (e.g. `^[A-Z0-9_/]*$` for `name`). */
+  pattern?: string;
+  /** ADT object types this field accepts (e.g. `superclass` → `["CLAS/OC"]`,
+   * `referencedObject` → `["TABL/DT","STOB"]`). */
+  valueHelpTypes?: string[];
+}
+
 export interface LifecycleDeps {
   driver: LspRequester;
   callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
@@ -264,7 +280,8 @@ export function createLifecycle(deps: LifecycleDeps) {
       return parseFederated(await callTool('abap_creation-get_all_creatable_objects', { destination: dest() })).data;
     },
 
-    /** Creation details (required fields) for one object type, e.g. `"CLAS/OC"`. */
+    /** Creation details (required fields) for one object type, e.g. `"CLAS/OC"`. The flat MCP
+     * field list (`{tag, required, maxLength}`); see `getCreationForm` for the legal values. */
     async getObjectTypeDetails(objectType: string, opts: { name?: string } = {}): Promise<unknown> {
       const res = await callTool('abap_creation-get_object_type_details', {
         destination: dest(),
@@ -272,6 +289,49 @@ export function createLifecycle(deps: LifecycleDeps) {
         name: opts.name ?? 'Z_PLACEHOLDER',
       });
       return parseFederated(res).data;
+    },
+
+    /**
+     * The full creation **form contract** for an object type — richer than
+     * `getObjectTypeDetails`: each field's value-help target object types, name regex, label,
+     * and required flag, parsed from the native `objectCreation/getCreationUiModelAndContent`
+     * UI model. Use it to fill type-specific fields legally (e.g. a `DDLS/DF`'s
+     * `referencedObject` must be a `TABL/DT`/`STOB`; a class `superclass` must be `CLAS/OC`).
+     */
+    async getCreationForm(
+      objectType: string,
+      opts: { name?: string } = {},
+    ): Promise<{ objectType: string; fields: CreationField[] }> {
+      const res = await driver.sendRequest<{ fieldGroupSections?: Array<{ uiModel?: string }> }>(
+        'adtLs/objectCreation/getCreationUiModelAndContent',
+        { name: opts.name ?? 'Z_PLACEHOLDER', description: '', objectType, destination: dest() },
+      );
+      const fields: CreationField[] = [];
+      for (const section of res?.fieldGroupSections ?? []) {
+        let model: { sections?: Array<{ controls?: Array<Record<string, unknown>> }> };
+        try {
+          model = JSON.parse(section.uiModel ?? '{}');
+        } catch {
+          continue;
+        }
+        for (const sec of model.sections ?? []) {
+          for (const c of sec.controls ?? []) {
+            const bindingPath = c.bindingPath as string | undefined;
+            if (!bindingPath) continue;
+            const field: CreationField = { path: bindingPath.replace(/^\$\./, ''), required: Boolean(c.required) };
+            const label = (c.label as { text?: string } | undefined)?.text;
+            if (label) field.label = label;
+            if (typeof c.maxLength === 'number') field.maxLength = c.maxLength;
+            if (typeof c.pattern === 'string') field.pattern = c.pattern;
+            const vh = (c.onValueHelp as { adtTypes?: Array<{ value?: string }> } | undefined)?.adtTypes
+              ?.map((a) => a.value)
+              .filter((v): v is string => Boolean(v));
+            if (vh?.length) field.valueHelpTypes = vh;
+            fields.push(field);
+          }
+        }
+      }
+      return { objectType, fields };
     },
 
     /** List the available RAP generators (id + title) usable with `generateObjects`. */

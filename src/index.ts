@@ -36,7 +36,7 @@ export { parseFederated } from './channels/federated.js';
 export type { FederatedResult } from './channels/federated.js';
 
 // Result / argument types + the per-namespace surfaces
-export type { ActivateResult, CreateResult, ObjectRef } from './api/lifecycle.js';
+export type { ActivateResult, CreateResult, CreationField, ObjectRef } from './api/lifecycle.js';
 export {
   applyTextEdits,
   decodeSemanticTokens,

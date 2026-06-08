@@ -51,4 +51,55 @@ describe('lifecycle metadata methods', () => {
     const { lc } = setup();
     expect(await lc.listGenerators()).toEqual({ ok: 1 });
   });
+
+  it('getCreationForm parses the native UI model into fields with value-help types + pattern', async () => {
+    const uiModel = JSON.stringify({
+      sections: [
+        {
+          controls: [
+            {
+              $type: 'valueHelpText',
+              bindingPath: '$.packageName',
+              required: true,
+              label: { text: 'Package Name' },
+              onValueHelp: { adtTypes: [{ value: 'DEVC/K' }] },
+            },
+            {
+              $type: 'text',
+              bindingPath: '$.name',
+              required: true,
+              maxLength: 30,
+              pattern: '^[A-Z0-9_/]*$',
+              label: { text: 'Name' },
+            },
+            {
+              $type: 'valueHelpText',
+              bindingPath: '$.superclass',
+              label: { text: 'Superclass' },
+              onValueHelp: { adtTypes: [{ value: 'CLAS/OC' }] },
+            },
+          ],
+        },
+      ],
+    });
+    const driver = {
+      sendRequest: vi.fn(async () => ({ fieldGroupSections: [{ uiModel }] })),
+    } as unknown as LspRequester;
+    const lc = createLifecycle({ driver, callTool: vi.fn(), destination: () => 'DEV' });
+    const form = await lc.getCreationForm('CLAS/OC');
+    expect(driver.sendRequest).toHaveBeenCalledWith('adtLs/objectCreation/getCreationUiModelAndContent', {
+      name: 'Z_PLACEHOLDER',
+      description: '',
+      objectType: 'CLAS/OC',
+      destination: 'DEV',
+    });
+    expect(form).toEqual({
+      objectType: 'CLAS/OC',
+      fields: [
+        { path: 'packageName', required: true, label: 'Package Name', valueHelpTypes: ['DEVC/K'] },
+        { path: 'name', required: true, maxLength: 30, pattern: '^[A-Z0-9_/]*$', label: 'Name' },
+        { path: 'superclass', required: false, label: 'Superclass', valueHelpTypes: ['CLAS/OC'] },
+      ],
+    });
+  });
 });
