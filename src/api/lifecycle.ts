@@ -201,6 +201,41 @@ export function createLifecycle(deps: LifecycleDeps) {
       return parseFederated(res).data;
     },
 
+    /** List the object types you can create on this system (the ABAP-Cloud / RAP catalog). */
+    async listCreatableObjects(): Promise<unknown> {
+      return parseFederated(await callTool('abap_creation-get_all_creatable_objects', { destination: dest() })).data;
+    },
+
+    /** Creation details (required fields) for one object type, e.g. `"CLAS/OC"`. */
+    async getObjectTypeDetails(objectType: string, opts: { name?: string } = {}): Promise<unknown> {
+      const res = await callTool('abap_creation-get_object_type_details', {
+        destination: dest(),
+        objectType,
+        name: opts.name ?? 'Z_PLACEHOLDER',
+      });
+      return parseFederated(res).data;
+    },
+
+    /** List the available RAP generators (id + title) usable with `generateObjects`. */
+    async listGenerators(): Promise<unknown> {
+      return parseFederated(await callTool('abap_generators-list_generators', { destination: dest() })).data;
+    },
+
+    /** The JSON input schema a generator's `content` must satisfy (feed `generateObjects`). */
+    async getGeneratorSchema(
+      generatorId: string,
+      opts: { packageName?: string; referencedObjectType?: string; referencedObjectName?: string } = {},
+    ): Promise<unknown> {
+      const res = await callTool('abap_generators-get_schema', {
+        destination: dest(),
+        generatorId,
+        packageName: opts.packageName ?? '$TMP',
+        referencedObjectType: opts.referencedObjectType ?? '',
+        referencedObjectName: opts.referencedObjectName ?? '',
+      });
+      return parseFederated(res).data;
+    },
+
     /**
      * Find the transport request(s) relevant to creating/changing ONE object (read-only
      * validation, object-scoped — not a system transport list).

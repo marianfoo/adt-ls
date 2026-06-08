@@ -38,6 +38,7 @@ import { createServices } from './api/services.js';
 import type { Services } from './api/services.js';
 import { createDestination, ensureLoggedOn, getLogonInfo, initializeDestinationsService } from './auth/reentrance.js';
 import type { LogonStrategy } from './auth/strategy.js';
+import { parseFederated } from './channels/federated.js';
 import { AdtLsMcpClient } from './channels/mcp-federation.js';
 import { setMcpDestination, startMcpServer, startMcpServerWithFallback } from './channels/mcp-lifecycle.js';
 import { TRUSTSTORE_PASSWORD, prepareAdtLsTls, resolveJreTools } from './connection/cert.js';
@@ -318,6 +319,10 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
       delete: lifecycle.deleteObject,
       generate: lifecycle.generateObjects,
       validate: lifecycle.validateObject,
+      listCreatableObjects: lifecycle.listCreatableObjects,
+      getObjectTypeDetails: lifecycle.getObjectTypeDetails,
+      listGenerators: lifecycle.listGenerators,
+      getGeneratorSchema: lifecycle.getGeneratorSchema,
     },
     navigation,
     quality,
@@ -333,6 +338,8 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
       lsp: <T = unknown>(method: string, params?: unknown): Promise<T> => active.sendRequest<T>(method, params),
       tool: (name: string, args: Record<string, unknown> = {}): Promise<unknown> => activeCallTool(name, args),
     },
+    listDestinations: (): Promise<unknown> =>
+      activeCallTool('abap_list_destinations', {}).then((r) => parseFederated(r).data),
     /** Re-logon manually (also auto-heals on dead-session detection). */
     reconnect: (): Promise<boolean> => relogon(),
     health: (): HealthInfo => ({
@@ -409,6 +416,17 @@ export interface AdtLsClient {
     }): Promise<unknown>;
     /** Validate creation input before create (read-only verdict). */
     validate(args: { objectType: string; name: string; packageName: string; description: string }): Promise<unknown>;
+    /** List the object types creatable on this system (ABAP-Cloud / RAP catalog). */
+    listCreatableObjects(): Promise<unknown>;
+    /** Creation details (required fields) for one object type, e.g. `"CLAS/OC"`. */
+    getObjectTypeDetails(objectType: string, opts?: { name?: string }): Promise<unknown>;
+    /** List the available RAP generators (feed an id to `generate` / `getGeneratorSchema`). */
+    listGenerators(): Promise<unknown>;
+    /** The JSON input schema a generator's `content` must satisfy. */
+    getGeneratorSchema(
+      generatorId: string,
+      opts?: { packageName?: string; referencedObjectType?: string; referencedObjectName?: string },
+    ): Promise<unknown>;
   };
   /** LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, completion, syntax check). */
   navigation: Navigation;
@@ -449,6 +467,8 @@ export interface AdtLsClient {
     /** Raw call to a tool on adt-ls's own MCP server (e.g. a backend-dynamic tool). */
     tool(name: string, args?: Record<string, unknown>): Promise<unknown>;
   };
+  /** List the ABAP destinations adt-ls knows (works without a connected destination). */
+  listDestinations(): Promise<unknown>;
   /** Force a SAP re-logon; `true` when the session is live afterwards (also auto-heals on dead-session detection). */
   reconnect(): Promise<boolean>;
   /** Connection + liveness snapshot. */

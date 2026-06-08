@@ -55,11 +55,11 @@ headless): `renameProvider`, `codeActionProvider` (quick-fixes / refactorings),
 | `abap_transport-get` | ✅ | `transport.find` |
 | `abap_business_services-fetch_services` | ✅ | `services.serviceBindingDetails` |
 | `abap_business_services-fetch_service_information` | ✅ | `services.*` |
-| **`abap_list_destinations`** | ❌ **GAP** | only via `raw.tool('abap_list_destinations')` |
-| **`abap_creation-get_all_creatable_objects`** | ❌ **GAP** | only via `raw.tool(...)` |
-| **`abap_creation-get_object_type_details`** | ❌ **GAP** | only via `raw.tool(...)` |
-| **`abap_generators-list_generators`** | ❌ **GAP** | only via `raw.tool(...)` |
-| **`abap_generators-get_schema`** | ❌ **GAP** | only via `raw.tool(...)` |
+| `abap_list_destinations` | ✅ (0.3.0) | `listDestinations()` |
+| `abap_creation-get_all_creatable_objects` | ✅ (0.3.0) | `lifecycle.listCreatableObjects()` |
+| `abap_creation-get_object_type_details` | ✅ (0.3.0) | `lifecycle.getObjectTypeDetails()` |
+| `abap_generators-list_generators` | ✅ (0.3.0) | `lifecycle.listGenerators()` |
+| `abap_generators-get_schema` | ✅ (0.3.0) | `lifecycle.getGeneratorSchema()` |
 
 > Note: the library covers **more transport than the MCP exposes** — `transport.assign` /
 > `list` / `getLockStatus` use **native `adtLs/cts/*` LSP** methods, not these two MCP tools.
@@ -70,18 +70,9 @@ headless): `renameProvider`, `codeActionProvider` (quick-fixes / refactorings),
 
 ## 3. Gaps & recommendations (prioritized)
 
-**A — Typed wrappers for the 5 metadata MCP tools** *(easy, generic, additive)*
-The library already calls the MCP; these just need typed methods instead of `raw.tool`:
-
-| Suggested API | Backing tool |
-| --- | --- |
-| `repository.listDestinations()` | `abap_list_destinations` |
-| `lifecycle.listCreatableObjects()` | `abap_creation-get_all_creatable_objects` |
-| `lifecycle.getObjectTypeDetails(type)` | `abap_creation-get_object_type_details` |
-| `lifecycle.listGenerators()` | `abap_generators-list_generators` |
-| `lifecycle.getGeneratorSchema(id)` | `abap_generators-get_schema` |
-
-(arc-1-lsp already exposes all five as MCP tools via `raw.tool` — they're proven, just not typed in the SDK.)
+**A — Typed wrappers for the 5 metadata MCP tools** — ✅ **done in 0.3.0**
+Added `listDestinations()` (top-level) + `lifecycle.{listCreatableObjects, getObjectTypeDetails,
+listGenerators, getGeneratorSchema}`, so these no longer need `raw.tool`.
 
 **B — Expose advertised LSP features the lib doesn't surface** *(low-cost — the navigation layer
 already does the didOpen→query→didClose dance)*
