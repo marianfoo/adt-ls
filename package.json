@@ -38,6 +38,7 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "docs:api": "typedoc",
+    "docs:html": "typedoc --options typedoc.html.json",
     "prepack": "tsup",
     "prepublishOnly": "npm run lint && npm run typecheck"
   },

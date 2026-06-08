@@ -1,0 +1,15 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts"],
+  "out": "site",
+  "readme": "README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "hideGenerator": true,
+  "gitRevision": "main",
+  "navigationLinks": {
+    "npm": "https://www.npmjs.com/package/@marianfoo/adt-ls",
+    "GitHub": "https://github.com/marianfoo/adt-ls"
+  }
+}
