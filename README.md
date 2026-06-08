@@ -65,6 +65,7 @@ await driver.dispose();
 - **[Use cases](https://github.com/marianfoo/adt-ls/blob/main/docs/use-cases.md)** — dev-tool & CI/CD recipes (ABAP Unit gate, ATC, syntax check, MCP server, scaffolding) with the API to use.
 - **[API reference (Markdown)](https://github.com/marianfoo/adt-ls/blob/main/docs/api/README.md)** — the same reference rendered in-repo (`npm run docs:api`).
 - **[Capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)** — the method surface + the object-type support boundary.
+- **[adt-ls capability survey](https://github.com/marianfoo/adt-ls/blob/main/docs/adt-ls-capabilities.md)** — what the live binary offers vs. what's wrapped, and the known coverage gaps.
 - **[ADRs](https://github.com/marianfoo/adt-ls/tree/main/docs/adr)** — the architecture decisions (0001–0013).
 
 ---
