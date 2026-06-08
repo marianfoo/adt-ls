@@ -49,7 +49,7 @@ import { logger } from './log.js';
 import { makeRelogon, makeReviveIfDead } from './resilience/session-retry.js';
 
 const execFileP = promisify(execFile);
-const VERSION = '0.2.0';
+const VERSION = '0.4.0'; // x-release-please-version
 const CLIENT_INFO = { name: '@marianfoo/adt-ls', version: VERSION };
 /** Keep-alive heartbeat cadence + activity window (ADR-0007). */
 const KEEPALIVE_INTERVAL_MS = 180_000;
