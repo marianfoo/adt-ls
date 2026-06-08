@@ -3,9 +3,15 @@
  * executable ABAP object (`adtLs/run`) and inspect/publish a service binding
  * (`adtLs/businessservice/srvb`). Each resolves the object to its repotree AFF URI.
  *
+ * Service *info* (OData URL + entity sets) goes through the backend MCP tools
+ * `abap_business_services-{fetch_services,fetch_service_information}` — the headless path
+ * the editor-only LSP `getServiceEntitySet`/`getPreviewURL` calls do NOT expose (they
+ * "Internal error" headless). Verified live (V2 + V4) against a4h.
+ *
  * `publishServiceBinding` is a mutation; the library does NOT gate it (consumer policy —
  * ADR-0012).
  */
+import { parseFederated } from '../channels/federated.js';
 import type { LspClient } from '../driver.js';
 import type { Lifecycle, ObjectRef } from './lifecycle.js';
 import { readFile } from './repository.js';
@@ -14,6 +20,27 @@ export interface ServicesDeps {
   lsp: LspClient;
   /** Reused for name → repotree AFF URI (carries the destination). */
   lifecycle: Pick<Lifecycle, 'resolveAffUri'>;
+  /** adt-ls MCP tool invoker (for the business-services tools). */
+  callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
+  /** The connected destination id, or undefined. */
+  destination: () => string | undefined;
+}
+
+/** The OData services a binding exposes (from `fetch_services`). */
+export interface ServiceBindingServices {
+  bindingType?: string;
+  odataVersion?: string;
+  odataInfoUri?: Array<{ href: string }>;
+  services: Array<{
+    name: string;
+    content: Array<{ serviceDefinition: string; serviceVersion: string }>;
+    isPublished?: boolean;
+  }>;
+}
+/** Live OData service info (from `fetch_service_information`). */
+export interface ServiceInfo {
+  serviceUrl: string;
+  entitySets: Array<{ name: string; navigations: string[] }>;
 }
 
 /** Runtime + business-service surface (the `services` namespace). */
@@ -24,10 +51,21 @@ export interface Services {
   serviceBindingDetails(ref: ObjectRef): Promise<unknown>;
   /** Publish (or unpublish) a service binding — mutating. */
   publishServiceBinding(ref: ObjectRef): Promise<unknown>;
+  /** List the OData services a binding exposes (type, version, definitions, publish state). */
+  listServices(ref: ObjectRef): Promise<ServiceBindingServices>;
+  /** Live OData service info — the **service URL + entity sets** — for a binding's service
+   * (chains fetch_services → fetch_service_information). For an unpublished V4 binding this
+   * throws asking you to publish first. `service` picks a specific service (default: first). */
+  getServiceInfo(ref: ObjectRef, opts?: { service?: string }): Promise<ServiceInfo>;
 }
 
 export function createServices(deps: ServicesDeps): Services {
-  const { lsp, lifecycle } = deps;
+  const { lsp, lifecycle, callTool } = deps;
+  const dest = (): string => {
+    const d = deps.destination();
+    if (!d) throw new Error('No ABAP destination is connected.');
+    return d;
+  };
 
   // The srvb segment loads the binding from the SFS; on an object not yet touched this
   // session the SFS hasn't materialized it, and the call fails with "Unsupported Object
@@ -36,6 +74,14 @@ export function createServices(deps: ServicesDeps): Services {
     const lsUri = await lifecycle.resolveAffUri(ref);
     await readFile(lsp, lsUri).catch(() => {}); // best-effort SFS warm-up
     return lsUri;
+  }
+
+  async function fetchServices(ref: ObjectRef): Promise<ServiceBindingServices> {
+    const res = parseFederated(
+      await callTool('abap_business_services-fetch_services', { destination: dest(), serviceBindingName: ref.name }),
+    );
+    if (!res.ok) throw new Error(`fetch_services failed for ${ref.name}: ${res.text}`);
+    return (res.data ?? { services: [] }) as ServiceBindingServices;
   }
 
   return {
@@ -65,6 +111,45 @@ export function createServices(deps: ServicesDeps): Services {
     async publishServiceBinding(ref: ObjectRef): Promise<unknown> {
       const lsUri = await resolveAndLoad(ref);
       return lsp.sendRequest('adtLs/businessservice/srvb/publishandUnpublishAction', { lsUri });
+    },
+
+    /** List the OData services a binding exposes (`abap_business_services-fetch_services`):
+     * `{bindingType, odataVersion, odataInfoUri, services:[{name, content:[{serviceDefinition,
+     * serviceVersion}], isPublished?}]}`. */
+    listServices(ref: ObjectRef): Promise<ServiceBindingServices> {
+      return fetchServices(ref);
+    },
+
+    /** OData service URL + entity sets for a binding's service. Chains fetch_services →
+     * fetch_service_information (the latter needs all of serviceName/serviceDefinition/
+     * serviceVersion/odataInfoUri/odataVersion, sourced from the former). */
+    async getServiceInfo(ref: ObjectRef, opts: { service?: string } = {}): Promise<ServiceInfo> {
+      const bindingData = await fetchServices(ref);
+      const services = bindingData.services ?? [];
+      const svc = opts.service ? (services.find((s) => s.name === opts.service) ?? services[0]) : services[0];
+      if (!svc) throw new Error(`No OData service found in binding ${ref.name}.`);
+      const content = svc.content?.[0];
+      if (!content) throw new Error(`Service ${svc.name} in ${ref.name} has no version content.`);
+      // V4 must be published before its service info is reachable (per the tool contract).
+      if (bindingData.odataVersion === 'V4' && svc.isPublished === false) {
+        throw new Error(
+          `Service binding ${ref.name} (OData V4) is not published — call publishServiceBinding first, then retry getServiceInfo.`,
+        );
+      }
+      const res = parseFederated(
+        await callTool('abap_business_services-fetch_service_information', {
+          destination: dest(),
+          serviceBindingName: ref.name,
+          serviceName: svc.name,
+          serviceDefinition: content.serviceDefinition,
+          serviceVersion: content.serviceVersion,
+          odataInfoUri: bindingData.odataInfoUri?.[0]?.href ?? '',
+          odataVersion: bindingData.odataVersion ?? '',
+          isPublished: svc.isPublished ?? true,
+        }),
+      );
+      if (!res.ok) throw new Error(`fetch_service_information failed for ${svc.name}: ${res.text}`);
+      return res.data as ServiceInfo;
     },
   };
 }

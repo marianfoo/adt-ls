@@ -120,6 +120,16 @@ describe('candidate capabilities (live — needs adt-ls + ADTLS_TEST_PASSWORD)',
       expect(check.isTransportCheckSuccessful).toBe(true);
       expect(check.isRecordingRequired).toBe(false);
 
+      // ── SRVB service info via the business-services MCP tools (a published DMO V2 binding) ──
+      const svcList = (await adt.services.listServices({ name: '/DMO/UI_FLIGHT_R_V2', objectType: 'SRVB/SVB' })) as {
+        odataVersion?: string;
+        services: Array<{ name: string }>;
+      };
+      expect(svcList.services.length).toBeGreaterThan(0);
+      const svcInfo = await adt.services.getServiceInfo({ name: '/DMO/UI_FLIGHT_R_V2', objectType: 'SRVB/SVB' });
+      expect(svcInfo.serviceUrl).toMatch(/\/sap\/opu\/odata/);
+      expect(svcInfo.entitySets.length).toBeGreaterThan(0);
+
       // ── Native activate on broken source → success:false with diagnostics ──
       await adt.lifecycle.update({ name: NAME, objectType: TYPE, source: BROKEN });
       const bad = await adt.lifecycle.activate({ name: NAME, objectType: TYPE });

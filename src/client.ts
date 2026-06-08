@@ -276,7 +276,7 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
     logger.warn('adt-ls advertised no semanticTokens legend — navigation.semanticTokens will not resolve type names');
   const navigation = createNavigation({ lsp: active, lifecycle, semanticTokensLegend });
   const quality = createQuality({ lsp: active, lifecycle });
-  const services = createServices({ lsp: active, lifecycle });
+  const services = createServices({ lsp: active, lifecycle, callTool: activeCallTool, destination: () => destId });
 
   // 8. Warm up the cold backend caches + start the keep-alive (only when connected).
   let keepAliveTimer: ReturnType<typeof setInterval> | undefined;

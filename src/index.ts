@@ -49,7 +49,7 @@ export type {
   TextEdit,
 } from './api/navigation.js';
 export type { Quality } from './api/quality.js';
-export type { Services } from './api/services.js';
+export type { ServiceBindingServices, ServiceInfo, Services } from './api/services.js';
 export type { QuickSearchResult, SearchReference, UserRef } from './api/repository.js';
 
 // adt-ls's own MCP server lifecycle (start / stop / bind a destination). For consumers
