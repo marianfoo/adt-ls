@@ -1,6 +1,6 @@
 # Interface: Navigation
 
-Defined in: [api/navigation.ts:40](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L40)
+Defined in: [api/navigation.ts:119](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L119)
 
 LSP code-intelligence surface (the `navigation` namespace). Positions are a declared
 `symbol` name or explicit 1-based `line` + `character`.
@@ -11,7 +11,7 @@ LSP code-intelligence surface (the `navigation` namespace). Positions are a decl
 
 > **documentSymbols**(`ref`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:42](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L42)
+Defined in: [api/navigation.ts:121](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L121)
 
 Object outline (LSP `DocumentSymbol[]` — kinds + ranges + children).
 
@@ -31,7 +31,7 @@ Object outline (LSP `DocumentSymbol[]` — kinds + ranges + children).
 
 > **checkSyntax**(`ref`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:44](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L44)
+Defined in: [api/navigation.ts:123](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L123)
 
 ABAP syntax check WITHOUT activating (pull diagnostics).
 
@@ -51,7 +51,7 @@ ABAP syntax check WITHOUT activating (pull diagnostics).
 
 > **goToDefinition**(`ref`, `locator`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:46](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L46)
+Defined in: [api/navigation.ts:125](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L125)
 
 Go to a symbol's definition (the implementation).
 
@@ -75,7 +75,7 @@ Go to a symbol's definition (the implementation).
 
 > **goToDeclaration**(`ref`, `locator`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:48](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L48)
+Defined in: [api/navigation.ts:127](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L127)
 
 Go to a symbol's declaration (the signature).
 
@@ -99,7 +99,7 @@ Go to a symbol's declaration (the signature).
 
 > **hover**(`ref`, `locator`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:50](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L50)
+Defined in: [api/navigation.ts:129](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L129)
 
 Hover info — ABAP signature + ABAP-Doc, or CDS element info.
 
@@ -123,7 +123,7 @@ Hover info — ABAP signature + ABAP-Doc, or CDS element info.
 
 > **documentHighlight**(`ref`, `locator`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:52](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L52)
+Defined in: [api/navigation.ts:131](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L131)
 
 Read/write/text occurrences of the symbol within the document.
 
@@ -147,7 +147,7 @@ Read/write/text occurrences of the symbol within the document.
 
 > **findReferences**(`ref`, `locator`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:54](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L54)
+Defined in: [api/navigation.ts:133](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L133)
 
 Where-used (`Location[]`). Timeout-guarded — heavily-used globals can hang.
 
@@ -181,7 +181,7 @@ Where-used (`Location[]`). Timeout-guarded — heavily-used globals can hang.
 
 > **typeHierarchy**(`ref`, `locator`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:60](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L60)
+Defined in: [api/navigation.ts:139](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L139)
 
 Inheritance / implementation tree (prepare → super/sub).
 
@@ -211,9 +211,10 @@ Inheritance / implementation tree (prepare → super/sub).
 
 > **completion**(`ref`, `locator`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/navigation.ts:66](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L66)
+Defined in: [api/navigation.ts:146](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L146)
 
-Code completion at a position (capped — lists are huge).
+Code completion at a position (capped — lists are huge). When `resolve` is set, each
+returned item is enriched via `completionItem/resolve` (adds signatures / ABAP-Doc).
 
 #### Parameters
 
@@ -231,6 +232,67 @@ Code completion at a position (capped — lists are huge).
 
 `number`
 
+###### resolve?
+
+`boolean`
+
+###### resolveLimit?
+
+`number`
+
 #### Returns
 
 `Promise`\<`unknown`\>
+
+***
+
+### format()
+
+> **format**(`ref`, `opts?`): `Promise`\<\{ `formatted`: `string`; `edits`: [`TextEdit`](TextEdit.md)[]; \}\>
+
+Defined in: [api/navigation.ts:154](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L154)
+
+Format source via the ABAP Pretty-Printer (whole document). Returns the formatted
+source plus the raw LSP `TextEdit[]`. (`tabSize`/`insertSpaces` are passed through; the
+pretty-printer largely applies its own ABAP rules.)
+
+#### Parameters
+
+##### ref
+
+[`ObjectRef`](ObjectRef.md)
+
+##### opts?
+
+###### tabSize?
+
+`number`
+
+###### insertSpaces?
+
+`boolean`
+
+#### Returns
+
+`Promise`\<\{ `formatted`: `string`; `edits`: [`TextEdit`](TextEdit.md)[]; \}\>
+
+***
+
+### semanticTokens()
+
+> **semanticTokens**(`ref`): `Promise`\<\{ `legend`: [`SemanticTokensLegend`](SemanticTokensLegend.md); `tokens`: [`DecodedToken`](DecodedToken.md)[]; \}\>
+
+Defined in: [api/navigation.ts:160](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L160)
+
+Semantic tokens for the object, decoded to absolute, name-resolved tokens (the same
+pass that primes hover/highlight). Returns `{ legend, tokens }`.
+
+#### Parameters
+
+##### ref
+
+[`ObjectRef`](ObjectRef.md)
+
+#### Returns
+
+`Promise`\<\{ `legend`: [`SemanticTokensLegend`](SemanticTokensLegend.md); `tokens`: [`DecodedToken`](DecodedToken.md)[]; \}\>

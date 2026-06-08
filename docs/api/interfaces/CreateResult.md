@@ -1,6 +1,6 @@
 # Interface: CreateResult
 
-Defined in: [api/lifecycle.ts:34](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L34)
+Defined in: [api/lifecycle.ts:68](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L68)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [api/lifecycle.ts:34](https://github.com/marianfoo/adt-ls/blob/main/
 
 > `optional` **message?**: `string`
 
-Defined in: [api/lifecycle.ts:35](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L35)
+Defined in: [api/lifecycle.ts:69](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L69)
 
 ***
 
@@ -16,4 +16,4 @@ Defined in: [api/lifecycle.ts:35](https://github.com/marianfoo/adt-ls/blob/main/
 
 > `optional` **filePath?**: `string`
 
-Defined in: [api/lifecycle.ts:36](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L36)
+Defined in: [api/lifecycle.ts:70](https://github.com/marianfoo/adt-ls/blob/main/src/api/lifecycle.ts#L70)

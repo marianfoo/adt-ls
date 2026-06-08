@@ -19,18 +19,24 @@ one serves a call. Raw access: `adt.raw.tool(name,args)` (MCP) and
 | `source.read(ref)` | LSP | resolve → `fileSystem/readFile` |
 | `lifecycle.create(ref)` | MCP | `abap_creation-create_object` |
 | `lifecycle.update(ref)` | LSP | `fileSystem/writeFile` |
-| `lifecycle.activate(ref)` | MCP | `abap_activate_objects` |
+| `lifecycle.activate(ref, {forceActivation})` | LSP | `adtLs/activation/activate` (native — per-phase flags + diagnostics; **0.4.0**) |
 | `lifecycle.runUnitTests(ref)` | MCP | `abap_run_unit_tests` |
 | `lifecycle.delete(ref)` | LSP | `fileSystem/delete` (the `.json` metadata file) |
 | `lifecycle.generate(...)` | MCP | `abap_generators-generate_objects` |
 | `lifecycle.validate(...)` | MCP | `abap_creation-run_validation` |
-| `navigation.documentSymbols / goToDefinition / goToDeclaration / findReferences / typeHierarchy / hover / documentHighlight / completion / checkSyntax` | LSP | `textDocument/*` (didOpen → query → didClose) |
+| `lifecycle.listCreatableObjects / getObjectTypeDetails / listGenerators / getGeneratorSchema` | MCP | `abap_creation-*` / `abap_generators-*` |
+| `lifecycle.getCreationForm(objectType)` | LSP | `adtLs/objectCreation/getCreationUiModelAndContent` (value-help types + name regex; **0.4.0**) |
+| `navigation.documentSymbols / goToDefinition / goToDeclaration / findReferences / typeHierarchy / hover / documentHighlight / completion(+resolve) / checkSyntax` | LSP | `textDocument/*` (didOpen → query → didClose) |
+| `navigation.format(ref)` | LSP | `textDocument/formatting` (ABAP Pretty-Printer, dyn-registered on didOpen; **0.4.0**) |
+| `navigation.semanticTokens(ref)` | LSP | `textDocument/semanticTokens/full` → decoded via the legend (**0.4.0**) |
 | `quality.runAtc / listAtcVariants` | LSP | `adtLs/atc/{runCheck,getCheckVariants}` |
 | `quality.runUnitTestsWithCoverage` | LSP | `adtLs/abapUnit/runTests` + `adtLs/coverage/getCoverage` |
 | `services.runApplication` | LSP | `adtLs/run/runApplication` |
 | `services.serviceBindingDetails / publishServiceBinding` | LSP | `adtLs/businessservice/srvb/*` |
+| `services.listServices / getServiceInfo` | MCP | `abap_business_services-{fetch_services,fetch_service_information}` (OData URL + entity sets; **0.4.0**) |
 | `transport.find / create` | MCP | `abap_transport-{get,create}` (dynamic, backend-dependent) |
 | `transport.assign / list / getLockStatus` | LSP | `adtLs/cts/transport/*`, `adtLs/fileSystem/getFileLockStatus` (always present) |
+| `transport.check(ref, {operation})` | LSP | `adtLs/cts/transport/checkTransportForObjectLock` (decision oracle: needed? locked? assignable; **0.4.0**) |
 
 ## Object-type boundary (ADR-0012)
 

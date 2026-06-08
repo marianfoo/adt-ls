@@ -1,13 +1,17 @@
 # @marianfoo/adt-ls
 
+[![npm](https://img.shields.io/npm/v/@marianfoo/adt-ls.svg)](https://www.npmjs.com/package/@marianfoo/adt-ls)
+[![license: Apache-2.0](https://img.shields.io/npm/l/@marianfoo/adt-ls.svg)](LICENSE)
+
 > Generic, reusable TypeScript SDK over SAP's headless **adt-ls** — the `adt-lsc`
 > language server shipped inside the official `sapse.adt-vscode` extension. It hides
 > the painful setup (discovery, JVM, named-pipe + LSP handshake, reentrance logon,
 > TLS/truststore, session resilience) so that *driving adt-ls is a few lines of code*.
 
-**Status: published on npm (`0.2.0`) — functionally complete & live-proven.** The full
-SAP authoring lifecycle (search → create → update → read → activate → run-tests →
-delete) runs end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
+**Status: published on npm — functionally complete & live-proven.** The full SAP authoring
+lifecycle (search → create → update → read → activate → run-tests → delete), plus code
+intelligence, quality gates, ABAP formatting, transport, and OData service info, all run
+end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
 `1.0.0.202605281240`). Runs under **Node ≥ 20 and Bun** (both verified live).
 
 ## Install
@@ -58,6 +62,20 @@ const { port, token } = await startMcpServer(driver, { port: 2240, token: myToke
 // → proxy http://localhost:${port}/mcp (Authorization: Bearer ${token}) however you like
 await driver.dispose();
 ```
+
+## Capabilities
+
+One namespaced client over both adt-ls channels (LSP + its own MCP) — the split is hidden:
+
+- **`repository`** — object search, file read/write/delete, inactive-object list, name→URI resolver.
+- **`source` / `lifecycle`** — read; create, update, **activate** (native — per-phase diagnostics, `forceActivation`), run unit tests, delete; RAP generators; creatable-type catalog + **creation-form** (legal values per field) + validation.
+- **`navigation`** — document symbols, definition/declaration, references, type hierarchy, hover, completion (with **resolve** → method signatures + ABAP-Doc), syntax check, **semantic tokens**, and **ABAP Pretty-Printer formatting**.
+- **`quality`** — ATC static analysis + ABAP Unit code coverage.
+- **`services`** — run a console app, service-binding details/publish, and live **OData service info** (URL + entity sets).
+- **`transport`** — find / create / assign / list, lock status, and the **transport decision oracle** (`check`).
+- **`raw`** — escape hatches to any adt-ls MCP tool or LSP method.
+
+What maps to which adt-ls call: the **[capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)**. What's reachable headless vs. not (with live evidence): the **[capability survey](https://github.com/marianfoo/adt-ls/blob/main/docs/adt-ls-capabilities.md)**.
 
 ## Documentation
 

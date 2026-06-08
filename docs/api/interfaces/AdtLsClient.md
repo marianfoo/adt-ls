@@ -1,6 +1,6 @@
 # Interface: AdtLsClient
 
-Defined in: [client.ts:355](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L355)
+Defined in: [client.ts:371](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L371)
 
 The unified adt-ls client returned by [createAdtLs](../functions/createAdtLs.md). One coherent surface over
 both adt-ls channels (LSP + adt-ls's own MCP) — the channel split is hidden. Always
@@ -12,7 +12,7 @@ call [dispose()](#dispose) when finished.
 
 > **repository**: `object`
 
-Defined in: [client.ts:357](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L357)
+Defined in: [client.ts:373](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L373)
 
 Repository queries + file operations + the name→URI resolver.
 
@@ -140,7 +140,7 @@ List inactive (draft) objects on the connected destination.
 
 > **source**: `object`
 
-Defined in: [client.ts:377](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L377)
+Defined in: [client.ts:393](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L393)
 
 Read object source by name.
 
@@ -166,7 +166,7 @@ Read an object's source (per include for classes, e.g. `include: 'testclasses'`)
 
 > **lifecycle**: `object`
 
-Defined in: [client.ts:382](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L382)
+Defined in: [client.ts:398](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L398)
 
 The authoring lifecycle (modern ABAP-Cloud / RAP types; classic types throw a clear error).
 
@@ -240,13 +240,14 @@ Update an object's source (optionally a specific include).
 
 > **activate**(`args`): `Promise`\<[`ActivateResult`](ActivateResult.md)\>
 
-Activate; on failure `success:false` with structured `diagnostics` (ranges).
+Activate via native `activation/activate` (per-phase flags + refresh URIs; optional
+`forceActivation`). `success:false` with structured `diagnostics` on failure.
 
 ##### Parameters
 
 ###### args
 
-[`ObjectRef`](ObjectRef.md)
+[`ObjectRef`](ObjectRef.md) & `object`
 
 ##### Returns
 
@@ -352,13 +353,108 @@ Validate creation input before create (read-only verdict).
 
 `Promise`\<`unknown`\>
 
+#### listCreatableObjects()
+
+> **listCreatableObjects**(): `Promise`\<`unknown`\>
+
+List the object types creatable on this system (ABAP-Cloud / RAP catalog).
+
+##### Returns
+
+`Promise`\<`unknown`\>
+
+#### getObjectTypeDetails()
+
+> **getObjectTypeDetails**(`objectType`, `opts?`): `Promise`\<`unknown`\>
+
+Creation details (flat MCP field list) for one object type, e.g. `"CLAS/OC"`.
+
+##### Parameters
+
+###### objectType
+
+`string`
+
+###### opts?
+
+###### name?
+
+`string`
+
+##### Returns
+
+`Promise`\<`unknown`\>
+
+#### getCreationForm()
+
+> **getCreationForm**(`objectType`, `opts?`): `Promise`\<\{ `objectType`: `string`; `fields`: [`CreationField`](CreationField.md)[]; \}\>
+
+Full creation form contract — each field's value-help target types, name regex, label,
+required — parsed from the native UI model (richer than `getObjectTypeDetails`).
+
+##### Parameters
+
+###### objectType
+
+`string`
+
+###### opts?
+
+###### name?
+
+`string`
+
+##### Returns
+
+`Promise`\<\{ `objectType`: `string`; `fields`: [`CreationField`](CreationField.md)[]; \}\>
+
+#### listGenerators()
+
+> **listGenerators**(): `Promise`\<`unknown`\>
+
+List the available RAP generators (feed an id to `generate` / `getGeneratorSchema`).
+
+##### Returns
+
+`Promise`\<`unknown`\>
+
+#### getGeneratorSchema()
+
+> **getGeneratorSchema**(`generatorId`, `opts?`): `Promise`\<`unknown`\>
+
+The JSON input schema a generator's `content` must satisfy.
+
+##### Parameters
+
+###### generatorId
+
+`string`
+
+###### opts?
+
+###### packageName?
+
+`string`
+
+###### referencedObjectType?
+
+`string`
+
+###### referencedObjectName?
+
+`string`
+
+##### Returns
+
+`Promise`\<`unknown`\>
+
 ***
 
 ### navigation
 
 > **navigation**: [`Navigation`](Navigation.md)
 
-Defined in: [client.ts:414](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L414)
+Defined in: [client.ts:448](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L448)
 
 LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, completion, syntax check).
 
@@ -368,7 +464,7 @@ LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, c
 
 > **quality**: [`Quality`](Quality.md)
 
-Defined in: [client.ts:416](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L416)
+Defined in: [client.ts:450](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L450)
 
 Quality: ATC static analysis + ABAP Unit code coverage.
 
@@ -378,7 +474,7 @@ Quality: ATC static analysis + ABAP Unit code coverage.
 
 > **services**: [`Services`](Services.md)
 
-Defined in: [client.ts:418](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L418)
+Defined in: [client.ts:452](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L452)
 
 Runtime + business services: run a console app, service-binding details/publish.
 
@@ -388,7 +484,7 @@ Runtime + business services: run a console app, service-binding details/publish.
 
 > **transport**: `object`
 
-Defined in: [client.ts:420](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L420)
+Defined in: [client.ts:454](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L454)
 
 CTS transport + lock operations.
 
@@ -494,6 +590,23 @@ List your modifiable transports (capped + filterable).
 
 `Promise`\<`unknown`\>
 
+#### check()
+
+> **check**(`args`): `Promise`\<`unknown`\>
+
+Transport decision oracle: does this op need a transport, which are assignable, is it
+locked? (`isRecordingRequired:false` for `$TMP`/local.) `operation` defaults to MODIFY.
+
+##### Parameters
+
+###### args
+
+[`ObjectRef`](ObjectRef.md) & `object`
+
+##### Returns
+
+`Promise`\<`unknown`\>
+
 #### getLockStatus()
 
 > **getLockStatus**(`args`): `Promise`\<\{ `lockingSupported`: `boolean`; `lockId`: `string` \| `null`; \}\>
@@ -516,7 +629,7 @@ Read an object's lock status.
 
 > **raw**: `object`
 
-Defined in: [client.ts:446](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L446)
+Defined in: [client.ts:489](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L489)
 
 Escape hatches for the long tail (ADR-0002).
 
@@ -568,11 +681,25 @@ Raw call to a tool on adt-ls's own MCP server (e.g. a backend-dynamic tool).
 
 ## Methods
 
+### listDestinations()
+
+> **listDestinations**(): `Promise`\<`unknown`\>
+
+Defined in: [client.ts:496](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L496)
+
+List the ABAP destinations adt-ls knows (works without a connected destination).
+
+#### Returns
+
+`Promise`\<`unknown`\>
+
+***
+
 ### reconnect()
 
 > **reconnect**(): `Promise`\<`boolean`\>
 
-Defined in: [client.ts:453](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L453)
+Defined in: [client.ts:498](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L498)
 
 Force a SAP re-logon; `true` when the session is live afterwards (also auto-heals on dead-session detection).
 
@@ -586,7 +713,7 @@ Force a SAP re-logon; `true` when the session is live afterwards (also auto-heal
 
 > **health**(): [`HealthInfo`](HealthInfo.md)
 
-Defined in: [client.ts:455](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L455)
+Defined in: [client.ts:500](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L500)
 
 Connection + liveness snapshot.
 
@@ -600,7 +727,7 @@ Connection + liveness snapshot.
 
 > **dispose**(): `Promise`\<`void`\>
 
-Defined in: [client.ts:457](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L457)
+Defined in: [client.ts:502](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L502)
 
 Shut down: stop the keep-alive, kill adt-ls, close the proxy, and clean temp dirs.
 

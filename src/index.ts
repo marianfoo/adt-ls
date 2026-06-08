@@ -45,6 +45,7 @@ export type {
   DecodedToken,
   Locator,
   Navigation,
+  Position,
   SemanticTokensLegend,
   TextEdit,
 } from './api/navigation.js';

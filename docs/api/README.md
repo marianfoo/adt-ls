@@ -9,12 +9,19 @@
 - [ObjectRef](interfaces/ObjectRef.md)
 - [ActivateResult](interfaces/ActivateResult.md)
 - [CreateResult](interfaces/CreateResult.md)
+- [CreationField](interfaces/CreationField.md)
 - [Locator](interfaces/Locator.md)
+- [Position](interfaces/Position.md)
+- [TextEdit](interfaces/TextEdit.md)
+- [SemanticTokensLegend](interfaces/SemanticTokensLegend.md)
+- [DecodedToken](interfaces/DecodedToken.md)
 - [Navigation](interfaces/Navigation.md)
 - [Quality](interfaces/Quality.md)
 - [SearchReference](interfaces/SearchReference.md)
 - [QuickSearchResult](interfaces/QuickSearchResult.md)
 - [UserRef](interfaces/UserRef.md)
+- [ServiceBindingServices](interfaces/ServiceBindingServices.md)
+- [ServiceInfo](interfaces/ServiceInfo.md)
 - [Services](interfaces/Services.md)
 - [LogonHandlerRegistrar](interfaces/LogonHandlerRegistrar.md)
 - [LogonContext](interfaces/LogonContext.md)
@@ -43,6 +50,8 @@
 
 ## Functions
 
+- [applyTextEdits](functions/applyTextEdits.md)
+- [decodeSemanticTokens](functions/decodeSemanticTokens.md)
 - [basic](functions/basic.md)
 - [bearer](functions/bearer.md)
 - [interactive](functions/interactive.md)

@@ -18,7 +18,8 @@ export interface Locator {
   character?: number;
 }
 
-interface Position {
+/** A 0-based LSP position (as adt-ls emits). */
+export interface Position {
   line: number;
   character: number;
 }

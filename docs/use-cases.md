@@ -198,7 +198,7 @@ const tests = await adt.source.read({ name: 'ZCL_ORDER', objectType: 'CLAS/OC', 
 
 ### 8. Code intelligence for an editor / IDE extension
 
-**Use:** `navigation.*` — locate by **symbol name** *or* `{ line, character }` (0-based).
+**Use:** `navigation.*` — locate by **symbol name** *or* `{ line, character }` (**1-based**).
 
 ```ts
 const ref = { name: 'ZCL_ORDER', objectType: 'CLAS/OC' };
@@ -206,12 +206,15 @@ await adt.navigation.documentSymbols(ref);                         // outline
 await adt.navigation.hover(ref, { symbol: 'lif_order~submit' });   // hover by symbol — no coords needed
 await adt.navigation.goToDefinition(ref, { line: 42, character: 11 });
 await adt.navigation.findReferences(ref, { symbol: 'mv_total' }, { includeDeclaration: true });
-await adt.navigation.completion(ref, { line: 50, character: 8 }, { maxItems: 50 });
+await adt.navigation.completion(ref, { line: 50, character: 8 }, { resolve: true }); // + signatures/ABAP-Doc
 await adt.navigation.typeHierarchy(ref, { symbol: 'zcl_order' }, { direction: 'both' });
+await adt.navigation.semanticTokens(ref);                          // decoded tokens for highlighting
+const { formatted } = await adt.navigation.format(ref);            // ABAP Pretty-Printer
 ```
 
 This is the differentiator: you get **language-server intelligence** (hover/refs/completion/
-type-hierarchy) that a raw ADT REST client doesn't give you.
+type-hierarchy/semantic tokens) and the **ABAP Pretty-Printer** — things a raw ADT REST client
+doesn't give you.
 
 ### 9. Pre-commit hook
 
@@ -274,13 +277,20 @@ await adt.lifecycle.generate({
   packageName: 'ZDEMO',
   transportRequestNumber: 'DEVK900123',
 });
+
+// the generated service binding's live OData URL + entity sets (publish a V4 binding first):
+const { serviceUrl, entitySets } = await adt.services.getServiceInfo({ name: 'ZUI_DEMO_O4', objectType: 'SRVB/SVB' });
 ```
 
 ### 13. Transport-aware deployment
 
-**Use:** `transport.find` / `create` / `assign` — wire created objects into CTS.
+**Use:** `transport.check` / `find` / `create` / `assign` — decide, then wire created objects into CTS.
 
 ```ts
+// decision oracle FIRST: does this object need a transport, and which are assignable?
+const decision = await adt.transport.check({ name: 'ZCL_ORDER', objectType: 'CLAS/OC', operation: 'CREATE' });
+// → { isRecordingRequired, isLockedInRequests, transports: [...], ... }
+
 const tr = await adt.transport.create({
   developmentPackage: 'ZDEMO', transportDescription: 'CI deploy', isCreation: true,
 });
@@ -318,11 +328,11 @@ await adt.transport.getLockStatus({ name: 'ZCL_ORDER', objectType: 'CLAS/OC' });
 | --- | --- | --- |
 | `repository` | `search`, `getUsers`, `getLsUri`, `readFile`/`writeFile`/`delete`, `listInactive` | discovery, raw AFF file ops |
 | `source` | `read` | read object source (per include) |
-| `lifecycle` | `create`, `update`, `activate`, `runUnitTests`, `delete`, `generate`, `validate`, `resolveAffUri` | the authoring loop + scaffolding |
-| `navigation` | `documentSymbols`, `goToDefinition`, `goToDeclaration`, `findReferences`, `hover`, `documentHighlight`, `typeHierarchy`, `completion`, `checkSyntax` | editor/IDE code-intelligence |
+| `lifecycle` | `create`, `update`, `activate`, `runUnitTests`, `delete`, `generate`, `validate`, `listCreatableObjects`, `getObjectTypeDetails`, `getCreationForm`, `listGenerators`, `getGeneratorSchema`, `resolveAffUri` | the authoring loop + scaffolding + creation metadata |
+| `navigation` | `documentSymbols`, `goToDefinition`, `goToDeclaration`, `findReferences`, `hover`, `documentHighlight`, `typeHierarchy`, `completion` (+`resolve`), `checkSyntax`, `semanticTokens`, `format` | editor/IDE code-intelligence + ABAP Pretty-Printer |
 | `quality` | `runAtc`, `listAtcVariants`, `runUnitTestsWithCoverage` | CI gates: ATC + coverage |
-| `services` | `runApplication`, `serviceBindingDetails`, `publishServiceBinding` | console run + business services |
-| `transport` | `find`, `create`, `assign`, `list`, `getLockStatus` | CTS / transport management |
+| `services` | `runApplication`, `serviceBindingDetails`, `publishServiceBinding`, `listServices`, `getServiceInfo` | console run + business services + OData service info |
+| `transport` | `find`, `create`, `assign`, `list`, `getLockStatus`, `check` | CTS / transport management + decision oracle |
 | `raw` | `lsp(method, params)`, `tool(name, args)` | escape hatches for the long tail |
 | top-level | `health()`, `reconnect()`, `dispose()` | liveness, recovery, cleanup |
 
