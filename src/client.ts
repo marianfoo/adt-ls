@@ -267,7 +267,14 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
     destination: () => destId,
     reviveIfDead,
   });
-  const navigation = createNavigation({ lsp: active, lifecycle });
+  const semanticTokensLegend = (
+    driver.initializeResult?.capabilities?.semanticTokensProvider as
+      | { legend?: { tokenTypes: string[]; tokenModifiers: string[] } }
+      | undefined
+  )?.legend;
+  if (!semanticTokensLegend)
+    logger.warn('adt-ls advertised no semanticTokens legend — navigation.semanticTokens will not resolve type names');
+  const navigation = createNavigation({ lsp: active, lifecycle, semanticTokensLegend });
   const quality = createQuality({ lsp: active, lifecycle });
   const services = createServices({ lsp: active, lifecycle });
 
@@ -332,6 +339,7 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
       create: lifecycle.createTransport,
       assign: lifecycle.assignTransport,
       list: lifecycle.listTransports,
+      check: lifecycle.checkTransport,
       getLockStatus: lifecycle.getLockStatus,
     },
     raw: {
@@ -399,8 +407,9 @@ export interface AdtLsClient {
     }): Promise<CreateResult>;
     /** Update an object's source (optionally a specific include). */
     update(args: ObjectRef & { source: string; include?: string }): Promise<void>;
-    /** Activate; on failure `success:false` with structured `diagnostics` (ranges). */
-    activate(args: ObjectRef): Promise<ActivateResult>;
+    /** Activate via native `activation/activate` (per-phase flags + refresh URIs; optional
+     * `forceActivation`). `success:false` with structured `diagnostics` on failure. */
+    activate(args: ObjectRef & { forceActivation?: boolean }): Promise<ActivateResult>;
     /** Run the object's ABAP Unit tests. */
     runUnitTests(args: ObjectRef): Promise<unknown>;
     /** Delete the object (targets its `.json` metadata). */
@@ -457,6 +466,15 @@ export interface AdtLsClient {
     ): Promise<{ assigned: boolean; object: string; objectType: string; transport: string }>;
     /** List your modifiable transports (capped + filterable). */
     list(opts?: { limit?: number; query?: string }): Promise<unknown>;
+    /** Transport decision oracle: does this op need a transport, which are assignable, is it
+     * locked? (`isRecordingRequired:false` for `$TMP`/local.) `operation` defaults to MODIFY. */
+    check(
+      args: ObjectRef & {
+        operation?: 'CREATE' | 'MODIFY' | 'DELETE';
+        transportLayer?: string;
+        recordChanges?: boolean;
+      },
+    ): Promise<unknown>;
     /** Read an object's lock status. */
     getLockStatus(args: ObjectRef): Promise<{ lockingSupported: boolean; lockId: string | null }>;
   };

@@ -29,10 +29,88 @@ interface DocumentSymbol {
   children?: DocumentSymbol[];
 }
 
+/** A standard LSP text edit (0-based positions). */
+export interface TextEdit {
+  range: { start: Position; end: Position };
+  newText: string;
+}
+
+/**
+ * Apply LSP `TextEdit[]` to source text (pure). Edits are non-overlapping per the LSP
+ * spec; we sort by start offset descending so applying one never shifts the offsets of
+ * those not yet applied. Positions are UTF-16 code-unit based, matching JS string indices.
+ */
+export function applyTextEdits(text: string, edits: TextEdit[]): string {
+  if (!edits || edits.length === 0) return text;
+  const lineStarts = [0];
+  for (let i = 0; i < text.length; i++) if (text[i] === '\n') lineStarts.push(i + 1);
+  const toOffset = (p: Position): number => {
+    // A line past the end (servers often emit a sentinel end like {line: 1e9, character: 0}
+    // for a whole-document replace) means end-of-text — NOT the start of the last line.
+    if (p.line >= lineStarts.length) return text.length;
+    const lineStart = lineStarts[p.line];
+    // End of this line's CONTENT (exclude the trailing '\n'); for the last line, end-of-text.
+    const lineEnd = p.line + 1 < lineStarts.length ? lineStarts[p.line + 1] - 1 : text.length;
+    return Math.min(lineStart + Math.max(0, p.character), lineEnd);
+  };
+  const sorted = [...edits].sort((a, b) => toOffset(b.range.start) - toOffset(a.range.start));
+  let out = text;
+  for (const e of sorted) {
+    out = out.slice(0, toOffset(e.range.start)) + e.newText + out.slice(toOffset(e.range.end));
+  }
+  return out;
+}
+
+/** The server's semantic-tokens legend (from `initialize` capabilities). */
+export interface SemanticTokensLegend {
+  tokenTypes: string[];
+  tokenModifiers: string[];
+}
+/** One decoded semantic token (absolute position + resolved names). */
+export interface DecodedToken {
+  line: number;
+  character: number;
+  length: number;
+  tokenType: string;
+  tokenModifiers: string[];
+}
+
+/**
+ * Decode LSP delta-encoded semantic tokens (flat int array of 5-tuples
+ * `[ΔlineFromPrev, ΔstartChar, length, tokenTypeIdx, modifierBitset]`) into absolute,
+ * name-resolved tokens (pure). Positions are 0-based, as LSP emits them.
+ */
+export function decodeSemanticTokens(data: number[] | undefined, legend: SemanticTokensLegend): DecodedToken[] {
+  if (!Array.isArray(data)) return [];
+  const out: DecodedToken[] = [];
+  let line = 0;
+  let char = 0;
+  for (let i = 0; i + 4 < data.length; i += 5) {
+    const [dLine, dChar, length, typeIdx, modBits] = data.slice(i, i + 5);
+    if (dLine > 0) {
+      line += dLine;
+      char = dChar;
+    } else {
+      char += dChar;
+    }
+    const tokenModifiers = legend.tokenModifiers.filter((_, b) => (modBits & (1 << b)) !== 0);
+    out.push({
+      line,
+      character: char,
+      length,
+      tokenType: legend.tokenTypes[typeIdx] ?? String(typeIdx),
+      tokenModifiers,
+    });
+  }
+  return out;
+}
+
 export interface NavigationDeps {
   lsp: LspClient;
   /** Reused for name → repotree AFF URI (carries the destination). */
   lifecycle: Pick<Lifecycle, 'resolveAffUri'>;
+  /** Server semantic-tokens legend (from initialize) — enables `semanticTokens` decoding. */
+  semanticTokensLegend?: SemanticTokensLegend;
 }
 
 /** LSP code-intelligence surface (the `navigation` namespace). Positions are a declared
@@ -62,8 +140,23 @@ export interface Navigation {
     locator: Locator,
     opts?: { direction?: 'supertypes' | 'subtypes' | 'both' },
   ): Promise<unknown>;
-  /** Code completion at a position (capped — lists are huge). */
-  completion(ref: ObjectRef, locator: Locator, opts?: { maxItems?: number }): Promise<unknown>;
+  /** Code completion at a position (capped — lists are huge). When `resolve` is set, each
+   * returned item is enriched via `completionItem/resolve` (adds signatures / ABAP-Doc). */
+  completion(
+    ref: ObjectRef,
+    locator: Locator,
+    opts?: { maxItems?: number; resolve?: boolean; resolveLimit?: number },
+  ): Promise<unknown>;
+  /** Format source via the ABAP Pretty-Printer (whole document). Returns the formatted
+   * source plus the raw LSP `TextEdit[]`. (`tabSize`/`insertSpaces` are passed through; the
+   * pretty-printer largely applies its own ABAP rules.) */
+  format(
+    ref: ObjectRef,
+    opts?: { tabSize?: number; insertSpaces?: boolean },
+  ): Promise<{ formatted: string; edits: TextEdit[] }>;
+  /** Semantic tokens for the object, decoded to absolute, name-resolved tokens (the same
+   * pass that primes hover/highlight). Returns `{ legend, tokens }`. */
+  semanticTokens(ref: ObjectRef): Promise<{ legend: SemanticTokensLegend; tokens: DecodedToken[] }>;
 }
 
 export function createNavigation(deps: NavigationDeps): Navigation {
@@ -292,8 +385,15 @@ export function createNavigation(deps: NavigationDeps): Navigation {
       });
     },
 
-    /** Code completion at a position (capped — completion lists are huge). */
-    completion(ref: ObjectRef, locator: Locator, opts: { maxItems?: number } = {}): Promise<unknown> {
+    /** Code completion at a position (capped — completion lists are huge). With `resolve`,
+     * the returned (capped) items are enriched via `completionItem/resolve` — adding the
+     * ABAP method signature / ABAP-Doc as markdown `documentation` (one backend call per
+     * item, so resolution is bounded by `resolveLimit`, default 25). */
+    completion(
+      ref: ObjectRef,
+      locator: Locator,
+      opts: { maxItems?: number; resolve?: boolean; resolveLimit?: number } = {},
+    ): Promise<unknown> {
       return withOpenDocument(ref, async (uri, content) => {
         const position = await resolvePosition(uri, content, locator);
         const res = await lsp.sendRequest<{ items?: unknown[]; isIncomplete?: boolean } | unknown[]>(
@@ -302,14 +402,74 @@ export function createNavigation(deps: NavigationDeps): Navigation {
         );
         const items = Array.isArray(res) ? res : (res?.items ?? []);
         const isIncomplete = Array.isArray(res) ? undefined : res?.isIncomplete;
-        const slim = items.slice(0, opts.maxItems ?? 50).map((it) => {
-          if (it && typeof it === 'object' && 'data' in it) {
-            const { data: _data, ...rest } = it as Record<string, unknown>;
-            return rest;
-          }
-          return it;
+        const capped = items.slice(0, opts.maxItems ?? 50) as Array<Record<string, unknown>>;
+
+        // Default (fast) path: drop the opaque `data` resolve-blob and return as-is.
+        if (!opts.resolve) {
+          const slim = capped.map((it) => {
+            if (it && typeof it === 'object' && 'data' in it) {
+              const { data: _data, ...rest } = it;
+              return rest;
+            }
+            return it;
+          });
+          return { isIncomplete, total: items.length, items: slim };
+        }
+
+        // Resolve path: enrich items that carry `data` (identifier/member completions —
+        // keywords have none), then strip `data` from the output (token sink).
+        const limit = opts.resolveLimit ?? 25;
+        // NOTE: the guard check + increment below MUST stay synchronous (before any await),
+        // so all map callbacks run their guard in one pass and the cap holds exactly.
+        let resolvedCount = 0;
+        const enriched = await Promise.all(
+          capped.map(async (it) => {
+            if (!it || typeof it !== 'object' || !('data' in it) || resolvedCount >= limit) {
+              const { data: _d, ...rest } = (it ?? {}) as Record<string, unknown>;
+              return rest;
+            }
+            resolvedCount++;
+            try {
+              const full = (await lsp.sendRequest<Record<string, unknown>>('completionItem/resolve', it)) ?? it;
+              const { data: _data, ...rest } = full;
+              return rest;
+            } catch {
+              const { data: _data, ...rest } = it;
+              return rest;
+            }
+          }),
+        );
+        return { isIncomplete, total: items.length, resolved: resolvedCount, items: enriched };
+      });
+    },
+
+    /** Format the object's source with the ABAP Pretty-Printer (`textDocument/formatting`,
+     * which adt-ls registers dynamically per-URI on didOpen). Returns the formatted source
+     * (edits applied) plus the raw TextEdits. */
+    format(
+      ref: ObjectRef,
+      opts: { tabSize?: number; insertSpaces?: boolean } = {},
+    ): Promise<{ formatted: string; edits: TextEdit[] }> {
+      return withOpenDocument(ref, async (uri, content) => {
+        const edits =
+          (await lsp.sendRequest<TextEdit[]>('textDocument/formatting', {
+            textDocument: { uri },
+            options: { tabSize: opts.tabSize ?? 2, insertSpaces: opts.insertSpaces ?? true },
+          })) ?? [];
+        const list = Array.isArray(edits) ? edits : [];
+        return { formatted: applyTextEdits(content, list), edits: list };
+      });
+    },
+
+    /** Semantic tokens, decoded via the server legend (the same `semanticTokens/full` pass
+     * that primes the hover/highlight token cache). */
+    semanticTokens(ref: ObjectRef): Promise<{ legend: SemanticTokensLegend; tokens: DecodedToken[] }> {
+      const legend = deps.semanticTokensLegend ?? { tokenTypes: [], tokenModifiers: [] };
+      return withOpenDocument(ref, async (uri) => {
+        const res = await lsp.sendRequest<{ data?: number[] }>('textDocument/semanticTokens/full', {
+          textDocument: { uri },
         });
-        return { isIncomplete, total: items.length, items: slim };
+        return { legend, tokens: decodeSemanticTokens(res?.data, legend) };
       });
     },
   };

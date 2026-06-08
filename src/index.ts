@@ -37,7 +37,17 @@ export type { FederatedResult } from './channels/federated.js';
 
 // Result / argument types + the per-namespace surfaces
 export type { ActivateResult, CreateResult, ObjectRef } from './api/lifecycle.js';
-export type { Locator, Navigation } from './api/navigation.js';
+export {
+  applyTextEdits,
+  decodeSemanticTokens,
+} from './api/navigation.js';
+export type {
+  DecodedToken,
+  Locator,
+  Navigation,
+  SemanticTokensLegend,
+  TextEdit,
+} from './api/navigation.js';
 export type { Quality } from './api/quality.js';
 export type { Services } from './api/services.js';
 export type { QuickSearchResult, SearchReference, UserRef } from './api/repository.js';

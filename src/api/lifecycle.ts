@@ -30,6 +30,40 @@ export interface ObjectRef {
 export interface ActivateResult {
   success: boolean;
   diagnostics: unknown[];
+  /** Whether the syntax/consistency check ran (native `activation/activate`). */
+  checkExecuted?: boolean;
+  /** Whether activation actually ran. */
+  activationExecuted?: boolean;
+  /** Whether downstream generation ran (e.g. RAP artifacts). */
+  generationExecuted?: boolean;
+  /** Whether the backend supports `forceActivation` for this object. */
+  forceSupported?: boolean;
+  /** LS URIs the backend marked for refresh after activation. */
+  refreshedUris?: string[];
+}
+
+/** One LSP-ish diagnostic looks error-severity (across the shapes ADT/LSP use). */
+function isErrorDiagnostic(d: Record<string, unknown>): boolean {
+  if (d.severity === 1 || d.severity === 'E' || d.severity === 'error') return true;
+  return typeof d.type === 'string' && /error|abend/i.test(d.type);
+}
+
+/**
+ * True if any activation diagnostic is error-severity. Native `activation/activate` nests
+ * them as `{ lsUri, diagnostic: [{ range, severity, source, message }] }` (severity 1 =
+ * error, verified live); we also tolerate a flat `{ severity }` shape defensively.
+ */
+function hasErrorDiagnostics(diags: unknown[]): boolean {
+  return diags.some((entry) => {
+    if (!entry || typeof entry !== 'object') return false;
+    const o = entry as Record<string, unknown>;
+    if (Array.isArray(o.diagnostic)) {
+      return o.diagnostic.some(
+        (d) => d != null && typeof d === 'object' && isErrorDiagnostic(d as Record<string, unknown>),
+      );
+    }
+    return isErrorDiagnostic(o);
+  });
 }
 export interface CreateResult {
   message?: string;
@@ -130,12 +164,36 @@ export function createLifecycle(deps: LifecycleDeps) {
       await writeFile(driver, uri, args.source);
     },
 
-    async activate(args: ObjectRef): Promise<ActivateResult> {
+    /**
+     * Activate the object via the native `adtLs/activation/activate` primitive (richer than
+     * the MCP wrapper: per-phase flags, refresh URIs, optional `forceActivation`, and no
+     * 15-object cap). `success` = activation ran with no error-severity diagnostics.
+     */
+    async activate(args: ObjectRef & { forceActivation?: boolean }): Promise<ActivateResult> {
       const uri = await resolveAffUri(args);
-      const res = await callTool('abap_activate_objects', { destination: dest(), uris: [uri] });
-      const { data } = parseFederated(res);
-      const d = (data ?? {}) as { success?: boolean; objectDiagnostics?: unknown[] };
-      return { success: Boolean(d.success), diagnostics: d.objectDiagnostics ?? [] };
+      const res = await driver.sendRequest<{
+        isCheckExecuted?: boolean;
+        isActivationExecuted?: boolean;
+        isGenerationExecuted?: boolean;
+        isForceSupported?: boolean;
+        refreshLsUris?: string[];
+        objectDiagnostics?: unknown[];
+      }>('adtLs/activation/activate', {
+        destination: dest(),
+        lsUris: [uri],
+        references: [],
+        forceActivation: args.forceActivation ?? false,
+      });
+      const diagnostics = res?.objectDiagnostics ?? [];
+      return {
+        success: Boolean(res?.isActivationExecuted) && !hasErrorDiagnostics(diagnostics),
+        diagnostics,
+        checkExecuted: res?.isCheckExecuted,
+        activationExecuted: res?.isActivationExecuted,
+        generationExecuted: res?.isGenerationExecuted,
+        forceSupported: res?.isForceSupported,
+        refreshedUris: res?.refreshLsUris,
+      };
     },
 
     async runUnitTests(args: ObjectRef): Promise<unknown> {
@@ -332,6 +390,28 @@ export function createLifecycle(deps: LifecycleDeps) {
         truncated: transports.length < matched.length,
         transports,
       };
+    },
+
+    /**
+     * Transport decision oracle for an object: does this create/modify/delete need a
+     * transport, which requests are assignable, and is it already locked? Read-only — the
+     * native `checkTransportForObjectLock` that drives the lock→assign round-trip. For
+     * `$TMP`/local objects `isRecordingRequired` is `false`. `operation` defaults to MODIFY.
+     */
+    async checkTransport(
+      args: ObjectRef & {
+        operation?: 'CREATE' | 'MODIFY' | 'DELETE';
+        transportLayer?: string;
+        recordChanges?: boolean;
+      },
+    ): Promise<unknown> {
+      const objectUri = await resolveAffUri(args);
+      return driver.sendRequest('adtLs/cts/transport/checkTransportForObjectLock', {
+        operationType: args.operation ?? 'MODIFY',
+        objectInfo: { objectUri },
+        transportLayer: args.transportLayer ?? '',
+        isRecordChanges: args.recordChanges ?? true,
+      });
     },
 
     /** Read an object's lock status (`{lockingSupported, lockId}`; `lockId:null` when unlocked). */

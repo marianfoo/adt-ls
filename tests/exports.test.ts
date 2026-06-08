@@ -24,3 +24,15 @@ describe('public API exports (0.2.0)', () => {
     expect(sendRequest).toHaveBeenCalledWith('adtLs/mcp/setDestination', { destinationId: 'DEV' });
   });
 });
+
+/** Guards the pure helpers exported for the 0.4.0 capabilities (format / semanticTokens). */
+describe('public API exports (0.4.0)', () => {
+  it('exposes applyTextEdits + decodeSemanticTokens', () => {
+    expect(typeof api.applyTextEdits).toBe('function');
+    expect(typeof api.decodeSemanticTokens).toBe('function');
+    expect(api.applyTextEdits('abc', [])).toBe('abc');
+    expect(api.decodeSemanticTokens([0, 0, 3, 0, 0], { tokenTypes: ['keyword'], tokenModifiers: [] })).toEqual([
+      { line: 0, character: 0, length: 3, tokenType: 'keyword', tokenModifiers: [] },
+    ]);
+  });
+});
