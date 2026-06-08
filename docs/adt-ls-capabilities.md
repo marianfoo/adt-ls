@@ -59,15 +59,23 @@ form-based editing, support bundles, AI hook); `debugger` is real but interactiv
 | `semanticTokensProvider` | ✅ | ✅ (0.4.0) | `navigation.semanticTokens` → decoded `[{line,character,length,tokenType,tokenModifiers[]}]` via the 23-type/10-modifier legend (same pass that primes hover/highlight) |
 | `documentFormatting` / `documentRangeFormatting` | ❌ `false` at init **but registered live** | ✅ (0.4.0) | **CONFIRMED:** `textDocument/{formatting,rangeFormatting}` are dynamically registered on `didOpen` (captured the `client/registerCapability` live); `navigation.format` → ABAP Pretty-Printer output. The prior "unverified" is now resolved. |
 
-Not advertised at all → correctly absent: `rename`, `codeAction` (quick-fix), `signatureHelp`,
-`foldingRange`, `inlayHint`, `callHierarchy`.
+Not advertised at all → **live-confirmed `"Internal error"`** (§4b): `rename`, `codeAction`
+(quick-fix), `implementation`, `prepareCallHierarchy`, `signatureHelp`, `foldingRange`,
+`workspace/symbol`, `workspace/diagnostic` (+ `inlayHint`, `selectionRange` per the decompile).
 
 ## 3. MCP tools (`tools/list` — 14 static)
 
-All wrapped (lifecycle / transport / services) or exposed in **0.3.0** (`listDestinations`,
-`listCreatableObjects`, `getObjectTypeDetails`, `listGenerators`, `getGeneratorSchema`). The
-library covers **more than the MCP exposes** — transport assign/list/lock, search, file ops, ATC
-and coverage all go through native `adtLs/*` LSP methods, not MCP tools.
+The 14 are (verified live from the server's `!MESSAGE Successfully registered tool` log):
+`abap_business_services-{fetch_services,fetch_service_information}`, `abap_activate_objects`,
+`abap_run_unit_tests`, `abap_creation-{get_all_creatable_objects,get_object_type_details,
+run_validation,create_object}`, `abap_list_destinations`, `abap_generators-{list_generators,
+get_schema,generate_objects}`, `abap_transport-{create,get}`.
+
+All wrapped, or exposed in **0.3.0** (`listDestinations`, `listCreatableObjects`,
+`getObjectTypeDetails`, `listGenerators`, `getGeneratorSchema`) / **0.4.0** (the two
+`abap_business_services-*` tools → `services.listServices` / `services.getServiceInfo`). The
+library covers **more than the MCP exposes** — transport assign/list/lock/check, search, file
+ops, ATC and coverage all go through native `adtLs/*` LSP methods, not MCP tools.
 
 ---
 
@@ -84,15 +92,29 @@ Each was probed live; the **exact verified call** is recorded as durable evidenc
 | **Transport decision oracle** | `transport.check(ref, {operation?,transportLayer?,recordChanges?})` | `adtLs/cts/transport/checkTransportForObjectLock {operationType:'MODIFY', objectInfo:{objectUri:uri}, transportLayer:'', isRecordChanges:true}` → `{isTransportCheckSuccessful,isRecordingRequired,isLockedInRequests,transportCreationConfiguration{…},checkMessages{…}}`. `$TMP` → `isRecordingRequired:false`. |
 | **Completion resolve** | `navigation.completion(ref, locator, {resolve:true})` | member position (e.g. `out->`) → items carry `data` → `completionItem/resolve` returns `documentation.value` = markdown ABAP signature (`importing/returning/…`). Keyword positions carry no `data` (no-op). |
 | **Decoded semantic tokens** | `navigation.semanticTokens(ref)` | `textDocument/semanticTokens/full` → `{data:[…5-int tuples]}`; decoded with the `initialize` legend (23 types / 10 modifiers) into absolute `{line,character,length,tokenType,tokenModifiers[]}`. |
+| **SRVB service info (URL + entity sets)** | `services.listServices(ref)` / `services.getServiceInfo(ref)` | chain the MCP tools `abap_business_services-fetch_services` (→ `{odataVersion, odataInfoUri, services:[{name, content:[{serviceDefinition, serviceVersion}], isPublished}]}`) then `fetch_service_information` (all 7 fields required) → `{serviceUrl:"…/sap/opu/odata/…?sap-client=001", entitySets:[{name, navigations[]}]}`. Verified V2 **and** V4 (published). **NOT** the raw LSP `getServiceEntitySet`/`getPreviewURL` (editor-only → see §4b). |
 
-### 4b. Probed but **deferred** (evidence-backed)
+### 4b. Probed and **confirmed NOT usable headless** (live evidence)
 
-| Candidate | Why deferred |
+> **Correction (was deferred, now wrapped):** SRVB preview *is* usable — via the MCP tools
+> above, not the raw LSP `getServiceEntitySet`/`getPreviewURL`. Those LSP methods are the VS Code
+> editor's internal calls and `"Internal error"` headless regardless of the
+> `ServiceBindingPreviewData` shape (decompiled `{bindingType,entity,lsuri,service,
+> serviceDefinationName,serviceName,serviceVersion}`); the server-side preview path the editor
+> uses isn't the agent contract. The agent contract is the two `abap_business_services-*` MCP tools.
+
+| Candidate | Evidence it's not reachable headless |
 | --- | --- |
-| SRVB `getServiceEntitySet` / `getPreviewURL` | `ServiceBindingPreviewData` shape decompiled (`{bindingType,entity,lsuri,service,serviceDefinationName,serviceName,serviceVersion}` — note lowercase `lsuri`); even fully populated, returns **`"Internal error"`** on a4h (needs a *published* binding + gateway activation). Medium value, not reliably reachable. |
-| `objectGenerator` native dry-run (`getListOfObjectsToBeGenerated`) | `fetchAllGenerators` needs a project-qualified ref URI; class lsUri → `"Internal error"`, package ADT URI → `"URI does not contain a AFF file name"`. The **MCP** `abap_generators-*` path already covers generation; native dry-run is a finicky, low-marginal-value extra. |
+| `objectGenerator` native pipeline (`fetchAllGenerators` → `getListOfObjectsToBeGenerated` dry-run) | `fetchAllGenerators {projectDestination, referencedObjectUri}` → **`"Internal error"`** for every reference (CDS/DDLS, TABL, with the LS repotree URI); an ADT URI is rejected (`"URI does not contain a AFF file name"`). Tested 3 reference objects × 2 URI shapes — all fail. Generation itself IS reachable via the wrapped MCP `abap_generators-{list_generators,get_schema,generate_objects}`; only the native reference-anchored **dry-run preview** is unreachable. |
+| Standard-LSP extras: `rename`, `codeAction` (quick-fix), `implementation`, `prepareCallHierarchy`, `signatureHelp`, `foldingRange`, `workspace/symbol`, `workspace/diagnostic` | **All return `"Internal error"`** live (probed on `CL_ABAP_TYPEDESCR`, doc opened). Confirms the decompile finding that these are not in the advertised `ServerCapabilities`. `rename`/`codeAction` would be high-value but are genuinely not served headless (the refactoring backends exist in `com.sap.adt.refactoring` but have no `adtLs/*` segment). |
+
+### 4c. Reachable but **deferred on value** (not bugs)
+
+| Candidate | Why not wrapped |
+| --- | --- |
 | `objectCreation/{getCreationUiModelAndContent,validate}` | Both work (`validate` needs `fieldGroup:` **integer**, e.g. `1`), but **duplicate** the library's existing MCP `getObjectTypeDetails` / `validateObject`. |
 | `fileSystem/toggleVersion` | `adtLs/fileSystem/toggleVersion {uri}` → `null` (works) but it's a UI active/inactive **view** toggle — unclear value for a headless/programmatic consumer. |
+| `codeLens` | Advertised, but only SRVB/AFF-JSON lenses with client-side commands → no headless value. |
 | `codePrediction`, `modelDriven`, `support`, `joule`, `cts/solman` | Niche / interactive / backend-gated (AI completion, form-UI protocol, support bundles, ChaRM). |
 
 ## 5. Hard boundaries — NOT in adt-ls (don't build; main-arc-1 territory)
@@ -103,9 +125,11 @@ No `adtLs/*` method exists for these, so they can't be reached headless:
 - **Git** (gCTS / abapGit).
 - **Transport release / delete / reassign** — the segment has only check/create/assign/search.
 - **Runtime logs** — dumps (ST22), traces/profiler, system messages, gateway errors.
-- **Quick-fixes** (`codeAction` unadvertised) and **refactoring** (rename/extract) — the backend
-  handlers exist in `com.sap.adt.refactoring`, but there's **no `adtLs/refactoring` segment** and
-  `rename`/`codeAction` aren't advertised → unreachable until SAP exposes them.
+- **Quick-fixes** (`codeAction`) and **refactoring** (rename/extract) — backend handlers exist in
+  `com.sap.adt.refactoring`, but there's **no `adtLs/refactoring` segment** and `rename`/`codeAction`
+  aren't advertised → **live-confirmed `"Internal error"`** (§4b). Unreachable until SAP exposes them.
+- **Project-wide diagnostics** (`workspace/diagnostic`) and **workspace symbol search**
+  (`workspace/symbol`) — **live-confirmed `"Internal error"`**; lint a package by iterating files.
 - **Revision history** (`getVersions`).
 - **FLP customization** (catalogs / tiles).
 - **Classic object types** — PROG / FUNC / FUGR / INCL, classic DDIC (TABL/DOMA/DTEL/…), MSAG,
