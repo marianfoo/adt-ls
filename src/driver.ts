@@ -84,6 +84,22 @@ export function routeServerRequest(
   return null;
 }
 
+/**
+ * Build adt-ls's spawn argv. `extraArgs` (e.g. SNC/JCo JVM flags like
+ * `-Djco.middleware.snc_lib=…`, or `-consoleLog`) are prepended ahead of adt-ls's own
+ * `-data`/`--pipe`, where JVM launchers expect leading flags. Pure (no I/O).
+ */
+export function composeSpawnArgs(opts: { dataDir: string; pipeName: string; extraArgs?: string[] }): string[] {
+  return [
+    ...(opts.extraArgs ?? []),
+    '-Djco.trace_path',
+    opts.dataDir,
+    '-data',
+    opts.dataDir,
+    `--pipe=${opts.pipeName}`,
+  ];
+}
+
 function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const t = setTimeout(() => reject(new Error(`${label} timed out after ${ms}ms`)), ms);
@@ -106,13 +122,18 @@ export interface AdtLsDriverOptions {
   dataDir?: string;
   /** Extra env for the spawned JVM (e.g. JAVA_TOOL_OPTIONS truststore). */
   extraEnv?: Record<string, string>;
+  /**
+   * Extra CLI/JVM args prepended ahead of adt-ls's own `-data`/`--pipe` — e.g. SNC/JCo
+   * flags (`-Djco.middleware.snc_lib=…`, `-Djava.library.path=…`) or `-consoleLog`.
+   */
+  extraArgs?: string[];
   /** server→client request handlers, keyed by LSP method. */
   requestHandlers?: Record<string, ServerRequestHandler>;
   /** Client identity advertised in initialize (name is reused as the userAgentInfo). */
   clientInfo?: { name: string; version: string };
 }
 
-const DEFAULT_CLIENT = { name: '@marianfoo/adt-ls', version: '0.1.1' };
+const DEFAULT_CLIENT = { name: '@marianfoo/adt-ls', version: '0.2.0' };
 
 export class AdtLsDriver implements LspClient {
   private child?: ChildProcess;
@@ -121,6 +142,7 @@ export class AdtLsDriver implements LspClient {
   private pipeName?: string;
   private readonly dataDir: string;
   private readonly extraEnv: Record<string, string>;
+  private readonly extraArgs: string[];
   private readonly requestHandlers: Record<string, ServerRequestHandler>;
   private readonly clientInfo: { name: string; version: string };
   initializeResult?: AdtLsInitializeResult;
@@ -132,6 +154,7 @@ export class AdtLsDriver implements LspClient {
     const id = crypto.randomBytes(6).toString('hex');
     this.dataDir = opts.dataDir ?? path.join(os.tmpdir(), `adt-ls-${id}`);
     this.extraEnv = opts.extraEnv ?? {};
+    this.extraArgs = opts.extraArgs ?? [];
     this.requestHandlers = { ...opts.requestHandlers };
     this.clientInfo = opts.clientInfo ?? DEFAULT_CLIENT;
   }
@@ -161,10 +184,14 @@ export class AdtLsDriver implements LspClient {
       if (tail.length > 60) tail.shift();
     };
 
-    const child = spawn(this.binPath, ['-Djco.trace_path', this.dataDir, '-data', this.dataDir, `--pipe=${pipeName}`], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, ...this.extraEnv },
-    });
+    const child = spawn(
+      this.binPath,
+      composeSpawnArgs({ dataDir: this.dataDir, pipeName, extraArgs: this.extraArgs }),
+      {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, ...this.extraEnv },
+      },
+    );
     this.child = child;
     child.stdout?.on('data', capture);
     child.stderr?.on('data', (d: Buffer) => {

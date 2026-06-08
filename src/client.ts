@@ -48,7 +48,7 @@ import { logger } from './log.js';
 import { makeRelogon, makeReviveIfDead } from './resilience/session-retry.js';
 
 const execFileP = promisify(execFile);
-const VERSION = '0.1.1';
+const VERSION = '0.2.0';
 const CLIENT_INFO = { name: '@marianfoo/adt-ls', version: VERSION };
 /** Keep-alive heartbeat cadence + activity window (ADR-0007). */
 const KEEPALIVE_INTERVAL_MS = 180_000;
@@ -71,8 +71,9 @@ export interface ConnectionOptions {
 }
 
 export interface CreateAdtLsOptions {
-  /** Explicit adt-ls binary path; otherwise discovered (sapse.adt-vscode / vendor / env). */
-  adtLs?: { path?: string };
+  /** Explicit adt-ls binary path; otherwise discovered (sapse.adt-vscode / vendor / env).
+   *  `extraArgs` are prepended to the adt-ls launch (e.g. SNC/JCo JVM flags, `-consoleLog`). */
+  adtLs?: { path?: string; extraArgs?: string[] };
   /** Backend connection. Omit (with `auth`) for foundation mode (adt-ls up, no destination). */
   connection?: ConnectionOptions;
   /** Logon strategy. Omit (with `connection`) for foundation mode. */
@@ -153,7 +154,12 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
   }
 
   // 2. Spawn the driver.
-  const driver = new AdtLsDriver(binPath, { dataDir: path.join(workBase, 'data'), extraEnv, clientInfo: CLIENT_INFO });
+  const driver = new AdtLsDriver(binPath, {
+    dataDir: path.join(workBase, 'data'),
+    extraEnv,
+    extraArgs: opts.adtLs?.extraArgs,
+    clientInfo: CLIENT_INFO,
+  });
   await driver.start();
 
   // 3. Destination + logon (only when connecting).

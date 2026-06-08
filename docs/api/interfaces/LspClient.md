@@ -8,7 +8,7 @@ on this fuller surface.
 
 ## Extends
 
-- `LspRequester`
+- [`LspRequester`](LspRequester.md)
 
 ## Methods
 
@@ -40,7 +40,7 @@ Defined in: [driver.ts:53](https://github.com/marianfoo/adt-ls/blob/main/src/dri
 
 #### Inherited from
 
-`LspRequester.sendRequest`
+[`LspRequester`](LspRequester.md).[`sendRequest`](LspRequester.md#sendrequest)
 
 ***
 

@@ -42,6 +42,22 @@ export type { Quality } from './api/quality.js';
 export type { Services } from './api/services.js';
 export type { QuickSearchResult, SearchReference, UserRef } from './api/repository.js';
 
+// adt-ls's own MCP server lifecycle (start / stop / bind a destination). For consumers
+// that PROXY adt-ls's MCP endpoint to external agents (the SDK also uses these internally).
+export {
+  setMcpDestination,
+  startMcpServer,
+  startMcpServerWithFallback,
+  stopMcpServer,
+} from './channels/mcp-lifecycle.js';
+export type { StartMcpServerResult } from './channels/mcp-lifecycle.js';
+
 // Advanced / escape hatches
-export { AdtLsDriver } from './driver.js';
-export type { AdtLsDriverOptions, AdtLsInitializeResult, LspClient, ServerRequestHandler } from './driver.js';
+export { AdtLsDriver, composeSpawnArgs } from './driver.js';
+export type {
+  AdtLsDriverOptions,
+  AdtLsInitializeResult,
+  LspClient,
+  LspRequester,
+  ServerRequestHandler,
+} from './driver.js';

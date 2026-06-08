@@ -2,7 +2,7 @@
 
 > **createAdtLs**(`opts`): `Promise`\<[`AdtLsClient`](../interfaces/AdtLsClient.md)\>
 
-Defined in: [client.ts:113](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L113)
+Defined in: [client.ts:114](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L114)
 
 `@marianfoo/adt-ls` — a generic TypeScript SDK over SAP's headless adt-ls (`adt-lsc`,
 shipped in the `sapse.adt-vscode` extension). One unified, namespaced client over both

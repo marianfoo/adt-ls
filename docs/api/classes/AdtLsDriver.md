@@ -1,6 +1,6 @@
 # Class: AdtLsDriver
 
-Defined in: [driver.ts:117](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L117)
+Defined in: [driver.ts:138](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L138)
 
 Request + notification channel. LSP document features (didOpen → query →
 didClose) need fire-and-forget notifications, so the navigation layer depends
@@ -16,7 +16,7 @@ on this fuller surface.
 
 > **new AdtLsDriver**(`binPath`, `opts?`): `AdtLsDriver`
 
-Defined in: [driver.ts:128](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L128)
+Defined in: [driver.ts:150](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L150)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [driver.ts:128](https://github.com/marianfoo/adt-ls/blob/main/src/dr
 
 > `optional` **initializeResult?**: [`AdtLsInitializeResult`](../interfaces/AdtLsInitializeResult.md)
 
-Defined in: [driver.ts:126](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L126)
+Defined in: [driver.ts:148](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L148)
 
 ## Methods
 
@@ -46,7 +46,7 @@ Defined in: [driver.ts:126](https://github.com/marianfoo/adt-ls/blob/main/src/dr
 
 > **setRequestHandler**(`method`, `handler`): `void`
 
-Defined in: [driver.ts:140](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L140)
+Defined in: [driver.ts:163](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L163)
 
 Register/replace a server→client request handler (before or after start).
 
@@ -70,7 +70,7 @@ Register/replace a server→client request handler (before or after start).
 
 > **start**(`timeoutMs?`): `Promise`\<[`AdtLsInitializeResult`](../interfaces/AdtLsInitializeResult.md)\>
 
-Defined in: [driver.ts:144](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L144)
+Defined in: [driver.ts:167](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L167)
 
 #### Parameters
 
@@ -88,7 +88,7 @@ Defined in: [driver.ts:144](https://github.com/marianfoo/adt-ls/blob/main/src/dr
 
 > **sendRequest**\<`T`\>(`method`, `params?`): `Promise`\<`T`\>
 
-Defined in: [driver.ts:217](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L217)
+Defined in: [driver.ts:244](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L244)
 
 #### Type Parameters
 
@@ -120,7 +120,7 @@ Defined in: [driver.ts:217](https://github.com/marianfoo/adt-ls/blob/main/src/dr
 
 > **sendNotification**(`method`, `params?`): `Promise`\<`void`\>
 
-Defined in: [driver.ts:222](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L222)
+Defined in: [driver.ts:249](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L249)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [driver.ts:222](https://github.com/marianfoo/adt-ls/blob/main/src/dr
 
 > **dispose**(): `Promise`\<`void`\>
 
-Defined in: [driver.ts:227](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L227)
+Defined in: [driver.ts:254](https://github.com/marianfoo/adt-ls/blob/main/src/driver.ts#L254)
 
 #### Returns
 

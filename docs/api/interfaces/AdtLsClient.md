@@ -1,6 +1,6 @@
 # Interface: AdtLsClient
 
-Defined in: [client.ts:349](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L349)
+Defined in: [client.ts:355](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L355)
 
 The unified adt-ls client returned by [createAdtLs](../functions/createAdtLs.md). One coherent surface over
 both adt-ls channels (LSP + adt-ls's own MCP) — the channel split is hidden. Always
@@ -12,7 +12,7 @@ call [dispose()](#dispose) when finished.
 
 > **repository**: `object`
 
-Defined in: [client.ts:351](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L351)
+Defined in: [client.ts:357](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L357)
 
 Repository queries + file operations + the name→URI resolver.
 
@@ -140,7 +140,7 @@ List inactive (draft) objects on the connected destination.
 
 > **source**: `object`
 
-Defined in: [client.ts:371](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L371)
+Defined in: [client.ts:377](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L377)
 
 Read object source by name.
 
@@ -166,7 +166,7 @@ Read an object's source (per include for classes, e.g. `include: 'testclasses'`)
 
 > **lifecycle**: `object`
 
-Defined in: [client.ts:376](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L376)
+Defined in: [client.ts:382](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L382)
 
 The authoring lifecycle (modern ABAP-Cloud / RAP types; classic types throw a clear error).
 
@@ -358,7 +358,7 @@ Validate creation input before create (read-only verdict).
 
 > **navigation**: [`Navigation`](Navigation.md)
 
-Defined in: [client.ts:408](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L408)
+Defined in: [client.ts:414](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L414)
 
 LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, completion, syntax check).
 
@@ -368,7 +368,7 @@ LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, c
 
 > **quality**: [`Quality`](Quality.md)
 
-Defined in: [client.ts:410](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L410)
+Defined in: [client.ts:416](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L416)
 
 Quality: ATC static analysis + ABAP Unit code coverage.
 
@@ -378,7 +378,7 @@ Quality: ATC static analysis + ABAP Unit code coverage.
 
 > **services**: [`Services`](Services.md)
 
-Defined in: [client.ts:412](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L412)
+Defined in: [client.ts:418](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L418)
 
 Runtime + business services: run a console app, service-binding details/publish.
 
@@ -388,7 +388,7 @@ Runtime + business services: run a console app, service-binding details/publish.
 
 > **transport**: `object`
 
-Defined in: [client.ts:414](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L414)
+Defined in: [client.ts:420](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L420)
 
 CTS transport + lock operations.
 
@@ -516,7 +516,7 @@ Read an object's lock status.
 
 > **raw**: `object`
 
-Defined in: [client.ts:440](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L440)
+Defined in: [client.ts:446](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L446)
 
 Escape hatches for the long tail (ADR-0002).
 
@@ -572,7 +572,7 @@ Raw call to a tool on adt-ls's own MCP server (e.g. a backend-dynamic tool).
 
 > **reconnect**(): `Promise`\<`boolean`\>
 
-Defined in: [client.ts:447](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L447)
+Defined in: [client.ts:453](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L453)
 
 Force a SAP re-logon; `true` when the session is live afterwards (also auto-heals on dead-session detection).
 
@@ -586,7 +586,7 @@ Force a SAP re-logon; `true` when the session is live afterwards (also auto-heal
 
 > **health**(): [`HealthInfo`](HealthInfo.md)
 
-Defined in: [client.ts:449](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L449)
+Defined in: [client.ts:455](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L455)
 
 Connection + liveness snapshot.
 
@@ -600,7 +600,7 @@ Connection + liveness snapshot.
 
 > **dispose**(): `Promise`\<`void`\>
 
-Defined in: [client.ts:451](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L451)
+Defined in: [client.ts:457](https://github.com/marianfoo/adt-ls/blob/main/src/client.ts#L457)
 
 Shut down: stop the keep-alive, kill adt-ls, close the proxy, and clean temp dirs.
 

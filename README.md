@@ -5,10 +5,10 @@
 > the painful setup (discovery, JVM, named-pipe + LSP handshake, reentrance logon,
 > TLS/truststore, session resilience) so that *driving adt-ls is a few lines of code*.
 
-**Status: working — functionally complete & live-proven.** The full SAP authoring
-lifecycle (search → create → update → read → activate → run-tests → delete) runs
-end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
-`1.0.0.202605281240`). Not yet published to npm.
+**Status: published on npm (`0.2.0`) — functionally complete & live-proven.** The full
+SAP authoring lifecycle (search → create → update → read → activate → run-tests →
+delete) runs end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
+`1.0.0.202605281240`). Runs under **Node ≥ 20 and Bun** (both verified live).
 
 ## Install
 
@@ -37,6 +37,25 @@ await adt.lifecycle.create({ objectType: 'CLAS/OC', name: 'ZCL_BAR', packageName
 await adt.lifecycle.activate({ name: 'ZCL_BAR', objectType: 'CLAS/OC' });
 
 await adt.dispose();
+```
+
+### Low-level building blocks
+
+Consumers that drive adt-ls themselves — e.g. **proxying its MCP endpoint** to external
+agents — can skip `createAdtLs()` and use the primitives directly (this is what
+`abapify/openadt` adopts):
+
+```ts
+import { resolveAdtLsPath, AdtLsDriver, startMcpServer } from '@marianfoo/adt-ls';
+
+const driver = new AdtLsDriver(resolveAdtLsPath(), {
+  extraArgs: ['-consoleLog', `-Djco.middleware.snc_lib=${sncLib}`], // SNC/JCo JVM flags
+});
+await driver.start(); // discovery + spawn + LSP initialize (short pipe; macOS-safe)
+// register your own logon handlers: driver.setRequestHandler('adtLs/destinations/requestBrowserBasedLogon', …)
+const { port, token } = await startMcpServer(driver, { port: 2240, token: myToken });
+// → proxy http://localhost:${port}/mcp (Authorization: Bearer ${token}) however you like
+await driver.dispose();
 ```
 
 ## Documentation
