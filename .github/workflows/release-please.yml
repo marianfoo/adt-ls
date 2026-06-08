@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write # npm provenance attestation
+      id-token: write # OIDC trusted publishing + provenance — no NPM_TOKEN needed
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,9 +37,8 @@ jobs:
           node-version: 20
           registry-url: https://registry.npmjs.org
           cache: npm
+      - run: npm install -g npm@latest # trusted publishing (OIDC) requires npm >= 11.5
       # `npm ci` then `npm publish` runs prepublishOnly (lint + typecheck) and
       # prepack (tsup build) automatically — same as a local publish.
       - run: npm ci
       - run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
