@@ -3,9 +3,11 @@ import { searchWithRevive } from '../src/api/repository.js';
 import {
   isLoggedOffFederatedResult,
   isLoggedOffMessage,
+  isWriteSessionError,
   makeRelogon,
   makeReviveIfDead,
   makeWithRelogon,
+  withWriteRetry,
 } from '../src/resilience/session-retry.js';
 
 describe('isLoggedOffMessage', () => {
@@ -130,6 +132,60 @@ describe('searchWithRevive', () => {
   it('is a no-op passthrough when no reviveIfDead is given', async () => {
     const run = vi.fn().mockResolvedValue(empty);
     expect(await searchWithRevive(run)).toBe(empty);
+    expect(run).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('isWriteSessionError', () => {
+  it('matches lost-session write signatures (500 / 423 / lock / lost context)', () => {
+    expect(isWriteSessionError('HTTP 500 Internal Server Error')).toBe(true);
+    expect(isWriteSessionError('Error 423: invalid lock handle')).toBe(true);
+    expect(isWriteSessionError('the stateful session was terminated')).toBe(true);
+    expect(isWriteSessionError('sap-contextid is no longer valid')).toBe(true);
+  });
+  it('does NOT match real deterministic write errors (4xx / syntax)', () => {
+    expect(isWriteSessionError('400 Bad Request: name must be uppercase')).toBe(false);
+    expect(isWriteSessionError('Syntax error in line 5')).toBe(false);
+    expect(isWriteSessionError('package $TMP is not allowed')).toBe(false);
+  });
+});
+
+describe('withWriteRetry', () => {
+  it('returns the result and never probes on success', async () => {
+    const revive = vi.fn(async () => true);
+    const run = vi.fn().mockResolvedValue('ok');
+    expect(await withWriteRetry(run, revive)).toBe('ok');
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(revive).not.toHaveBeenCalled();
+  });
+
+  it('revives + retries once on a session-death write error when the session is dead', async () => {
+    const revive = vi.fn(async () => true); // dead → revived
+    const run = vi.fn().mockRejectedValueOnce(new Error('HTTP 500 Internal Server Error')).mockResolvedValueOnce('ok');
+    expect(await withWriteRetry(run, revive)).toBe('ok');
+    expect(run).toHaveBeenCalledTimes(2);
+    expect(revive).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT retry a session-death-shaped error when the session is actually alive', async () => {
+    const revive = vi.fn(async () => false); // alive → genuine 500
+    const run = vi.fn().mockRejectedValue(new Error('HTTP 500 Internal Server Error'));
+    await expect(withWriteRetry(run, revive)).rejects.toThrow('500');
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(revive).toHaveBeenCalledTimes(1);
+  });
+
+  it('does NOT probe or retry a non-session write error (surfaces immediately)', async () => {
+    const revive = vi.fn(async () => true);
+    const run = vi.fn().mockRejectedValue(new Error('Syntax error in line 5'));
+    await expect(withWriteRetry(run, revive)).rejects.toThrow('Syntax');
+    expect(run).toHaveBeenCalledTimes(1);
+    expect(revive).not.toHaveBeenCalled(); // no needless probe on a deterministic error
+  });
+
+  it('rethrows when no reviveIfDead is wired', async () => {
+    const run = vi.fn().mockRejectedValue(new Error('HTTP 500'));
+    await expect(withWriteRetry(run)).rejects.toThrow('500');
     expect(run).toHaveBeenCalledTimes(1);
   });
 });

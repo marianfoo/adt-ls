@@ -11,6 +11,7 @@ import { parseFederated } from '../channels/federated.js';
  */
 import type { LspRequester } from '../driver.js';
 import { isTransientColdError, withColdRetry } from '../resilience/cold-retry.js';
+import { withWriteRetry } from '../resilience/session-retry.js';
 import {
   deleteFile,
   getLsUri,
@@ -177,7 +178,8 @@ export function createLifecycle(deps: LifecycleDeps) {
     async updateSource(args: ObjectRef & { source: string; include?: string }): Promise<void> {
       let uri = await resolveAffUri(args);
       if (args.include) uri = includeAffUri(uri, args.include);
-      await writeFile(driver, uri, args.source);
+      // A write can race a session death (lock ok, PUT 500/423) — revive + retry once.
+      await withWriteRetry(() => writeFile(driver, uri, args.source), deps.reviveIfDead);
     },
 
     /**
@@ -187,19 +189,23 @@ export function createLifecycle(deps: LifecycleDeps) {
      */
     async activate(args: ObjectRef & { forceActivation?: boolean }): Promise<ActivateResult> {
       const uri = await resolveAffUri(args);
-      const res = await driver.sendRequest<{
-        isCheckExecuted?: boolean;
-        isActivationExecuted?: boolean;
-        isGenerationExecuted?: boolean;
-        isForceSupported?: boolean;
-        refreshLsUris?: string[];
-        objectDiagnostics?: unknown[];
-      }>('adtLs/activation/activate', {
-        destination: dest(),
-        lsUris: [uri],
-        references: [],
-        forceActivation: args.forceActivation ?? false,
-      });
+      const res = await withWriteRetry(
+        () =>
+          driver.sendRequest<{
+            isCheckExecuted?: boolean;
+            isActivationExecuted?: boolean;
+            isGenerationExecuted?: boolean;
+            isForceSupported?: boolean;
+            refreshLsUris?: string[];
+            objectDiagnostics?: unknown[];
+          }>('adtLs/activation/activate', {
+            destination: dest(),
+            lsUris: [uri],
+            references: [],
+            forceActivation: args.forceActivation ?? false,
+          }),
+        deps.reviveIfDead,
+      );
       const diagnostics = res?.objectDiagnostics ?? [];
       return {
         success: Boolean(res?.isActivationExecuted) && !hasErrorDiagnostics(diagnostics),
@@ -223,7 +229,7 @@ export function createLifecycle(deps: LifecycleDeps) {
 
     async deleteObject(args: ObjectRef): Promise<void> {
       const uri = await resolveAffUri(args);
-      await deleteFile(driver, metadataAffUri(uri));
+      await withWriteRetry(() => deleteFile(driver, metadataAffUri(uri)), deps.reviveIfDead);
     },
 
     /**

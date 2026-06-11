@@ -102,3 +102,36 @@ export function makeReviveIfDead(
     return relogon();
   };
 }
+
+/**
+ * A stateful WRITE (lock + PUT/activate/delete) can fail when the SAP session dies between
+ * the lock and the write: the lock succeeds, then the write hits a backend with no valid
+ * stateful context and returns HTTP 500 / "Internal error" / a stale-lock 423 — NOT the
+ * "logged off" string `withRelogon` watches for. These are the signatures worth a
+ * revive-and-retry. A 4xx validation error (a real, deterministic failure) is deliberately
+ * excluded so genuine errors surface instead of being retried.
+ */
+const WRITE_SESSION_ERROR =
+  /\b(?:500|423)\b|internal (?:server )?error|invalid lock|lock handle|stateful session|context[\s-]?id|session\b[\w\s'"-]{0,20}?\b(?:expired|terminated|timed[\s-]?out|no longer valid)/i;
+
+/** True when a write failure looks like a lost-session race (see {@link withWriteRetry}). */
+export function isWriteSessionError(text: string): boolean {
+  return WRITE_SESSION_ERROR.test(text);
+}
+
+/**
+ * Run a stateful write; if it fails with a lost-session signature ({@link isWriteSessionError})
+ * AND the session actually proves dead (`reviveIfDead` re-logs-on), retry ONCE on the fresh
+ * session — adt-ls re-acquires the lock and re-writes. The retry is gated on `reviveIfDead`,
+ * so a real backend error on a LIVE session (revive returns false) or any non-session error
+ * surfaces unchanged: this never blind-retries a write. At most one retry; never loops.
+ */
+export async function withWriteRetry<T>(run: () => Promise<T>, reviveIfDead?: () => Promise<boolean>): Promise<T> {
+  try {
+    return await run();
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    if (reviveIfDead && isWriteSessionError(msg) && (await reviveIfDead())) return run();
+    throw e;
+  }
+}
