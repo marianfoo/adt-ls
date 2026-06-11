@@ -1,6 +1,6 @@
 {
   "name": "@marianfoo/adt-ls",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Generic TypeScript SDK over SAP's headless adt-ls (adt-lsc, from the sapse.adt-vscode extension).",
   "type": "module",
   "license": "Apache-2.0",

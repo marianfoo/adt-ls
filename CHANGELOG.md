@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/marianfoo/adt-ls/compare/v0.4.0...v0.4.1) (2026-06-11)
+
+
+### Bug Fixes
+
+* **resilience:** revive + retry a stateful write that races a session death ([#3](https://github.com/marianfoo/adt-ls/issues/3)) ([557f1ff](https://github.com/marianfoo/adt-ls/commit/557f1ffd62dd21e500c6e1f74c7da8c7ccf1c04e))
+
 ## [0.4.0](https://github.com/marianfoo/adt-ls/compare/v0.3.0...v0.4.0) (2026-06-08)
 
 
