@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/marianfoo/adt-ls/compare/v0.4.2...v0.5.0) (2026-06-12)
+
+
+### Features
+
+* **auth:** clientCert — passwordless X.509 mutual-TLS logon ([#6](https://github.com/marianfoo/adt-ls/issues/6)) ([1f13553](https://github.com/marianfoo/adt-ls/commit/1f135535555e9c0e2831eb07a6f67f2ad71b808e))
+
 ## [0.4.2](https://github.com/marianfoo/adt-ls/compare/v0.4.1...v0.4.2) (2026-06-12)
 
 
