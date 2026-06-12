@@ -52,7 +52,7 @@ describe('createAdtLs (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
       });
 
       expect(adt.health().connected).toBe(true);
-      expect(adt.health().adtLsVersion).toMatch(/1\.0\.0/);
+      expect(adt.health().adtLsVersion).toMatch(/1\.0\.1/);
       expect(adt.health().backendLive).toBe(true);
 
       const hits = await adt.repository.search('CL_ABAP_TYPEDESCR', { types: ['CLAS/OC'], cold: true });

@@ -5,9 +5,9 @@ and a **"revisit when"** trigger (most of this design is shaped by *current* adt
 limitations that SAP may lift — when they do, simplify). Status values: `Accepted`,
 `Superseded`, `Proposed`.
 
-Reference at time of writing: `sapse.adt-vscode` **1.0.0** / adt-ls
-**1.0.0.202605281240** / SAP Machine JRE **21.11.0**. Feasibility proven live against
-a4h (S/4HANA 2023) on 2026-06-07.
+Reference at time of writing: `sapse.adt-vscode` **1.0.1** / adt-ls
+**1.0.1.202606111342** / SAP Machine JRE **21.11.0**. Feasibility baseline refreshed
+on 2026-06-12; the original a4h end-to-end proof was recorded on 2026-06-07.
 
 | # | Title | Status |
 |---|-------|--------|

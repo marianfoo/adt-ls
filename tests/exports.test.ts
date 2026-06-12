@@ -36,3 +36,11 @@ describe('public API exports (0.4.0)', () => {
     ]);
   });
 });
+
+describe('public API exports (compatibility baseline)', () => {
+  it('exposes the supported adt-ls version helpers', () => {
+    expect(api.MINIMUM_ADT_LS_VERSION).toBe('1.0.1');
+    expect(api.VERIFIED_ADT_LS_VERSION).toBe('1.0.1.202606111342');
+    expect(typeof api.assertSupportedAdtLsVersion).toBe('function');
+  });
+});

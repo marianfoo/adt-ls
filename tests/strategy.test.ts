@@ -1,3 +1,4 @@
+import net, { type AddressInfo } from 'node:net';
 import { describe, expect, it, vi } from 'vitest';
 import { LSP_REQUEST_BROWSER_LOGON, LSP_REQUEST_LOGON_INPUT } from '../src/auth/reentrance.js';
 import { basic, bearer, custom, interactive } from '../src/auth/strategy.js';
@@ -38,7 +39,7 @@ describe('LogonStrategy', () => {
     expect(h({ params: [] })).toBe(false);
   });
 
-  it('interactive opens the SSO url + can prompt fields', async () => {
+  it('interactive opens the SSO url + can prompt legacy 1.0.0 fields', async () => {
     const opened: string[] = [];
     const s = interactive({ openUrl: (u) => void opened.push(u), promptField: async () => 'secret' });
     const reg = fakeRegistrar();
@@ -52,6 +53,52 @@ describe('LogonStrategy', () => {
       params: [{ field: { key: 'password' }, sensitive: true, label: 'PW' }],
     });
     expect(out).toEqual({ id: 'A4H', fields: [{ key: 'password', value: 'secret' }] });
+  });
+
+  it('interactive handles 1.0.1 sensitive-field socket logon input', async () => {
+    const received = new Promise<Record<string, string>>((resolve, reject) => {
+      const server = net.createServer((socket) => {
+        let data = '';
+        socket.on('data', (chunk) => {
+          data += chunk.toString();
+        });
+        socket.on('end', () => {
+          server.close();
+          try {
+            resolve(JSON.parse(data) as Record<string, string>);
+          } catch (error) {
+            reject(error);
+          }
+        });
+      });
+      server.on('error', reject);
+      server.listen(0, 'localhost', async () => {
+        try {
+          const port = (server.address() as AddressInfo).port;
+          const s = interactive({
+            openUrl: () => {},
+            promptField: async (field) => (field.key === 'password' ? ' secret ' : ' 001 '),
+          });
+          const reg = fakeRegistrar();
+          s.register(reg, {});
+          const out = await reg.handlers[LSP_REQUEST_LOGON_INPUT]({
+            id: 'A4H',
+            title: 'Logon to A4H',
+            sensitiveFieldsSocketPort: port,
+            params: [
+              { name: 'password', sensitive: true, label: 'Password' },
+              { name: 'client', sensitive: false, label: 'Client' },
+            ],
+          });
+          expect(out).toEqual({ nonSensitiveFields: { client: '001' } });
+        } catch (error) {
+          server.close();
+          reject(error);
+        }
+      });
+    });
+
+    await expect(received).resolves.toEqual({ password: 'secret' });
   });
 
   it('custom passes through a register function', () => {

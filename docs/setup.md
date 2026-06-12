@@ -18,8 +18,8 @@ extension** (publisher **SAPSE**). It is **not redistributable** (SAP Developer 
 
 Marketplace: <https://marketplace.visualstudio.com/items?itemName=SAPSE.adt-vscode>
 
-> **Version:** this library is verified against `adt-lsc` **`1.0.0.202605281240`**. Newer
-> `1.0.0.x` builds should work; in CI, pin the extension version for reproducibility.
+> **Version:** this library requires `adt-lsc` **`1.0.1` or newer** and is verified against
+> **`1.0.1.202606111342`**. In CI, pin the extension version for reproducibility.
 
 ### Option A — install the extension (best for local dev)
 
@@ -44,7 +44,7 @@ A `.vsix` is just a zip. Pick the build that matches your **runner's** OS + arch
 Download a specific build from the Marketplace gallery API (a `.vsix` is returned):
 
 ```bash
-VER=1.0.0                 # the version from the Marketplace "Version History"
+VER=1.0.1                 # the version from the Marketplace "Version History"
 PLAT=linux-x64            # your runner's targetPlatform from the table above
 curl -L -o adt-vscode-$PLAT.vsix \
   "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/SAPSE/vsextensions/adt-vscode/$VER/vspackage?targetPlatform=$PLAT"
@@ -107,7 +107,7 @@ xattr -dr com.apple.quarantine /path/to/Adt-ls.app
 - uses: actions/cache@v4
   with:
     path: vendor/adt-ls
-    key: adt-ls-${{ runner.os }}-1.0.0
+    key: adt-ls-${{ runner.os }}-1.0.1
 - run: test -d vendor/adt-ls || ./fetch-and-vendor-adt-ls.sh   # your extract step
 ```
 

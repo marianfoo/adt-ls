@@ -24,6 +24,7 @@ import {
   createMessageConnection,
 } from 'vscode-jsonrpc/node.js';
 import { logger } from './log.js';
+import { VERIFIED_ADT_LS_VERSION, assertSupportedAdtLsVersion } from './version.js';
 
 /**
  * A SHORT, cross-platform pipe name. We deliberately do NOT use vscode-jsonrpc's
@@ -237,6 +238,17 @@ export class AdtLsDriver implements LspClient {
     )) as AdtLsInitializeResult;
     conn.sendNotification('initialized', {});
     this.initializeResult = result;
+    try {
+      assertSupportedAdtLsVersion(result.serverInfo?.version);
+    } catch (error) {
+      await this.dispose().catch(() => {});
+      throw error;
+    }
+    if (result.serverInfo?.version !== VERIFIED_ADT_LS_VERSION) {
+      logger.warn(
+        `adt-ls ${result.serverInfo?.version} is supported but not the verified build ${VERIFIED_ADT_LS_VERSION}.`,
+      );
+    }
     logger.info(`adt-ls ready: ${result.serverInfo?.name} ${result.serverInfo?.version}`);
     return result;
   }

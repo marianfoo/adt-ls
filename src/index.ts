@@ -31,6 +31,16 @@ export type { DiscoverOptions } from './discovery.js';
 export { setLogger, silentLogger, stderrLogger } from './log.js';
 export type { Logger } from './log.js';
 
+// Supported SAP ADT VS Code / adt-ls compatibility baseline.
+export {
+  MINIMUM_ADT_LS_VERSION,
+  REQUIRED_SAPSE_ADT_VSCODE_VERSION,
+  VERIFIED_ADT_LS_VERSION,
+  assertSupportedAdtLsVersion,
+  isSupportedAdtLsVersion,
+  parseAdtLsVersion,
+} from './version.js';
+
 // Federated MCP result unwrap (for consumers calling raw.tool directly)
 export { parseFederated } from './channels/federated.js';
 export type { FederatedResult } from './channels/federated.js';

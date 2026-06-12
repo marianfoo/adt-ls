@@ -55,19 +55,19 @@ describe('resolveAdtLsPath', () => {
 
   it('finds the newest installed sapse.adt-vscode extension (darwin arm64)', () => {
     const ext = mk();
-    for (const v of ['sapse.adt-vscode-1.0.0-darwin-arm64', 'sapse.adt-vscode-0.9.0-darwin-arm64']) {
+    for (const v of ['sapse.adt-vscode-1.0.1-darwin-arm64', 'sapse.adt-vscode-0.9.0-darwin-arm64']) {
       const p = path.join(ext, v, 'adt-ls', 'macosx', 'cocoa', 'aarch64', 'Adt-ls.app', 'Contents', 'MacOS', 'adt-ls');
       mkdirSync(path.dirname(p), { recursive: true });
       writeFileSync(p, 'x');
     }
     const got = resolveAdtLsPath({ repoRoot: mk(), extensionsDir: ext, platform: 'darwin', arch: 'arm64' });
-    expect(got).toContain('sapse.adt-vscode-1.0.0-darwin-arm64');
+    expect(got).toContain('sapse.adt-vscode-1.0.1-darwin-arm64');
   });
 
   it('scans multiple extension dirs (cursor after vscode)', () => {
     const vscode = mk();
     const cursor = mk();
-    const p = path.join(cursor, 'sapse.adt-vscode-1.0.0-linux-x64', 'adt-ls', 'linux', 'gtk', 'x86_64', 'adt-ls');
+    const p = path.join(cursor, 'sapse.adt-vscode-1.0.1-linux-x64', 'adt-ls', 'linux', 'gtk', 'x86_64', 'adt-ls');
     mkdirSync(path.dirname(p), { recursive: true });
     writeFileSync(p, 'x');
     expect(resolveAdtLsPath({ repoRoot: mk(), extensionsDirs: [vscode, cursor], platform: 'linux', arch: 'x64' })).toBe(

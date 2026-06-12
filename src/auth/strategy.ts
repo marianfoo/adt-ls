@@ -1,3 +1,4 @@
+import net from 'node:net';
 import type { ServerRequestHandler } from '../driver.js';
 /**
  * Pluggable authentication (ADR-0003). The on-the-wire method is always
@@ -91,8 +92,30 @@ export interface InteractiveCallbacks {
 type RequestLogonInputParams = {
   id: string;
   title?: string;
-  params?: Array<{ description?: string; label?: string; sensitive?: boolean; field?: { key?: string } }>;
+  /** 1.0.1 sends sensitive answers to this localhost socket instead of the JSON-RPC response. */
+  sensitiveFieldsSocketPort?: number;
+  params?: Array<{
+    /** 1.0.1 field id. */
+    name?: string;
+    description?: string;
+    label?: string;
+    sensitive?: boolean;
+    /** 1.0.0 field id. */
+    field?: { key?: string };
+  }>;
 };
+
+function sendSensitiveFields(port: number, fields: Record<string, string>): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const socket = net.createConnection(port, 'localhost', () => {
+      socket.write(JSON.stringify(fields), (err) => {
+        socket.end();
+        err ? reject(err) : resolve();
+      });
+    });
+    socket.on('error', reject);
+  });
+}
 
 /** Interactive — the consumer supplies the UX (no hardcoded browser/TTY). */
 export function interactive(cb: InteractiveCallbacks): LogonStrategy {
@@ -108,14 +131,38 @@ export function interactive(cb: InteractiveCallbacks): LogonStrategy {
       if (cb.promptField) {
         driver.setRequestHandler(LSP_REQUEST_LOGON_INPUT, async (params) => {
           const p = params as RequestLogonInputParams;
-          const field = p.params?.[0];
-          if (!field?.field?.key) return undefined;
-          const value = await cb.promptField?.({
-            key: field.field.key,
-            label: field.description ?? field.label ?? 'Enter value',
-            sensitive: Boolean(field.sensitive),
-          });
-          return value ? { id: p.id, fields: [{ key: field.field.key, value }] } : undefined;
+          const fields = p.params ?? [];
+          if (fields.length === 0) return undefined;
+
+          const legacyFields: Array<{ key: string; value: string }> = [];
+          const sensitiveFields: Record<string, string> = {};
+          const nonSensitiveFields: Record<string, string> = {};
+
+          for (const field of fields) {
+            const key = field.name ?? field.field?.key;
+            if (!key) continue;
+            const value = await cb.promptField?.({
+              key,
+              label: field.description ?? field.label ?? 'Enter value',
+              sensitive: Boolean(field.sensitive),
+            });
+            const trimmed = value?.trim();
+            if (!trimmed) return undefined;
+
+            if (!p.sensitiveFieldsSocketPort) {
+              legacyFields.push({ key, value: trimmed });
+            } else if (field.sensitive) {
+              sensitiveFields[key] = trimmed;
+            } else {
+              nonSensitiveFields[key] = trimmed;
+            }
+          }
+
+          if (p.sensitiveFieldsSocketPort && Object.keys(sensitiveFields).length > 0) {
+            await sendSensitiveFields(p.sensitiveFieldsSocketPort, sensitiveFields);
+          }
+
+          return p.sensitiveFieldsSocketPort ? { nonSensitiveFields } : { id: p.id, fields: legacyFields };
         });
       }
     },

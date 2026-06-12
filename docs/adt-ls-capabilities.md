@@ -3,7 +3,7 @@
 What the headless `adt-lsc` language server **actually offers**, what `@marianfoo/adt-ls`
 **wraps**, what's **worth wrapping next**, and what's a **hard boundary** (never in adt-ls).
 
-> **Sources.** Live introspection of `adt-lsc` **1.0.0.202605281240** (`initialize`
+> **Sources.** Live introspection of `adt-lsc` **1.0.1.202606111342** (`initialize`
 > capabilities + MCP `tools/list`, see [Reproduce](#reproduce)), cross-checked against the full
 > **decompiled** `com.sap.adt.ls` LSP4J interfaces. The canonical deep map lives in arc-1-lsp at
 > `docs/research/adt-ls-capability-map.md` (**23 `adtLs/*` segments / ~92 methods**); the jar
@@ -81,7 +81,7 @@ ops, ATC and coverage all go through native `adtLs/*` LSP methods, not MCP tools
 
 ## 4. Candidate wrapping — status
 
-### 4a. Wrapped in 0.4.0 (live-verified against a4h `1.0.0.202605281240`)
+### 4a. Wrapped in 0.4.0 (live-verified against a4h `1.0.1.202606111342`)
 
 Each was probed live; the **exact verified call** is recorded as durable evidence.
 

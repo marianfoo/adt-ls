@@ -10,7 +10,7 @@
  *
  * `keytool` is required and always ships with adt-ls's bundled SAP Machine JRE;
  * `openssl` is required for cert generation (present on macOS/Linux + most images).
- * The bundled-JRE layout is verified against the 1.0.0 VSIX (see ADR-0004).
+ * The bundled-JRE layout is verified against the 1.0.1 VSIX (see ADR-0004).
  */
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
@@ -30,7 +30,7 @@ export interface JreTools {
 
 /**
  * Locate the bundled SAP Machine JRE's `keytool` + `cacerts` relative to the adt-ls
- * binary. Layouts differ by platform (verified against the 1.0.0 VSIX):
+ * binary. Layouts differ by platform (verified against the 1.0.1 VSIX):
  *   - linux/win: `binDir/plugins/com.sap.adt.jvm.<ver>/jre/...`
  *   - macOS:     `binDir/../Eclipse/plugins/com.sap.adt.jvm.<ver>/jre/...`
  */

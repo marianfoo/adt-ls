@@ -8,15 +8,15 @@
 The `adtLs/*` protocol is **private and unpublished**; SAP can change it between
 releases. It is young (its MCP server is flagged experimental). The installed adt-ls
 build reports itself in the LSP `initialize` response as
-`serverInfo.version` (verified: `ADTLS 1.0.0.202605281240`), and the extension carries
+`serverInfo.version` (verified: `ADTLS 1.0.1.202606111342`), and the extension carries
 a `version` in its `package.json`.
 
 ## Decision
 
-- Each `@marianfoo/adt-ls` release **declares a supported adt-ls build** (current:
-  `sapse.adt-vscode 1.0.0` / `adt-ls 1.0.0.202605281240` / SAP Machine JRE 21.11.0).
-- At startup, read `serverInfo.version` and **warn (not fail) on mismatch** with the
-  supported build.
+- Each `@marianfoo/adt-ls` release **declares a minimum and verified adt-ls build** (current:
+  `sapse.adt-vscode 1.0.1` / `adt-ls 1.0.1.202606111342` / SAP Machine JRE 21.11.0).
+- At startup, read `serverInfo.version`, **fail fast below the minimum version**, and warn
+  when the build is supported but differs from the exact verified build.
 - Pin *behaviour* to the supported build; never assume undocumented stability across
   versions. Capability docs are version-tagged.
 

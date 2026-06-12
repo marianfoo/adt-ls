@@ -2,7 +2,7 @@
 
 What `@marianfoo/adt-ls` exposes, which adt-ls call backs each method, and the
 object-type boundary. Live-verified against a4h (S/4HANA 2023, adt-ls
-`1.0.0.202605281240`). adt-ls has **two channels** — its own **MCP** server (federated)
+`1.0.1.202606111342`). adt-ls has **two channels** — its own **MCP** server (federated)
 and the **LSP** surface (`adtLs/*` + standard `textDocument/*`); the client hides which
 one serves a call. Raw access: `adt.raw.tool(name,args)` (MCP) and
 `adt.raw.lsp(method,params)` (LSP).
@@ -51,8 +51,9 @@ placeholder ("use Eclipse") and are **out of scope**.
 ## Notes & gotchas
 
 - **Pin the adt-ls build.** The `adtLs/*` protocol is private/unpublished and can change;
-  this release targets `sapse.adt-vscode 1.0.0` / `1.0.0.202605281240`. The client reads
-  `serverInfo.version` (`adt.health().adtLsVersion`).
+  this release requires `sapse.adt-vscode 1.0.1` or newer and is verified against
+  `1.0.1.202606111342`. Startup rejects older builds; `adt.health().adtLsVersion` reports
+  the active build.
 - **`transport.find/create` are dynamic** — they come from the connected system's MCP
   IDE-Actions and vary per backend/version; `transport.assign/list/getLockStatus` use the
   always-present native LSP path. Unknown dynamic tools are reachable via `raw.tool`.

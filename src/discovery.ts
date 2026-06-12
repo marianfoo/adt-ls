@@ -10,7 +10,7 @@
  *   3. newest installed `sapse.adt-vscode-*` across the VS Code / Cursor /
  *      VS Code Insiders extension directories
  *
- * The per-platform layout is verified against all four 1.0.0 VSIX:
+ * The per-platform layout is verified against all four 1.0.1 VSIX:
  *   macOS  `adt-ls/macosx/cocoa/<arch>/Adt-ls.app/Contents/MacOS/adt-ls`
  *   Linux  `adt-ls/linux/gtk/<arch>/adt-ls`
  *   Win    `adt-ls/win32/win32/<arch>/adt-lsc.exe`

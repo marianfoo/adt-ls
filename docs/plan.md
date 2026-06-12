@@ -18,7 +18,7 @@ CC/BTP bridge in the lib (ADR-0001).
 |---|---|
 | Per-platform binary paths (all 4 VSIX) | ✅ `macosx/cocoa/<arch>/Adt-ls.app/Contents/MacOS/adt-ls`, `linux/gtk/x86_64/adt-ls`, `win32/win32/x86_64/adt-lsc.exe` |
 | Bundled JRE | ✅ SAP Machine `21.11.0`; `keytool`/`cacerts` under `…/plugins/com.sap.adt.jvm.sapmachineminimal.<os>.<arch>_21.11.0/jre` (mac: `…/Contents/Eclipse/plugins/…`) |
-| Spawn + LSP `initialize` (userAgentInfos) | ✅ `ADTLS 1.0.0.202605281240` |
+| Spawn + LSP `initialize` (userAgentInfos) | ✅ `ADTLS 1.0.1.202606111342` |
 | Truststore build w/ bundled keytool | ✅ |
 | Full lifecycle vs a4h (auth+LSP+MCP+resilience) | ✅ green in ~33s |
 
@@ -238,13 +238,14 @@ edge, write-safety), `src/btp/*` (CC bridge → plugged via the `upstream` hook)
 
 ## 11. Versioning & compatibility (ADR-0009)
 
-Each release declares a supported adt-ls build (current `1.0.0.202605281240`). The
-client reads `serverInfo.version` from `initialize` and **warns on mismatch**. The
-private `adtLs/*` protocol can change between releases — pin behaviour, don't assume.
+Each release declares a minimum and verified adt-ls build (current
+`1.0.1.202606111342`). The client reads `serverInfo.version` from `initialize`, rejects
+older builds, and warns when a supported build differs from the verified one. The private
+`adtLs/*` protocol can change between releases — pin behaviour, don't assume.
 
 ## 12. Risks & open items
 
-- **Private protocol churn** — SAP can change `adtLs/*`; mitigated by version pin + warn.
+- **Private protocol churn** — SAP can change `adtLs/*`; mitigated by a minimum-version guard plus a verified-build warning.
 - **Windows runtime unproven** — S-win on the VM before claiming Win support.
 - **Dynamic MCP tools vary per backend** — covered by `raw.tool` + S-dyn.
 - **Interactive logon UX** — kept generic via callbacks; the batteries-included helper

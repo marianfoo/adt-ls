@@ -12,7 +12,7 @@
 lifecycle (search → create → update → read → activate → run-tests → delete), plus code
 intelligence, quality gates, ABAP formatting, transport, and OData service info, all run
 end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
-`1.0.0.202605281240`). Runs under **Node ≥ 20 and Bun** (both verified live).
+`1.0.1.202606111342`). Runs under **Node ≥ 20 and Bun** (both verified live).
 
 ## Install
 
@@ -24,6 +24,7 @@ You **bring adt-ls** (SAP Developer License — not redistributable): install th
 `sapse.adt-vscode` extension (VS Code / Cursor) and the library auto-discovers it, or
 vendor the per-platform VSIX for CI. **New here → [docs/setup.md](https://github.com/marianfoo/adt-ls/blob/main/docs/setup.md)**:
 which platform build to download, CI vendoring, and connecting with auth.
+This release requires `adt-ls >= 1.0.1` and is verified against `1.0.1.202606111342`.
 
 ## Quickstart
 
@@ -110,12 +111,12 @@ also the right one.
 Cloud-Connector/BTP bridge *inside* the library. What adt-ls can't do headless is out
 of scope. See [ADR-0001](docs/adr/0001-scope-adt-ls-only.md).
 
-## Verified feasibility (2026-06-07, macOS arm64, adt-ls `1.0.0.202605281240`)
+## Verified feasibility (baseline refreshed 2026-06-12, macOS arm64, adt-ls `1.0.1.202606111342`)
 
-Proven hands-on against the freshly-downloaded 1.0.0 VSIX and the live a4h system:
+Proven hands-on against the freshly-downloaded 1.0.1 VSIX and the live a4h system:
 
 - Per-platform binary paths confirmed across **all four** VSIX (darwin-arm64, darwin-x64, linux-x64, win32-x64).
-- Spawn + LSP `initialize` (with the `userAgentInfos` workaround) → `ADTLS 1.0.0.202605281240`.
+- Spawn + LSP `initialize` (with the `userAgentInfos` workaround) → `ADTLS 1.0.1.202606111342`.
 - Truststore build with the **bundled** SAP Machine JRE 21 `keytool`.
 - **Full `create → update → read → activate → run-tests → delete` GREEN against a4h** — exercising auth (reentrance + TLS proxy), the LSP channel, the MCP channel, and the resilience layer end-to-end.
 
