@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/marianfoo/adt-ls/compare/v0.4.1...v0.4.2) (2026-06-12)
+
+
+### Bug Fixes
+
+* require adt-ls 1.0.1 baseline ([f1853a0](https://github.com/marianfoo/adt-ls/commit/f1853a03fe9c7cadfd4cb7f5abb75726c40976a0))
+
 ## [0.4.1](https://github.com/marianfoo/adt-ls/compare/v0.4.0...v0.4.1) (2026-06-11)
 
 
