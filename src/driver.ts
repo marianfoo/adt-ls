@@ -134,7 +134,7 @@ export interface AdtLsDriverOptions {
   clientInfo?: { name: string; version: string };
 }
 
-const DEFAULT_CLIENT = { name: '@marianfoo/adt-ls', version: '0.4.1' }; // x-release-please-version
+const DEFAULT_CLIENT = { name: '@marianfoo/adt-ls', version: '0.4.2' }; // x-release-please-version
 
 export class AdtLsDriver implements LspClient {
   private child?: ChildProcess;
