@@ -119,6 +119,26 @@ describe('performReentranceLogon (browser emulation)', () => {
     expect(deliveredTicket).toBe('TICKET123');
   });
 
+  it('sends NO Authorization header when called without credentials (client-cert path)', async () => {
+    let sawAuth: string | undefined = 'INIT';
+    let delivered = false;
+    const deliverPort = await listen((_req, res) => {
+      delivered = true;
+      res.writeHead(302, { location: '/done' });
+      res.end();
+    });
+    const logonPort = await listen((req, res) => {
+      sawAuth = req.headers.authorization;
+      res.writeHead(307, { location: `http://localhost:${deliverPort}/adt/redirect?reentrance-ticket=T` });
+      res.end();
+    });
+
+    await performReentranceLogon(`http://127.0.0.1:${logonPort}/reentranceticket`); // no creds → TLS cert authenticates
+
+    expect(sawAuth).toBeUndefined();
+    expect(delivered).toBe(true);
+  });
+
   it('throws when the logon URL returns no redirect Location', async () => {
     const port = await listen((_req, res) => {
       res.writeHead(401);

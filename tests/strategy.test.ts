@@ -1,7 +1,7 @@
 import net, { type AddressInfo } from 'node:net';
 import { describe, expect, it, vi } from 'vitest';
 import { LSP_REQUEST_BROWSER_LOGON, LSP_REQUEST_LOGON_INPUT } from '../src/auth/reentrance.js';
-import { basic, bearer, custom, interactive } from '../src/auth/strategy.js';
+import { basic, bearer, clientCert, custom, interactive } from '../src/auth/strategy.js';
 import type { ServerRequestHandler } from '../src/driver.js';
 
 function fakeRegistrar() {
@@ -99,6 +99,20 @@ describe('LogonStrategy', () => {
     });
 
     await expect(received).resolves.toEqual({ password: 'secret' });
+  });
+
+  it('clientCert carries the cert + registers a no-credential reentrance handler', () => {
+    const s = clientCert({ cert: 'CERT_PEM', key: 'KEY_PEM', user: 'MARIAN' });
+    expect(s.kind).toBe('clientCert');
+    expect(s.user).toBe('MARIAN');
+    expect(s.clientCert).toEqual({ cert: 'CERT_PEM', key: 'KEY_PEM' });
+    const reg = fakeRegistrar();
+    s.register(reg, { insecure: true });
+    const h = reg.handlers[LSP_REQUEST_BROWSER_LOGON];
+    expect(h).toBeTypeOf('function');
+    expect(h({ params: [] })).toBe(false); // no logonUrl
+    // a logonUrl is accepted fire-and-forget; the TLS cert (presented by the proxy) authenticates it
+    expect(h({ params: [{ field: { key: 'logonUrl', value: 'http://127.0.0.1:1/reentranceticket' } }] })).toBe(true);
   });
 
   it('custom passes through a register function', () => {

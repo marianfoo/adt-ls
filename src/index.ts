@@ -20,7 +20,7 @@ export { createAdtLs } from './client.js';
 export type { AdtLsClient, ConnectionOptions, CreateAdtLsOptions, HealthInfo } from './client.js';
 
 // Auth strategies (ADR-0003)
-export { basic, bearer, custom, interactive } from './auth/strategy.js';
+export { basic, bearer, clientCert, custom, interactive } from './auth/strategy.js';
 export type { InteractiveCallbacks, LogonContext, LogonHandlerRegistrar, LogonStrategy } from './auth/strategy.js';
 
 // Discovery (ADR-0004) — BYO adt-ls
