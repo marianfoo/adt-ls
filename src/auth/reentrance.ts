@@ -86,7 +86,8 @@ export function extractLogonUrl(params: unknown): string | undefined {
   return m ? m[0] : undefined;
 }
 
-function authHeader(creds: LogonCredentials): Record<string, string> {
+function authHeader(creds?: LogonCredentials): Record<string, string> {
+  if (!creds) return {}; // client-cert auth: the TLS layer authenticates, no header
   if (creds.kind === 'bearer') return { Authorization: `Bearer ${creds.token}` };
   return { Authorization: `Basic ${Buffer.from(`${creds.user}:${creds.password}`).toString('base64')}` };
 }
@@ -122,10 +123,13 @@ function httpGet(
  * Emulate the browser reentrance flow: GET logonUrl with the credential → 307 +
  * reentrance-ticket in Location → deliver it to adt-ls's local 127.0.0.1 listener.
  * `insecure` skips TLS verification when WE call the proxy/backend (self-signed).
+ * `creds` is OPTIONAL — omit it for X.509 client-certificate auth, where the TLS layer
+ * (a cert-presenting reverse proxy) authenticates the GET and the backend issues the
+ * ticket for the cert-mapped user, so no Authorization header is sent.
  */
 export async function performReentranceLogon(
   logonUrl: string,
-  creds: LogonCredentials,
+  creds?: LogonCredentials,
   opts: { insecure?: boolean } = {},
 ): Promise<void> {
   const r1 = await httpGet(logonUrl, { headers: authHeader(creds), insecure: opts.insecure });
@@ -143,7 +147,7 @@ export async function performReentranceLogon(
  * until this resolves (browser-flow semantics), so awaiting it deadlocks.
  */
 export function makeReentranceLogonHandler(
-  creds: LogonCredentials,
+  creds?: LogonCredentials,
   opts: { insecure?: boolean } = {},
 ): ServerRequestHandler {
   return (params: unknown) => {

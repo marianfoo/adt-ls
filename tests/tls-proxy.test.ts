@@ -59,4 +59,47 @@ describe('startTlsReverseProxy (DIRECT)', () => {
       await fsp.rm(dir, { recursive: true, force: true });
     }
   });
+
+  it.skipIf(!hasOpenssl())('presents a client certificate upstream (mutual TLS) when clientCert is set', async () => {
+    const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'adtls-mtls-'));
+    const server = await generateLocalhostCert(dir);
+    const client = await generateLocalhostCert(path.join(dir, 'client'));
+
+    let peerPresented = false;
+    const backend = https.createServer(
+      { key: server.keyPem, cert: server.certPem, requestCert: true, rejectUnauthorized: false },
+      (req, res) => {
+        const peer = (req.socket as import('node:tls').TLSSocket).getPeerCertificate();
+        peerPresented = !!peer && Object.keys(peer).length > 0;
+        res.writeHead(200, { 'content-type': 'text/plain' });
+        res.end('ok');
+      },
+    );
+    await new Promise<void>((r) => backend.listen(0, '127.0.0.1', () => r()));
+    const backendPort = (backend.address() as AddressInfo).port;
+
+    const proxy = await startTlsReverseProxy({
+      key: server.keyPem,
+      cert: server.certPem,
+      target: { host: '127.0.0.1', port: backendPort, protocol: 'https' },
+      insecureUpstream: true,
+      clientCert: { cert: client.certPem, key: client.keyPem },
+    });
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const req = https.request(`${proxy.url}/x`, { rejectUnauthorized: false }, (res) => {
+          res.resume();
+          res.on('end', () => resolve());
+        });
+        req.on('error', reject);
+        req.end();
+      });
+      expect(peerPresented).toBe(true); // backend received our client cert through the proxy
+    } finally {
+      await proxy.close();
+      await new Promise<void>((r) => backend.close(() => r()));
+      await fsp.rm(dir, { recursive: true, force: true });
+    }
+  });
 });

@@ -8,6 +8,8 @@ import type { ServerRequestHandler } from '../driver.js';
  * Built-ins:
  *   - `basic(user, password)`  — headless, on-prem fixed user (fire-and-forget).
  *   - `bearer(token|getToken)` — headless, BTP ABAP / Steampunk (caller's OAuth token).
+ *   - `clientCert({cert,key})` — headless, passwordless X.509 mutual TLS (proxy presents
+ *     the cert; backend maps it via CERTRULE). Requires `connection.selfSigned`.
  *   - `interactive(callbacks)` — human completes SSO; the lib ships NO browser/TTY,
  *     only consumer callbacks (a batteries-included helper is a separate sub-export).
  *   - `custom(register)`       — full escape hatch.
@@ -36,9 +38,14 @@ export interface LogonContext {
 }
 
 export interface LogonStrategy {
-  readonly kind: 'basic' | 'bearer' | 'interactive' | 'custom';
+  readonly kind: 'basic' | 'bearer' | 'interactive' | 'custom' | 'clientCert';
   /** Optional user to record on the adt-ls destination (createDestination). */
   readonly user?: string;
+  /** PEM client cert + key for the upstream TLS hop. Set only by `clientCert()`; the
+   *  library's reverse proxy presents it to the backend on every request, so the TLS
+   *  connection itself (mutual TLS → e.g. AS ABAP `verify_client` + CERTRULE) authenticates
+   *  the user. Requires `connection.selfSigned` (the proxy does the mutual-TLS hop). */
+  readonly clientCert?: { cert: string | Buffer; key: string | Buffer };
   /** Register the server→client logon handler(s) before `ensureLoggedOn`. */
   register(driver: LogonHandlerRegistrar, ctx: LogonContext): void;
 }
@@ -76,6 +83,31 @@ export function bearer(token: string | (() => string | Promise<string>), opts: {
         })().catch((e) => logger.warn(`bearer reentrance logon failed: ${e instanceof Error ? e.message : String(e)}`));
         return true; // fire-and-forget
       });
+    },
+  };
+}
+
+/**
+ * Client certificate (mutual TLS) — passwordless, headless, NO browser. The library's
+ * reverse proxy presents `cert`/`key` to the backend on every upstream hop, so the TLS
+ * connection authenticates the user (e.g. AS ABAP `icm/HTTPS/verify_client=1` + CERTRULE
+ * maps the cert subject → user). The reentrance handler runs with NO credential — the cert
+ * authenticates the GET, so the backend issues the ticket for the cert-mapped user.
+ *
+ * Requires `connection.selfSigned` (the proxy does the mutual-TLS hop). License-free on the
+ * server; nothing to install on the client. Re-auth on a lapsed session is silent (the proxy
+ * just re-presents the cert) — no browser pop, unlike `interactive`.
+ */
+export function clientCert(opts: { cert: string | Buffer; key: string | Buffer; user?: string }): LogonStrategy {
+  return {
+    kind: 'clientCert',
+    user: opts.user,
+    clientCert: { cert: opts.cert, key: opts.key },
+    register(driver, ctx) {
+      driver.setRequestHandler(
+        LSP_REQUEST_BROWSER_LOGON,
+        makeReentranceLogonHandler(undefined, { insecure: ctx.insecure }),
+      );
     },
   };
 }

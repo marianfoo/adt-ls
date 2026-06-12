@@ -129,6 +129,13 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
   // The destination id is set only when a connection is configured (foundation mode → undefined).
   const destId: string | undefined = conn && auth ? (opts.destinationId ?? 'ADTLS') : undefined;
 
+  // X.509 client-cert auth needs the reverse proxy to present the cert upstream (mutual TLS).
+  if (auth?.clientCert && !conn?.selfSigned) {
+    throw new Error(
+      'clientCert auth requires connection.selfSigned — the reverse proxy presents the client cert to the backend.',
+    );
+  }
+
   // 1. TLS material + the systemUrl the JVM will use (only when connecting).
   let extraEnv: Record<string, string> = {};
   let systemUrl = conn?.systemUrl ?? '';
@@ -142,6 +149,8 @@ export async function createAdtLs(opts: CreateAdtLsOptions): Promise<AdtLsClient
       target: { host: u.hostname, port: Number(u.port || 443), protocol: u.protocol === 'http:' ? 'http' : 'https' },
       insecureUpstream: true,
       forwardProxy: conn.forwardProxy,
+      // X.509 client-cert auth: the proxy presents the cert on every upstream hop → mutual TLS.
+      clientCert: auth?.clientCert,
     });
     systemUrl = proxy.url;
     extraEnv = { JAVA_TOOL_OPTIONS: tls.javaToolOptions };

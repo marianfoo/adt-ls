@@ -42,6 +42,13 @@ export interface TlsReverseProxyOptions {
    * provide it.
    */
   forwardProxy?: { host: string; port: number };
+  /**
+   * DIRECT mode only: present this client cert (mutual TLS) to the backend on every
+   * upstream connection — for X.509 client-certificate logon, where the backend maps the
+   * cert subject → user (e.g. AS ABAP `icm/HTTPS/verify_client` + CERTRULE). Ignored in
+   * forward-proxy mode. PEM `cert`/`key`.
+   */
+  clientCert?: { cert: string | Buffer; key: string | Buffer };
 }
 
 export interface TlsReverseProxy {
@@ -76,7 +83,7 @@ export async function startTlsReverseProxy(opts: TlsReverseProxyOptions): Promis
           },
           onUpstream,
         )
-      : // DIRECT mode: straight to the backend over HTTPS.
+      : // DIRECT mode: straight to the backend over HTTPS (optionally with a client cert).
         https.request(
           {
             host: opts.target.host,
@@ -85,6 +92,7 @@ export async function startTlsReverseProxy(opts: TlsReverseProxyOptions): Promis
             path: req.url,
             headers: req.headers,
             rejectUnauthorized: !insecureUpstream,
+            ...(opts.clientCert ? { cert: opts.clientCert.cert, key: opts.clientCert.key } : {}),
           },
           onUpstream,
         );
