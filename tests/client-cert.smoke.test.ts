@@ -9,7 +9,7 @@
  * Requires adt-ls + a backend configured for client-cert logon AND a client cert whose
  * subject maps to a user. Provide via env (skips otherwise):
  *   ADTLS_TEST_CLIENT_CERT / ADTLS_TEST_CLIENT_KEY  — PEM file paths
- *   ADTLS_TEST_HOST (default a4h.marianzeis.de) / ADTLS_TEST_PORT (default 50001)
+ *   ADTLS_TEST_HOST / ADTLS_TEST_PORT (default 50001) — the backend HTTPS endpoint
  *   ADTLS_TEST_USER (optional — recorded on the destination)
  * Reads only (search). Setup recipe: docs adt-ls-reference §X.509 client-cert.
  */
@@ -28,7 +28,7 @@ if (!binPath) {
 const certPath = process.env.ADTLS_TEST_CLIENT_CERT;
 const keyPath = process.env.ADTLS_TEST_CLIENT_KEY;
 const gated = !binPath || !certPath || !keyPath;
-const HOST = process.env.ADTLS_TEST_HOST ?? 'a4h.marianzeis.de';
+const HOST = process.env.ADTLS_TEST_HOST ?? 'localhost';
 const PORT = process.env.ADTLS_TEST_PORT ?? '50001';
 
 describe('createAdtLs clientCert (live — needs ADTLS_TEST_CLIENT_CERT/_KEY + a cert-logon backend)', () => {

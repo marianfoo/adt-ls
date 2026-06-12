@@ -33,7 +33,7 @@ import { createAdtLs, basic } from '@marianfoo/adt-ls';
 
 const adt = await createAdtLs({
   connection: { systemUrl: 'https://my-s4:50001', selfSigned: true, client: '001' },
-  auth: basic('MARIAN', process.env.SAP_PW!), // or bearer(token) / interactive({ openUrl })
+  auth: basic('DEVELOPER', process.env.SAP_PW!), // or bearer(token) / interactive({ openUrl }) / clientCert({ cert, key })
 });
 
 const hits = await adt.repository.search('CL_ABAP*', { types: ['CLAS/OC'] });
@@ -43,6 +43,34 @@ await adt.lifecycle.create({ objectType: 'CLAS/OC', name: 'ZCL_BAR', packageName
 await adt.lifecycle.activate({ name: 'ZCL_BAR', objectType: 'CLAS/OC' });
 
 await adt.dispose();
+```
+
+### Auth strategies
+
+The on-the-wire logon is always a reentrance ticket; `auth` supplies the credential:
+
+- `basic(user, password)` — headless user/password (on-prem fixed user).
+- `bearer(token | getToken)` — headless OAuth bearer (BTP ABAP / Steampunk).
+- `interactive({ openUrl })` — the consumer opens the SSO URL; a human signs in (the lib
+  ships no browser/TTY).
+- `clientCert({ cert, key })` — **passwordless X.509 mutual TLS, no browser.** The reverse
+  proxy presents the client cert on every upstream hop, so the backend authenticates the TLS
+  connection itself and the reentrance handler runs with no credential. Requires
+  `connection.selfSigned`. Server-side this is the standard AS ABAP
+  [X.509 client-certificate logon](https://help.sap.com/docs/ABAP_PLATFORM_NEW/68bf513362174d54b58cddec28794093/bb5d22518bc72214e10000000a44176d.html)
+  + [rule-based mapping (CERTRULE)](https://help.sap.com/docs/ABAP_PLATFORM_NEW/e815bb97839a4d83be6c4fca48ee5777/c830fd902dc8473b9e59db1576cc784b.html);
+  it needs no KDC and no license (unlike Kerberos/SPNEGO). In an enterprise the cert is
+  typically issued by SAP Secure Login Service (often from a Kerberos/SAML logon) or a
+  corporate PKI. Consumers wire the cert source + server setup; arc-1-lsp ships a full guide.
+
+```ts
+import { createAdtLs, clientCert } from '@marianfoo/adt-ls';
+import { readFileSync } from 'node:fs';
+
+const adt = await createAdtLs({
+  connection: { systemUrl: 'https://my-s4:50001', selfSigned: true, client: '001' },
+  auth: clientCert({ cert: readFileSync('client.crt'), key: readFileSync('client.key') }),
+});
 ```
 
 ### Low-level building blocks
