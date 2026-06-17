@@ -1,5 +1,5 @@
 {
-  "name": "@marianfoo/adt-ls",
+  "name": "@arc-mcp/adt-ls",
   "version": "0.5.0",
   "description": "Generic TypeScript SDK over SAP's headless adt-ls (adt-lsc, from the sapse.adt-vscode extension).",
   "type": "module",
@@ -7,11 +7,11 @@
   "author": "marianfoo",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marianfoo/adt-ls.git"
+    "url": "git+https://github.com/arc-mcp/adt-ls.git"
   },
-  "homepage": "https://github.com/marianfoo/adt-ls#readme",
+  "homepage": "https://github.com/arc-mcp/adt-ls#readme",
   "bugs": {
-    "url": "https://github.com/marianfoo/adt-ls/issues"
+    "url": "https://github.com/arc-mcp/adt-ls/issues"
   },
   "keywords": [
     "sap",

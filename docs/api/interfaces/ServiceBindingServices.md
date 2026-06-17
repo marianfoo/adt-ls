@@ -1,6 +1,6 @@
 # Interface: ServiceBindingServices
 
-Defined in: [api/services.ts:30](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L30)
+Defined in: [api/services.ts:30](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L30)
 
 The OData services a binding exposes (from `fetch_services`).
 
@@ -10,7 +10,7 @@ The OData services a binding exposes (from `fetch_services`).
 
 > `optional` **bindingType?**: `string`
 
-Defined in: [api/services.ts:31](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L31)
+Defined in: [api/services.ts:31](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L31)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [api/services.ts:31](https://github.com/marianfoo/adt-ls/blob/main/s
 
 > `optional` **odataVersion?**: `string`
 
-Defined in: [api/services.ts:32](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L32)
+Defined in: [api/services.ts:32](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L32)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [api/services.ts:32](https://github.com/marianfoo/adt-ls/blob/main/s
 
 > `optional` **odataInfoUri?**: `object`[]
 
-Defined in: [api/services.ts:33](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L33)
+Defined in: [api/services.ts:33](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L33)
 
 #### href
 
@@ -38,7 +38,7 @@ Defined in: [api/services.ts:33](https://github.com/marianfoo/adt-ls/blob/main/s
 
 > **services**: `object`[]
 
-Defined in: [api/services.ts:34](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L34)
+Defined in: [api/services.ts:34](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L34)
 
 #### name
 

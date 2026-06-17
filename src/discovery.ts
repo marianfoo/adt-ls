@@ -1,5 +1,5 @@
 /**
- * Locate a developer-provided `adt-ls` binary. `@marianfoo/adt-ls` never ships or
+ * Locate a developer-provided `adt-ls` binary. `@arc-mcp/adt-ls` never ships or
  * redistributes adt-ls (SAP Developer License) — it discovers one the developer
  * already installed via the `sapse.adt-vscode` extension, a vendored copy, or an
  * explicit path. See ADR-0004.

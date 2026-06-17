@@ -1,4 +1,4 @@
-# Goal-command charter — `@marianfoo/adt-ls`
+# Goal-command charter — `@arc-mcp/adt-ls`
 
 Paste the block below as the argument to the goal command (e.g. `/goal <text>`). It is
 the durable north star, **trimmed to the 4000-char goal-condition limit** (≈3920). The
@@ -6,7 +6,7 @@ full detail lives in [docs/plan.md](docs/plan.md) and [docs/adr/](docs/adr/READM
 the prompt points the agent there.
 
 ```
-Build @marianfoo/adt-ls — a generic, reusable, Apache-2.0 TypeScript SDK that exposes EVERYTHING SAP's headless adt-ls (adt-lsc from the sapse.adt-vscode extension) provides, hiding all setup so driving adt-ls is a few lines — then make arc-1-lsp consume it, replacing src/adt-ls/* entirely. Feasibility PROVEN: full create→edit→activate→test→delete GREEN vs a4h on adt-ls 1.0.0.202605281240. Full ADRs (0001–0013) + plan live in /Users/marianzeis/DEV/adt-ls — read them first.
+Build @arc-mcp/adt-ls — a generic, reusable, Apache-2.0 TypeScript SDK that exposes EVERYTHING SAP's headless adt-ls (adt-lsc from the sapse.adt-vscode extension) provides, hiding all setup so driving adt-ls is a few lines — then make arc-1-lsp consume it, replacing src/adt-ls/* entirely. Feasibility PROVEN: full create→edit→activate→test→delete GREEN vs a4h on adt-ls 1.0.0.202605281240. Full ADRs (0001–0013) + plan live in /Users/marianzeis/DEV/adt-ls — read them first.
 
 SCOPE: adt-ls ONLY — no direct ADT/SAP HTTP, no SAP-SDK sidecar, no MCP server, no CC/BTP bridge in the lib.
 
@@ -34,7 +34,7 @@ SEED from arc-1-lsp's proven src/adt-ls/* (discovery, cert, driver, destinations
 
 TESTS/CI (3 tiers): unit on GitHub-hosted every PR; offline-integration (spawn+initialize, truststore) + live-SAP (a4h: logon + full lifecycle + dynamic-tool map) on a self-hosted runner — DOCUMENT runner setup for now, keep committed CI at Tier 1; skipIf-gate binary/SAP tests; ship setup-adt-ls extracting the platform subtree from a user VSIX into gitignored vendor/ (+ macOS de-quarantine). a4h cred = user MARIAN / SAP_S4_PRIMARY_PASSWORD (DEVELOPER stale → 401).
 
-PROCESS: (1) review the ADRs + plan in /Users/marianzeis/DEV/adt-ls (module mapping arc-1-lsp↔lib, LogonStrategy + connection interfaces, S-win/S-dyn/S-schema milestones). (2) create marianfoo/adt-ls repo + a new arc-1-lsp branch, build lib + integration together; arc-1-lsp keeps its MCP server, btp/CC bridge, authz, write-safety as thin wrappers (no backward-compat — not in prod). S-win runs later on the Windows VM.
+PROCESS: (1) review the ADRs + plan in /Users/marianzeis/DEV/adt-ls (module mapping arc-1-lsp↔lib, LogonStrategy + connection interfaces, S-win/S-dyn/S-schema milestones). (2) create arc-mcp/adt-ls repo + a new arc-1-lsp branch, build lib + integration together; arc-1-lsp keeps its MCP server, btp/CC bridge, authz, write-safety as thin wrappers (no backward-compat — not in prod). S-win runs later on the Windows VM.
 
-DONE = published-quality @marianfoo/adt-ls: easy to use, documented (README gotchas + capability matrix + quickstart), Apache-2.0, usable by anyone, used in arc-1-lsp in place of every adt-ls feature.
+DONE = published-quality @arc-mcp/adt-ls: easy to use, documented (README gotchas + capability matrix + quickstart), Apache-2.0, usable by anyone, used in arc-1-lsp in place of every adt-ls feature.
 ```

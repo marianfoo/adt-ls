@@ -1,4 +1,4 @@
-# Implementation plan — `@marianfoo/adt-ls`
+# Implementation plan — `@arc-mcp/adt-ls`
 
 Detailed plan for building the library and integrating it into arc-1-lsp. Pairs with
 the decisions in [adr/](adr/README.md) and the charter in [../GOAL.md](../GOAL.md).
@@ -59,7 +59,7 @@ runtime), **S-dyn** (dynamic MCP tool enumeration), **S-schema** (ADR-0013).
 ## 4. Package / repo layout
 
 ```
-marianfoo/adt-ls
+arc-mcp/adt-ls
 ├── src/
 │   ├── index.ts                 # createAdtLs() + public types
 │   ├── client.ts                # AdtLsClient: wires channels + namespaces
@@ -96,13 +96,13 @@ marianfoo/adt-ls
 ├── docs/                        # capability-map, headless-notes, gotchas, quickstart
 ├── .github/workflows/ci.yml     # Tier-1 only on GitHub-hosted
 ├── LICENSE                      # Apache-2.0
-└── package.json                 # @marianfoo/adt-ls, ESM, tsup/tsdown, exports
+└── package.json                 # @arc-mcp/adt-ls, ESM, tsup/tsdown, exports
 ```
 
 ## 5. Public API
 
 ```ts
-import { createAdtLs, basic, bearer, interactive } from '@marianfoo/adt-ls'
+import { createAdtLs, basic, bearer, interactive } from '@arc-mcp/adt-ls'
 
 const adt = await createAdtLs({
   adtLs?: { path?: string },                       // else auto-discover
@@ -156,7 +156,7 @@ interface ConnectionOptions {
 }
 ```
 
-## 7. Module mapping — arc-1-lsp `src/adt-ls/*` → `@marianfoo/adt-ls`
+## 7. Module mapping — arc-1-lsp `src/adt-ls/*` → `@arc-mcp/adt-ls`
 
 The seed is arc-1-lsp's proven, tested modules. Transformations: rename `arc1*`/
 `ARC1_*` → neutral; remove `src/server/*` + `src/btp/*` coupling; replace
@@ -190,7 +190,7 @@ edge, write-safety), `src/btp/*` (CC bridge → plugged via the `upstream` hook)
 
 > Phases 0–6 happen on a single arc-1-lsp branch + the new repo, built together.
 
-- **Phase 0 — Repo scaffold.** Create `marianfoo/adt-ls`; ESM + tsup/tsdown + vitest +
+- **Phase 0 — Repo scaffold.** Create `arc-mcp/adt-ls`; ESM + tsup/tsdown + vitest +
   Biome + Apache-2.0 + `package.json` exports; `scripts/setup-adt-ls.mjs`; Tier-1 CI.
   *Exit:* `npm run build` + lint + Tier-1 tests green.
 - **Phase 1 — Connect core.** discovery + driver (cross-platform pipe) + connection +
@@ -255,7 +255,7 @@ older builds, and warns when a supported build differs from the verified one. Th
 
 ## 13. Definition of done
 
-A published-quality `@marianfoo/adt-ls`: easy to use, properly documented (quickstart
+A published-quality `@arc-mcp/adt-ls`: easy to use, properly documented (quickstart
 + gotchas + capability matrix), Apache-2.0, usable by anyone, and used inside arc-1-lsp
 in place of every adt-ls feature it had — with the live a4h lifecycle green through the
 library.

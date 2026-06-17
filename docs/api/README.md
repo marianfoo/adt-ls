@@ -1,4 +1,4 @@
-# @marianfoo/adt-ls
+# @arc-mcp/adt-ls
 
 ## Classes
 

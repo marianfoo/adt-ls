@@ -1,8 +1,8 @@
-# Use cases — dev tools & CI/CD with `@marianfoo/adt-ls`
+# Use cases — dev tools & CI/CD with `@arc-mcp/adt-ls`
 
 This guide shows **how real-world developer tools and CI/CD pipelines** use the library,
 which API to reach for, and copy-pasteable code for each scenario. For the full method
-reference see the [hosted API docs](https://marianfoo.github.io/adt-ls/); for connection
+reference see the [hosted API docs](https://arc-mcp.github.io/adt-ls/); for connection
 details see [`usage.md`](./usage.md).
 
 ## Why it's easy
@@ -21,7 +21,7 @@ details see [`usage.md`](./usage.md).
 ## The 30-second mental model
 
 ```ts
-import { createAdtLs, basic } from '@marianfoo/adt-ls';
+import { createAdtLs, basic } from '@arc-mcp/adt-ls';
 
 const adt = await createAdtLs({
   connection: { systemUrl: 'https://my-s4:50001', client: '100', selfSigned: true },
@@ -89,7 +89,7 @@ tools only; it can't run in a headless pipeline.
 
 ```ts
 // run-abap-tests.ts
-import { createAdtLs, basic, setLogger, stderrLogger } from '@marianfoo/adt-ls';
+import { createAdtLs, basic, setLogger, stderrLogger } from '@arc-mcp/adt-ls';
 setLogger(stderrLogger); // diagnostics on stderr, never stdout
 
 const adt = await createAdtLs({
@@ -242,7 +242,7 @@ exactly how `arc-1-lsp` exposes 39 tools.) Two routes:
 server.tool('search_objects', schema, (args) => adt.repository.search(args.pattern, args));
 
 // (b) escape hatch to a tool on adt-ls's own MCP that the lib doesn't wrap
-import { parseFederated } from '@marianfoo/adt-ls';
+import { parseFederated } from '@arc-mcp/adt-ls';
 const raw = await adt.raw.tool('abap_list_destinations', {});
 const clean = parseFederated(raw);
 ```

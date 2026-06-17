@@ -1,6 +1,6 @@
 # Interface: Quality
 
-Defined in: [api/quality.ts:33](https://github.com/marianfoo/adt-ls/blob/main/src/api/quality.ts#L33)
+Defined in: [api/quality.ts:33](https://github.com/arc-mcp/adt-ls/blob/main/src/api/quality.ts#L33)
 
 Quality & test surface (the `quality` namespace). All reads.
 
@@ -10,7 +10,7 @@ Quality & test surface (the `quality` namespace). All reads.
 
 > **listAtcVariants**(`ref`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/quality.ts:35](https://github.com/marianfoo/adt-ls/blob/main/src/api/quality.ts#L35)
+Defined in: [api/quality.ts:35](https://github.com/arc-mcp/adt-ls/blob/main/src/api/quality.ts#L35)
 
 List the ATC check variants on the system (retrieved in the object's context).
 
@@ -36,7 +36,7 @@ List the ATC check variants on the system (retrieved in the object's context).
 
 > **runAtc**(`ref`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/quality.ts:37](https://github.com/marianfoo/adt-ls/blob/main/src/api/quality.ts#L37)
+Defined in: [api/quality.ts:37](https://github.com/arc-mcp/adt-ls/blob/main/src/api/quality.ts#L37)
 
 Run ABAP Test Cockpit static analysis — empty `checkVariant` = system default. Report-only, timeout-guarded.
 
@@ -66,7 +66,7 @@ Run ABAP Test Cockpit static analysis — empty `checkVariant` = system default.
 
 > **runUnitTestsWithCoverage**(`ref`, `opts?`): `Promise`\<`unknown`\>
 
-Defined in: [api/quality.ts:39](https://github.com/marianfoo/adt-ls/blob/main/src/api/quality.ts#L39)
+Defined in: [api/quality.ts:39](https://github.com/arc-mcp/adt-ls/blob/main/src/api/quality.ts#L39)
 
 Run ABAP Unit tests WITH code coverage → `{ status, result, coverage }`.
 

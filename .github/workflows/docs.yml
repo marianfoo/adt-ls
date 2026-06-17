@@ -1,7 +1,7 @@
 name: Docs
 
 # Build the TypeDoc HTML API reference and publish it to GitHub Pages
-# (https://marianfoo.github.io/adt-ls/). Pages source must be set to "GitHub Actions".
+# (https://arc-mcp.github.io/adt-ls/). Pages source must be set to "GitHub Actions".
 
 on:
   push:

@@ -1,6 +1,6 @@
 # Interface: LogonHandlerRegistrar
 
-Defined in: [auth/strategy.ts:28](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L28)
+Defined in: [auth/strategy.ts:28](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L28)
 
 Anything that can register a server→client request handler (e.g. AdtLsDriver).
 
@@ -10,7 +10,7 @@ Anything that can register a server→client request handler (e.g. AdtLsDriver).
 
 > **setRequestHandler**(`method`, `handler`): `void`
 
-Defined in: [auth/strategy.ts:29](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L29)
+Defined in: [auth/strategy.ts:29](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L29)
 
 #### Parameters
 

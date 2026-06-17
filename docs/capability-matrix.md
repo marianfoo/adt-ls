@@ -1,6 +1,6 @@
 # Capability matrix
 
-What `@marianfoo/adt-ls` exposes, which adt-ls call backs each method, and the
+What `@arc-mcp/adt-ls` exposes, which adt-ls call backs each method, and the
 object-type boundary. Live-verified against a4h (S/4HANA 2023, adt-ls
 `1.0.1.202606111342`). adt-ls has **two channels** — its own **MCP** server (federated)
 and the **LSP** surface (`adtLs/*` + standard `textDocument/*`); the client hides which

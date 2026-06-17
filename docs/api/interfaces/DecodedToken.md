@@ -1,6 +1,6 @@
 # Interface: DecodedToken
 
-Defined in: [api/navigation.ts:71](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L71)
+Defined in: [api/navigation.ts:71](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L71)
 
 One decoded semantic token (absolute position + resolved names).
 
@@ -10,7 +10,7 @@ One decoded semantic token (absolute position + resolved names).
 
 > **line**: `number`
 
-Defined in: [api/navigation.ts:72](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L72)
+Defined in: [api/navigation.ts:72](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L72)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [api/navigation.ts:72](https://github.com/marianfoo/adt-ls/blob/main
 
 > **character**: `number`
 
-Defined in: [api/navigation.ts:73](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L73)
+Defined in: [api/navigation.ts:73](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L73)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [api/navigation.ts:73](https://github.com/marianfoo/adt-ls/blob/main
 
 > **length**: `number`
 
-Defined in: [api/navigation.ts:74](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L74)
+Defined in: [api/navigation.ts:74](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L74)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [api/navigation.ts:74](https://github.com/marianfoo/adt-ls/blob/main
 
 > **tokenType**: `string`
 
-Defined in: [api/navigation.ts:75](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L75)
+Defined in: [api/navigation.ts:75](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L75)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [api/navigation.ts:75](https://github.com/marianfoo/adt-ls/blob/main
 
 > **tokenModifiers**: `string`[]
 
-Defined in: [api/navigation.ts:76](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L76)
+Defined in: [api/navigation.ts:76](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L76)

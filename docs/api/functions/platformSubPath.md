@@ -2,7 +2,7 @@
 
 > **platformSubPath**(`platform?`, `arch?`): `string`[]
 
-Defined in: [discovery.ts:23](https://github.com/marianfoo/adt-ls/blob/main/src/discovery.ts#L23)
+Defined in: [discovery.ts:23](https://github.com/arc-mcp/adt-ls/blob/main/src/discovery.ts#L23)
 
 Platform/arch-specific sub-path under an `adt-ls/` root.
 

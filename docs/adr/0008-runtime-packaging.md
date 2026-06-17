@@ -16,8 +16,8 @@ common runtime with the standard publishable convention.
   parser if config parsing is ever needed; prefer plain options objects).
 - **`.js` import specifiers** (NodeNext ESM), TypeScript **strict**.
 - Build with **tsup/tsdown**; test with **vitest**; lint/format with **Biome**.
-- Package **`@marianfoo/adt-ls`** (matching the existing `@marianfoo/*` scope), repo
-  **`marianfoo/adt-ls`**; proper `exports` map (root + sub-paths, e.g. the optional
+- Package **`@arc-mcp/adt-ls`** (matching the existing `@marianfoo/*` scope), repo
+  **`arc-mcp/adt-ls`**; proper `exports` map (root + sub-paths, e.g. the optional
   interactive browser/TTY helper as a separate entry).
 - stdout stays clean if a CLI/stdio consumer is ever built; logging is injectable.
 

@@ -1,4 +1,4 @@
-# Architecture Decision Records — `@marianfoo/adt-ls`
+# Architecture Decision Records — `@arc-mcp/adt-ls`
 
 Each ADR captures one decision: the **context**, the **decision**, its **consequences**,
 and a **"revisit when"** trigger (most of this design is shaped by *current* adt-ls

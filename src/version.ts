@@ -28,6 +28,6 @@ export function isSupportedAdtLsVersion(version: string | undefined): boolean {
 export function assertSupportedAdtLsVersion(version: string | undefined): void {
   if (isSupportedAdtLsVersion(version)) return;
   throw new Error(
-    `Unsupported adt-ls version ${version ?? '<missing>'}. @marianfoo/adt-ls requires adt-ls >= ${MINIMUM_ADT_LS_VERSION} (verified ${VERIFIED_ADT_LS_VERSION} from sapse.adt-vscode ${REQUIRED_SAPSE_ADT_VSCODE_VERSION}). Update the SAPSE.adt-vscode extension or provide a newer ADT_LS_PATH.`,
+    `Unsupported adt-ls version ${version ?? '<missing>'}. @arc-mcp/adt-ls requires adt-ls >= ${MINIMUM_ADT_LS_VERSION} (verified ${VERIFIED_ADT_LS_VERSION} from sapse.adt-vscode ${REQUIRED_SAPSE_ADT_VSCODE_VERSION}). Update the SAPSE.adt-vscode extension or provide a newer ADT_LS_PATH.`,
   );
 }

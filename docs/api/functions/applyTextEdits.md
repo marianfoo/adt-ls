@@ -2,7 +2,7 @@
 
 > **applyTextEdits**(`text`, `edits`): `string`
 
-Defined in: [api/navigation.ts:44](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L44)
+Defined in: [api/navigation.ts:44](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L44)
 
 Apply LSP `TextEdit[]` to source text (pure). Edits are non-overlapping per the LSP
 spec; we sort by start offset descending so applying one never shifts the offsets of

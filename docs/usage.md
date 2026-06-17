@@ -1,6 +1,6 @@
 # Usage guide
 
-`@marianfoo/adt-ls` drives SAP's headless **adt-ls** (the `adt-lsc` language server from
+`@arc-mcp/adt-ls` drives SAP's headless **adt-ls** (the `adt-lsc` language server from
 the `sapse.adt-vscode` extension) and exposes it as one TypeScript client. This guide
 covers connecting, authentication, the full API surface, resilience, logging, and
 cleanup. For the auto-generated type reference see **[docs/api/](api/README.md)**; for
@@ -18,7 +18,7 @@ what adt-ls can/can't do headless see the **[capability matrix](capability-matri
 ## Install & bring adt-ls
 
 ```bash
-npm install @marianfoo/adt-ls
+npm install @arc-mcp/adt-ls
 ```
 
 adt-ls is **not redistributable** (SAP Developer License), so you bring it. Either:
@@ -26,7 +26,7 @@ adt-ls is **not redistributable** (SAP Developer License), so you bring it. Eith
 - install the **SAP ADT VS Code extension** (`sapse.adt-vscode`) in VS Code or Cursor — the
   library auto-discovers it; or
 - extract it from a downloaded VSIX into `vendor/` with the bundled helper:
-  `node node_modules/@marianfoo/adt-ls/scripts/setup-adt-ls.mjs <path-to.vsix>`; or
+  `node node_modules/@arc-mcp/adt-ls/scripts/setup-adt-ls.mjs <path-to.vsix>`; or
 - point at a binary explicitly via the `ADT_LS_PATH` env var or `createAdtLs({ adtLs: { path } })`.
 
 Discovery order: `adtLs.path` / `ADT_LS_PATH` → `vendor/adt-ls/` → newest installed
@@ -40,7 +40,7 @@ no separate Java needed. Supported targets: `darwin-arm64`, `darwin-x64`, `linux
 returns the client. adt-ls requires an **HTTPS** `systemUrl`.
 
 ```ts
-import { createAdtLs, basic } from '@marianfoo/adt-ls';
+import { createAdtLs, basic } from '@arc-mcp/adt-ls';
 
 // Valid CA cert (e.g. SAP BTP ABAP) — no proxy, no truststore needed:
 const adt = await createAdtLs({
@@ -102,7 +102,7 @@ credential used to obtain it. The library does **not** acquire OAuth tokens — 
 token (or a provider).
 
 ```ts
-import { basic, bearer, interactive, custom } from '@marianfoo/adt-ls';
+import { basic, bearer, interactive, custom } from '@arc-mcp/adt-ls';
 
 basic('MARIAN', password);                 // on-prem fixed user (headless)
 bearer(myToken);                           // BTP ABAP — a token value …
@@ -230,7 +230,7 @@ await adt.reconnect();  // force a re-logon (returns true when live)
 The library is **silent by default**. Opt in (stdout stays clean):
 
 ```ts
-import { setLogger, stderrLogger } from '@marianfoo/adt-ls';
+import { setLogger, stderrLogger } from '@arc-mcp/adt-ls';
 setLogger(stderrLogger('[adt-ls]'));   // or pass your own { debug, info, warn, error }
 ```
 

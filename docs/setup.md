@@ -10,7 +10,7 @@ pick**, how the library finds it (local + CI), and **how it ties into authentica
 
 `adt-ls` (the `adt-lsc` language server) ships **inside SAP's `sapse.adt-vscode` VS Code
 extension** (publisher **SAPSE**). It is **not redistributable** (SAP Developer License), so
-`@marianfoo/adt-ls` never bundles it — you supply it. Two important facts:
+`@arc-mcp/adt-ls` never bundles it — you supply it. Two important facts:
 
 - The extension is **platform-specific** (separate builds per OS + CPU).
 - It bundles its **own SAP Machine JRE** (~21.x) — you do **not** need a separate Java install,
@@ -67,7 +67,7 @@ VS Code, then copy the `adt-ls/` folder out of `~/.vscode/extensions/sapse.adt-v
 If nothing matches it throws, **listing every path it tried** (paste that into an issue if stuck).
 
 ```ts
-import { resolveAdtLsPath } from '@marianfoo/adt-ls';
+import { resolveAdtLsPath } from '@arc-mcp/adt-ls';
 console.log(resolveAdtLsPath()); // or: createAdtLs({ adtLs: { path: '/opt/adt-lsc' }, … })
 ```
 
@@ -120,7 +120,7 @@ hood the library uses adt-ls's **reentrance-ticket** logon: your credential (or 
 obtains a short-lived ticket, then adt-ls logs the session on. You just pick a strategy:
 
 ```ts
-import { createAdtLs, basic, bearer, interactive } from '@marianfoo/adt-ls';
+import { createAdtLs, basic, bearer, interactive } from '@arc-mcp/adt-ls';
 
 const adt = await createAdtLs({
   connection: {
@@ -158,7 +158,7 @@ You almost never touch certificates: the library builds a truststore **from adt-
 ### Verify the whole setup
 
 ```ts
-import { resolveAdtLsPath, createAdtLs, basic } from '@marianfoo/adt-ls';
+import { resolveAdtLsPath, createAdtLs, basic } from '@arc-mcp/adt-ls';
 
 console.log('binary:', resolveAdtLsPath());                 // 1) discovery works?
 const adt = await createAdtLs({

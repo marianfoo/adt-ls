@@ -1,6 +1,6 @@
 # Interface: LogonStrategy
 
-Defined in: [auth/strategy.ts:37](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L37)
+Defined in: [auth/strategy.ts:37](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L37)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [auth/strategy.ts:37](https://github.com/marianfoo/adt-ls/blob/main/
 
 > `readonly` **kind**: `"basic"` \| `"bearer"` \| `"interactive"` \| `"custom"`
 
-Defined in: [auth/strategy.ts:38](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L38)
+Defined in: [auth/strategy.ts:38](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L38)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [auth/strategy.ts:38](https://github.com/marianfoo/adt-ls/blob/main/
 
 > `readonly` `optional` **user?**: `string`
 
-Defined in: [auth/strategy.ts:40](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L40)
+Defined in: [auth/strategy.ts:40](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L40)
 
 Optional user to record on the adt-ls destination (createDestination).
 
@@ -26,7 +26,7 @@ Optional user to record on the adt-ls destination (createDestination).
 
 > **register**(`driver`, `ctx`): `void`
 
-Defined in: [auth/strategy.ts:42](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L42)
+Defined in: [auth/strategy.ts:42](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L42)
 
 Register the server→client logon handler(s) before `ensureLoggedOn`.
 

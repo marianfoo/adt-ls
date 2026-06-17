@@ -36,7 +36,7 @@ export class AdtLsMcpClient {
   constructor(
     private readonly baseUrl: string,
     private readonly token: string,
-    private readonly clientInfo: { name: string; version: string } = { name: '@marianfoo/adt-ls', version: '0.0.0' },
+    private readonly clientInfo: { name: string; version: string } = { name: '@arc-mcp/adt-ls', version: '0.0.0' },
   ) {}
 
   private async rpc(body: unknown): Promise<{ json: JsonRpcResult | null; sessionId?: string; status: number }> {

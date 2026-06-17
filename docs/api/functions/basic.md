@@ -2,7 +2,7 @@
 
 > **basic**(`user`, `password`): [`LogonStrategy`](../interfaces/LogonStrategy.md)
 
-Defined in: [auth/strategy.ts:46](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L46)
+Defined in: [auth/strategy.ts:46](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L46)
 
 Basic (user/password) — headless reentrance. The common on-prem case.
 

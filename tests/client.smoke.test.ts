@@ -63,7 +63,7 @@ describe('createAdtLs (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
         objectType: TYPE,
         name: NAME,
         packageName: '$TMP',
-        description: '@marianfoo/adt-ls live test',
+        description: '@arc-mcp/adt-ls live test',
       });
       expect(created.filePath).toMatch(/zcl_adtls_lctest\.clas\.abap$/i);
 

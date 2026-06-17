@@ -1,6 +1,6 @@
 # Interface: QuickSearchResult
 
-Defined in: [api/repository.ts:17](https://github.com/marianfoo/adt-ls/blob/main/src/api/repository.ts#L17)
+Defined in: [api/repository.ts:17](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L17)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [api/repository.ts:17](https://github.com/marianfoo/adt-ls/blob/main
 
 > **references**: [`SearchReference`](SearchReference.md)[]
 
-Defined in: [api/repository.ts:18](https://github.com/marianfoo/adt-ls/blob/main/src/api/repository.ts#L18)
+Defined in: [api/repository.ts:18](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L18)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [api/repository.ts:18](https://github.com/marianfoo/adt-ls/blob/main
 
 > `optional` **message?**: `object`
 
-Defined in: [api/repository.ts:19](https://github.com/marianfoo/adt-ls/blob/main/src/api/repository.ts#L19)
+Defined in: [api/repository.ts:19](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L19)
 
 #### label?
 

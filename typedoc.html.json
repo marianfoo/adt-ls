@@ -9,7 +9,7 @@
   "hideGenerator": true,
   "gitRevision": "main",
   "navigationLinks": {
-    "npm": "https://www.npmjs.com/package/@marianfoo/adt-ls",
-    "GitHub": "https://github.com/marianfoo/adt-ls"
+    "npm": "https://www.npmjs.com/package/@arc-mcp/adt-ls",
+    "GitHub": "https://github.com/arc-mcp/adt-ls"
   }
 }

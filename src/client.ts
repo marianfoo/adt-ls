@@ -56,7 +56,7 @@ import {
 
 const execFileP = promisify(execFile);
 const VERSION = '0.5.0'; // x-release-please-version
-const CLIENT_INFO = { name: '@marianfoo/adt-ls', version: VERSION };
+const CLIENT_INFO = { name: '@arc-mcp/adt-ls', version: VERSION };
 /** Keep-alive heartbeat cadence + activity window (ADR-0007). */
 const KEEPALIVE_INTERVAL_MS = 180_000;
 const KEEPALIVE_WINDOW_MS = 900_000;

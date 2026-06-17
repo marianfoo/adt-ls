@@ -23,7 +23,7 @@ general, match adt-ls's output.
   adt-ls exposes raw ADT XML* (e.g. payloads surfaced verbatim, or via `raw.*`). **ABAP
   Unit coverage is the prime candidate** for a direct match.
 - Treat a **shared, transport-neutral domain model** spanning `@abapify/adt-cli` (REST)
-  and `@marianfoo/adt-ls` (adt-ls) as an **ecosystem collaboration track** with
+  and `@arc-mcp/adt-ls` (adt-ls) as an **ecosystem collaboration track** with
   Petr/abapify — valuable for consistency, but it needs transport-neutral types +
   adapters, so it is not a dependency or a blocker.
 

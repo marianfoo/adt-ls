@@ -13,7 +13,7 @@ a `version` in its `package.json`.
 
 ## Decision
 
-- Each `@marianfoo/adt-ls` release **declares a minimum and verified adt-ls build** (current:
+- Each `@arc-mcp/adt-ls` release **declares a minimum and verified adt-ls build** (current:
   `sapse.adt-vscode 1.0.1` / `adt-ls 1.0.1.202606111342` / SAP Machine JRE 21.11.0).
 - At startup, read `serverInfo.version`, **fail fast below the minimum version**, and warn
   when the build is supported but differs from the exact verified build.

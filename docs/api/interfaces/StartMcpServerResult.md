@@ -1,6 +1,6 @@
 # Interface: StartMcpServerResult
 
-Defined in: [channels/mcp-lifecycle.ts:9](https://github.com/marianfoo/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L9)
+Defined in: [channels/mcp-lifecycle.ts:9](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L9)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [channels/mcp-lifecycle.ts:9](https://github.com/marianfoo/adt-ls/bl
 
 > **port**: `number`
 
-Defined in: [channels/mcp-lifecycle.ts:10](https://github.com/marianfoo/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L10)
+Defined in: [channels/mcp-lifecycle.ts:10](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L10)
 
 ***
 
@@ -16,4 +16,4 @@ Defined in: [channels/mcp-lifecycle.ts:10](https://github.com/marianfoo/adt-ls/b
 
 > **token**: `string`
 
-Defined in: [channels/mcp-lifecycle.ts:11](https://github.com/marianfoo/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L11)
+Defined in: [channels/mcp-lifecycle.ts:11](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L11)

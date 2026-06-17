@@ -2,7 +2,7 @@
 
 > **custom**(`register`, `opts?`): [`LogonStrategy`](../interfaces/LogonStrategy.md)
 
-Defined in: [auth/strategy.ts:126](https://github.com/marianfoo/adt-ls/blob/main/src/auth/strategy.ts#L126)
+Defined in: [auth/strategy.ts:126](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L126)
 
 Full escape hatch: register your own server→client handlers.
 

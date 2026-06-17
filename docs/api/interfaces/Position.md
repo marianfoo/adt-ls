@@ -1,6 +1,6 @@
 # Interface: Position
 
-Defined in: [api/navigation.ts:22](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L22)
+Defined in: [api/navigation.ts:22](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L22)
 
 A 0-based LSP position (as adt-ls emits).
 
@@ -10,7 +10,7 @@ A 0-based LSP position (as adt-ls emits).
 
 > **line**: `number`
 
-Defined in: [api/navigation.ts:23](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L23)
+Defined in: [api/navigation.ts:23](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L23)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: [api/navigation.ts:23](https://github.com/marianfoo/adt-ls/blob/main
 
 > **character**: `number`
 
-Defined in: [api/navigation.ts:24](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L24)
+Defined in: [api/navigation.ts:24](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L24)

@@ -1,6 +1,6 @@
 # Interface: TextEdit
 
-Defined in: [api/navigation.ts:34](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L34)
+Defined in: [api/navigation.ts:34](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L34)
 
 A standard LSP text edit (0-based positions).
 
@@ -10,7 +10,7 @@ A standard LSP text edit (0-based positions).
 
 > **range**: `object`
 
-Defined in: [api/navigation.ts:35](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L35)
+Defined in: [api/navigation.ts:35](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L35)
 
 #### start
 
@@ -26,4 +26,4 @@ Defined in: [api/navigation.ts:35](https://github.com/marianfoo/adt-ls/blob/main
 
 > **newText**: `string`
 
-Defined in: [api/navigation.ts:36](https://github.com/marianfoo/adt-ls/blob/main/src/api/navigation.ts#L36)
+Defined in: [api/navigation.ts:36](https://github.com/arc-mcp/adt-ls/blob/main/src/api/navigation.ts#L36)

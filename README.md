@@ -1,7 +1,7 @@
-# @marianfoo/adt-ls
+# @arc-mcp/adt-ls
 
-[![npm](https://img.shields.io/npm/v/@marianfoo/adt-ls.svg)](https://www.npmjs.com/package/@marianfoo/adt-ls)
-[![license: Apache-2.0](https://img.shields.io/npm/l/@marianfoo/adt-ls.svg)](LICENSE)
+[![npm](https://img.shields.io/npm/v/@arc-mcp/adt-ls.svg)](https://www.npmjs.com/package/@arc-mcp/adt-ls)
+[![license: Apache-2.0](https://img.shields.io/npm/l/@arc-mcp/adt-ls.svg)](LICENSE)
 
 > Generic, reusable TypeScript SDK over SAP's headless **adt-ls** — the `adt-lsc`
 > language server shipped inside the official `sapse.adt-vscode` extension. It hides
@@ -17,19 +17,19 @@ end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
 ## Install
 
 ```bash
-npm install @marianfoo/adt-ls
+npm install @arc-mcp/adt-ls
 ```
 
 You **bring adt-ls** (SAP Developer License — not redistributable): install the
 `sapse.adt-vscode` extension (VS Code / Cursor) and the library auto-discovers it, or
-vendor the per-platform VSIX for CI. **New here → [docs/setup.md](https://github.com/marianfoo/adt-ls/blob/main/docs/setup.md)**:
+vendor the per-platform VSIX for CI. **New here → [docs/setup.md](https://github.com/arc-mcp/adt-ls/blob/main/docs/setup.md)**:
 which platform build to download, CI vendoring, and connecting with auth.
 This release requires `adt-ls >= 1.0.1` and is verified against `1.0.1.202606111342`.
 
 ## Quickstart
 
 ```ts
-import { createAdtLs, basic } from '@marianfoo/adt-ls';
+import { createAdtLs, basic } from '@arc-mcp/adt-ls';
 
 const adt = await createAdtLs({
   connection: { systemUrl: 'https://my-s4:50001', selfSigned: true, client: '001' },
@@ -64,7 +64,7 @@ The on-the-wire logon is always a reentrance ticket; `auth` supplies the credent
   corporate PKI. Consumers wire the cert source + server setup; arc-1-lsp ships a full guide.
 
 ```ts
-import { createAdtLs, clientCert } from '@marianfoo/adt-ls';
+import { createAdtLs, clientCert } from '@arc-mcp/adt-ls';
 import { readFileSync } from 'node:fs';
 
 const adt = await createAdtLs({
@@ -80,7 +80,7 @@ agents — can skip `createAdtLs()` and use the primitives directly (this is wha
 `abapify/openadt` adopts):
 
 ```ts
-import { resolveAdtLsPath, AdtLsDriver, startMcpServer } from '@marianfoo/adt-ls';
+import { resolveAdtLsPath, AdtLsDriver, startMcpServer } from '@arc-mcp/adt-ls';
 
 const driver = new AdtLsDriver(resolveAdtLsPath(), {
   extraArgs: ['-consoleLog', `-Djco.middleware.snc_lib=${sncLib}`], // SNC/JCo JVM flags
@@ -104,18 +104,18 @@ One namespaced client over both adt-ls channels (LSP + its own MCP) — the spli
 - **`transport`** — find / create / assign / list, lock status, and the **transport decision oracle** (`check`).
 - **`raw`** — escape hatches to any adt-ls MCP tool or LSP method.
 
-What maps to which adt-ls call: the **[capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)**. What's reachable headless vs. not (with live evidence): the **[capability survey](https://github.com/marianfoo/adt-ls/blob/main/docs/adt-ls-capabilities.md)**.
+What maps to which adt-ls call: the **[capability matrix](https://github.com/arc-mcp/adt-ls/blob/main/docs/capability-matrix.md)**. What's reachable headless vs. not (with live evidence): the **[capability survey](https://github.com/arc-mcp/adt-ls/blob/main/docs/adt-ls-capabilities.md)**.
 
 ## Documentation
 
-- **[Setup guide](https://github.com/marianfoo/adt-ls/blob/main/docs/setup.md)** — **start here**: where to get the binary, which platform build, CI vendoring, and connecting with auth.
-- **[📖 API reference (hosted)](https://marianfoo.github.io/adt-ls/)** — the full TypeDoc site, auto-published to GitHub Pages on every push to `main`.
-- **[Usage guide](https://github.com/marianfoo/adt-ls/blob/main/docs/usage.md)** — connecting, auth, the full API with examples, resilience, logging.
-- **[Use cases](https://github.com/marianfoo/adt-ls/blob/main/docs/use-cases.md)** — dev-tool & CI/CD recipes (ABAP Unit gate, ATC, syntax check, MCP server, scaffolding) with the API to use.
-- **[API reference (Markdown)](https://github.com/marianfoo/adt-ls/blob/main/docs/api/README.md)** — the same reference rendered in-repo (`npm run docs:api`).
-- **[Capability matrix](https://github.com/marianfoo/adt-ls/blob/main/docs/capability-matrix.md)** — the method surface + the object-type support boundary.
-- **[adt-ls capability survey](https://github.com/marianfoo/adt-ls/blob/main/docs/adt-ls-capabilities.md)** — what the live binary offers vs. what's wrapped, and the known coverage gaps.
-- **[ADRs](https://github.com/marianfoo/adt-ls/tree/main/docs/adr)** — the architecture decisions (0001–0013).
+- **[Setup guide](https://github.com/arc-mcp/adt-ls/blob/main/docs/setup.md)** — **start here**: where to get the binary, which platform build, CI vendoring, and connecting with auth.
+- **[📖 API reference (hosted)](https://arc-mcp.github.io/adt-ls/)** — the full TypeDoc site, auto-published to GitHub Pages on every push to `main`.
+- **[Usage guide](https://github.com/arc-mcp/adt-ls/blob/main/docs/usage.md)** — connecting, auth, the full API with examples, resilience, logging.
+- **[Use cases](https://github.com/arc-mcp/adt-ls/blob/main/docs/use-cases.md)** — dev-tool & CI/CD recipes (ABAP Unit gate, ATC, syntax check, MCP server, scaffolding) with the API to use.
+- **[API reference (Markdown)](https://github.com/arc-mcp/adt-ls/blob/main/docs/api/README.md)** — the same reference rendered in-repo (`npm run docs:api`).
+- **[Capability matrix](https://github.com/arc-mcp/adt-ls/blob/main/docs/capability-matrix.md)** — the method surface + the object-type support boundary.
+- **[adt-ls capability survey](https://github.com/arc-mcp/adt-ls/blob/main/docs/adt-ls-capabilities.md)** — what the live binary offers vs. what's wrapped, and the known coverage gaps.
+- **[ADRs](https://github.com/arc-mcp/adt-ls/tree/main/docs/adr)** — the architecture decisions (0001–0013).
 
 ---
 

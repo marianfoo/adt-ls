@@ -1,6 +1,6 @@
 # Interface: FederatedResult
 
-Defined in: [channels/federated.ts:12](https://github.com/marianfoo/adt-ls/blob/main/src/channels/federated.ts#L12)
+Defined in: [channels/federated.ts:12](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/federated.ts#L12)
 
 Helpers for unwrapping results of adt-ls's own (federated) MCP tools.
 
@@ -18,7 +18,7 @@ instead of the doubly-wrapped envelope.
 
 > `optional` **content?**: `object`[]
 
-Defined in: [channels/federated.ts:13](https://github.com/marianfoo/adt-ls/blob/main/src/channels/federated.ts#L13)
+Defined in: [channels/federated.ts:13](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/federated.ts#L13)
 
 #### text?
 
@@ -30,7 +30,7 @@ Defined in: [channels/federated.ts:13](https://github.com/marianfoo/adt-ls/blob/
 
 > `optional` **isError?**: `boolean`
 
-Defined in: [channels/federated.ts:14](https://github.com/marianfoo/adt-ls/blob/main/src/channels/federated.ts#L14)
+Defined in: [channels/federated.ts:14](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/federated.ts#L14)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [channels/federated.ts:14](https://github.com/marianfoo/adt-ls/blob/
 
 > `optional` **structuredContent?**: `unknown`
 
-Defined in: [channels/federated.ts:15](https://github.com/marianfoo/adt-ls/blob/main/src/channels/federated.ts#L15)
+Defined in: [channels/federated.ts:15](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/federated.ts#L15)

@@ -1,6 +1,6 @@
 # Interface: ServiceInfo
 
-Defined in: [api/services.ts:41](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L41)
+Defined in: [api/services.ts:41](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L41)
 
 Live OData service info (from `fetch_service_information`).
 
@@ -10,7 +10,7 @@ Live OData service info (from `fetch_service_information`).
 
 > **serviceUrl**: `string`
 
-Defined in: [api/services.ts:42](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L42)
+Defined in: [api/services.ts:42](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L42)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [api/services.ts:42](https://github.com/marianfoo/adt-ls/blob/main/s
 
 > **entitySets**: `object`[]
 
-Defined in: [api/services.ts:43](https://github.com/marianfoo/adt-ls/blob/main/src/api/services.ts#L43)
+Defined in: [api/services.ts:43](https://github.com/arc-mcp/adt-ls/blob/main/src/api/services.ts#L43)
 
 #### name
 

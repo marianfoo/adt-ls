@@ -1,6 +1,6 @@
 # adt-ls capability survey & coverage gaps
 
-What the headless `adt-lsc` language server **actually offers**, what `@marianfoo/adt-ls`
+What the headless `adt-lsc` language server **actually offers**, what `@arc-mcp/adt-ls`
 **wraps**, what's **worth wrapping next**, and what's a **hard boundary** (never in adt-ls).
 
 > **Sources.** Live introspection of `adt-lsc` **1.0.1.202606111342** (`initialize`
@@ -19,7 +19,7 @@ library reaches all three.
 
 Legend: ✅ wrapped · 🟡 reachable but **not wrapped** (candidate) · ⛔ present but not agent-usable.
 
-| Segment | Methods | `@marianfoo/adt-ls` coverage |
+| Segment | Methods | `@arc-mcp/adt-ls` coverage |
 | --- | --- | --- |
 | `repository` | getUsers, getLsUri, quickSearch | ✅ `repository.{getUsers,getLsUri,search}` |
 | `fileSystem` | readFile, writeFile, delete, getFileLockStatus, lockFile, unlockFile, **toggleVersion**, stat, abapStat, readDirectory, getObjectName, getPackageName, forceRefresh, getFolderUri, **getExternalLinks** | ✅ read/write/delete/getFileLockStatus · 🟡 toggleVersion (active⇄inactive draft), getExternalLinks, stat/readDirectory, explicit lock/unlock |
@@ -156,7 +156,7 @@ No `adtLs/*` method exists for these, so they can't be reached headless:
 ```ts
 // bun add file:<lib> @modelcontextprotocol/sdk  &&  bun run introspect.ts
 import crypto from 'node:crypto';
-import { AdtLsDriver, resolveAdtLsPath, startMcpServer } from '@marianfoo/adt-ls';
+import { AdtLsDriver, resolveAdtLsPath, startMcpServer } from '@arc-mcp/adt-ls';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 
