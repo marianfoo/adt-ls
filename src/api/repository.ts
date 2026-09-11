@@ -67,9 +67,9 @@ export async function searchWithRevive(
   return r;
 }
 
-/** List inactive (draft) objects on a destination. Uses `destinationId`. */
+/** List inactive (draft) objects on a destination. */
 export function getInactiveObjects(driver: LspRequester, destinationId: string): Promise<unknown[]> {
-  return driver.sendRequest<unknown[]>('adtLs/activation/getInactiveObjects', { destinationId });
+  return driver.sendRequest<unknown[]>('adtLs/activation/getInactiveObjects', { destination: destinationId });
 }
 
 /**
@@ -93,9 +93,10 @@ export function writeFile(driver: LspRequester, uri: string, content: string): P
   return driver.sendRequest('adtLs/fileSystem/writeFile', { uri, content });
 }
 
-/** Delete an object via its AFF metadata (`.json`) URI. */
+/** Delete the enclosing object via its AFF metadata (`.json`) URI.
+ * `force` confirms whole-object deletion (required by 1.1.2, error 1003 otherwise). */
 export function deleteFile(driver: LspRequester, uri: string): Promise<unknown> {
-  return driver.sendRequest('adtLs/fileSystem/delete', { uri });
+  return driver.sendRequest('adtLs/fileSystem/delete', { uri, options: { recursive: false, force: true } });
 }
 
 /** adt-ls returns this placeholder (not source) for object types it can't serve headless. */

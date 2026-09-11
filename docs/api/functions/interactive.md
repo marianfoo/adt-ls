@@ -2,7 +2,7 @@
 
 > **interactive**(`cb`): [`LogonStrategy`](../interfaces/LogonStrategy.md)
 
-Defined in: [auth/strategy.ts:98](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L98)
+Defined in: [auth/strategy.ts:153](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L153)
 
 Interactive — the consumer supplies the UX (no hardcoded browser/TTY).
 

@@ -18,8 +18,8 @@ extension** (publisher **SAPSE**). It is **not redistributable** (SAP Developer 
 
 Marketplace: <https://marketplace.visualstudio.com/items?itemName=SAPSE.adt-vscode>
 
-> **Version:** this library requires `adt-lsc` **`1.0.1` or newer** and is verified against
-> **`1.0.1.202606111342`**. In CI, pin the extension version for reproducibility.
+> **Version:** this library requires `adt-lsc` **`1.1.2` or newer** and is verified against
+> **`1.1.2.202608131517`**. In CI, pin the extension version for reproducibility.
 
 ### Option A — install the extension (best for local dev)
 
@@ -44,7 +44,7 @@ A `.vsix` is just a zip. Pick the build that matches your **runner's** OS + arch
 Download a specific build from the Marketplace gallery API (a `.vsix` is returned):
 
 ```bash
-VER=1.0.1                 # the version from the Marketplace "Version History"
+VER=1.1.2                 # the version from the Marketplace "Version History"
 PLAT=linux-x64            # your runner's targetPlatform from the table above
 curl -L -o adt-vscode-$PLAT.vsix \
   "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/SAPSE/vsextensions/adt-vscode/$VER/vspackage?targetPlatform=$PLAT"
@@ -63,6 +63,10 @@ VS Code, then copy the `adt-ls/` folder out of `~/.vscode/extensions/sapse.adt-v
 2. **`<cwd>/vendor/adt-ls/…`** — a vendored copy in your project.
 3. The newest installed **`sapse.adt-vscode-*`** under `~/.vscode/extensions`,
    `~/.cursor/extensions`, or `~/.vscode-insiders/extensions`.
+
+The version comparison spans all editor directories. An invalid explicit path throws
+instead of silently selecting a different installation. Updating Eclipse alone does not
+update adt-ls: these are separate SAP distributions.
 
 If nothing matches it throws, **listing every path it tried** (paste that into an issue if stuck).
 
@@ -107,7 +111,7 @@ xattr -dr com.apple.quarantine /path/to/Adt-ls.app
 - uses: actions/cache@v4
   with:
     path: vendor/adt-ls
-    key: adt-ls-${{ runner.os }}-1.0.1
+    key: adt-ls-${{ runner.os }}-1.1.2
 - run: test -d vendor/adt-ls || ./fetch-and-vendor-adt-ls.sh   # your extract step
 ```
 
@@ -185,3 +189,20 @@ auth are all good.
 | `health().backendLive: false` after idle | SAP sessions expire fast; the client auto-revives on the next call, or call `reconnect()` |
 | TLS / certificate errors | set `selfSigned: true` (self-signed) or `extraCaCerts` (corporate CA) |
 | Wrong-arch binary / won't spawn | you vendored the wrong `targetPlatform` — match the **runner**, not your laptop (table in §1) |
+
+## Inspect a runtime or upgrade from 1.0.1
+
+After installing SAPSE.adt-vscode 1.1.2 or newer, run `npm run build`, then
+`npm run inspect:adt-ls` in this repository. It starts an isolated foundation session
+and prints LSP providers and all MCP tool schemas without logging on to SAP. To save a
+clean JSON snapshot, run `node scripts/inspect-adt-ls.mjs > capabilities.json`.
+
+This SDK supplies `fileSystemMode: "VFS"` to MCP startup, as SAP's current extension does.
+Without it, 1.1.2 starts successfully but omits create/activate/unit-test/generator tools.
+Older runtimes now fail early because native activation, coverage and deletion contracts
+also changed. See the [migration research](research/2026-09-11-current-adt-compatibility.md).
+
+For live tests, set `ADTLS_TEST_PASSWORD` and optionally `ADTLS_TEST_USER` (default MARIAN),
+`ADTLS_TEST_URL` (default `https://a4h.marianzeis.de`), and `ADTLS_TEST_SELF_SIGNED=1` only
+for a backend requiring the TLS proxy. The A4H default uses trusted HTTPS port 443.
+The tests create unique local `$TMP` objects and remove them afterwards.

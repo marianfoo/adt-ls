@@ -1,6 +1,6 @@
 # Interface: ConnectionOptions
 
-Defined in: [client.ts:58](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L58)
+Defined in: [client.ts:64](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L64)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [client.ts:58](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > **systemUrl**: `string`
 
-Defined in: [client.ts:60](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L60)
+Defined in: [client.ts:66](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L66)
 
 HTTPS URL of the SAP backend, e.g. `https://host:50001`.
 
@@ -18,7 +18,7 @@ HTTPS URL of the SAP backend, e.g. `https://host:50001`.
 
 > `optional` **client?**: `string`
 
-Defined in: [client.ts:61](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L61)
+Defined in: [client.ts:67](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L67)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [client.ts:61](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > `optional` **language?**: `string`
 
-Defined in: [client.ts:62](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L62)
+Defined in: [client.ts:68](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L68)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [client.ts:62](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > `optional` **selfSigned?**: `boolean`
 
-Defined in: [client.ts:64](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L64)
+Defined in: [client.ts:70](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L70)
 
 Backend presents a self-signed cert → engage the localhost TLS reverse proxy.
 
@@ -44,7 +44,7 @@ Backend presents a self-signed cert → engage the localhost TLS reverse proxy.
 
 > `optional` **extraCaCerts?**: `string`[]
 
-Defined in: [client.ts:66](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L66)
+Defined in: [client.ts:72](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L72)
 
 Extra CA cert PEM file paths to add to the JVM truststore (corporate PKI).
 
@@ -54,7 +54,7 @@ Extra CA cert PEM file paths to add to the JVM truststore (corporate PKI).
 
 > `optional` **forwardProxy?**: `object`
 
-Defined in: [client.ts:69](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L69)
+Defined in: [client.ts:75](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L75)
 
 Route the proxy's backend hop via a consumer-supplied forward proxy (e.g. a Cloud
  Connector bridge). Only used with `selfSigned`. ADR-0006.
@@ -73,7 +73,7 @@ Route the proxy's backend hop via a consumer-supplied forward proxy (e.g. a Clou
 
 > `optional` **probe?**: `object`
 
-Defined in: [client.ts:71](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L71)
+Defined in: [client.ts:77](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L77)
 
 Liveness probe: a known-present object to search for. Default CL_ABAP_TYPEDESCR.
 

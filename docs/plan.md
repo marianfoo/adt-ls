@@ -1,5 +1,8 @@
 # Implementation plan — `@arc-mcp/adt-ls`
 
+> This is the original implementation plan. The current-runtime upgrade plan, review and
+> test evidence are in [2026-09-11 compatibility research](research/2026-09-11-current-adt-compatibility.md).
+
 Detailed plan for building the library and integrating it into arc-1-lsp. Pairs with
 the decisions in [adr/](adr/README.md) and the charter in [../GOAL.md](../GOAL.md).
 

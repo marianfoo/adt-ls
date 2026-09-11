@@ -292,6 +292,7 @@ const decision = await adt.transport.check({ name: 'ZCL_ORDER', objectType: 'CLA
 // → { isRecordingRequired, isLockedInRequests, transports: [...], ... }
 
 const tr = await adt.transport.create({
+  objectName: 'ZCL_FOO', objectType: 'CLAS/OC',
   developmentPackage: 'ZDEMO', transportDescription: 'CI deploy', isCreation: true,
 });
 await adt.transport.assign({ name: 'ZCL_ORDER', objectType: 'CLAS/OC', transport: /* tr number */ });
@@ -316,9 +317,10 @@ await adt.transport.getLockStatus({ name: 'ZCL_ORDER', objectType: 'CLAS/OC' });
   CLIs/MCP stdio).
 - **One backend per client.** Each `createAdtLs()` is one `adt-lsc` process + one destination.
   For several systems, create several clients.
-- **Scope boundary.** adt-lsc serves the **modern ABAP-Cloud** object types headless; classic
-  types return a clear "use Eclipse" error. Write-safety/allowlists are **your** policy — the
-  library does not gate writes (ADR-0012).
+- **Scope boundary.** Object support is determined by the installed runtime and backend.
+  1.1.2 serves additional classic types, including table definitions. Use
+  `lifecycle.listCreatableObjects()` and `capabilities()` for current contracts; see the
+  [capability matrix](capability-matrix.md).
 
 ---
 
@@ -332,9 +334,9 @@ await adt.transport.getLockStatus({ name: 'ZCL_ORDER', objectType: 'CLAS/OC' });
 | `navigation` | `documentSymbols`, `goToDefinition`, `goToDeclaration`, `findReferences`, `hover`, `documentHighlight`, `typeHierarchy`, `completion` (+`resolve`), `checkSyntax`, `semanticTokens`, `format` | editor/IDE code-intelligence + ABAP Pretty-Printer |
 | `quality` | `runAtc`, `listAtcVariants`, `runUnitTestsWithCoverage` | CI gates: ATC + coverage |
 | `services` | `runApplication`, `serviceBindingDetails`, `publishServiceBinding`, `listServices`, `getServiceInfo` | console run + business services + OData service info |
-| `transport` | `find`, `create`, `assign`, `list`, `getLockStatus`, `check` | CTS / transport management + decision oracle |
+| `transport` | `find`, `create`, `assign`, `list`, `getLockStatus`, `check`, `getDiff` | CTS / transport management + decision oracle |
 | `raw` | `lsp(method, params)`, `tool(name, args)` | escape hatches for the long tail |
-| top-level | `health()`, `reconnect()`, `dispose()` | liveness, recovery, cleanup |
+| top-level | `capabilities()`, `health()`, `reconnect()`, `dispose()` | liveness, recovery, cleanup |
 
 Low-level building blocks (`resolveAdtLsPath`, `AdtLsDriver`, `startMcpServer`/`stopMcpServer`/
 `setMcpDestination`) are exported too — for tools that proxy adt-ls's MCP themselves.

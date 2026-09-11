@@ -1,6 +1,6 @@
 # Interface: LspClient
 
-Defined in: [driver.ts:61](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L61)
+Defined in: [driver.ts:62](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L62)
 
 Request + notification channel. LSP document features (didOpen → query →
 didClose) need fire-and-forget notifications, so the navigation layer depends
@@ -16,7 +16,7 @@ on this fuller surface.
 
 > **sendRequest**\<`T`\>(`method`, `params?`): `Promise`\<`T`\>
 
-Defined in: [driver.ts:53](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L53)
+Defined in: [driver.ts:54](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L54)
 
 #### Type Parameters
 
@@ -48,7 +48,7 @@ Defined in: [driver.ts:53](https://github.com/arc-mcp/adt-ls/blob/main/src/drive
 
 > **sendNotification**(`method`, `params?`): `Promise`\<`void`\>
 
-Defined in: [driver.ts:62](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L62)
+Defined in: [driver.ts:63](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L63)
 
 #### Parameters
 

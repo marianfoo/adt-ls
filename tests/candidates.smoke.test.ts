@@ -17,15 +17,15 @@ try {
 const pw = process.env.ADTLS_TEST_PASSWORD;
 const gated = !binPath || !pw;
 
-const NAME = 'ZCL_ADTLS_CAND';
+const NAME = `ZCL_ADTLS_CAND_${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
 const TYPE = 'CLAS/OC';
 // Deliberately unindented so the pretty-printer has something to fix.
-const GOOD = `CLASS zcl_adtls_cand DEFINITION PUBLIC FINAL CREATE PUBLIC.
+const GOOD = `CLASS ${NAME.toLowerCase()} DEFINITION PUBLIC FINAL CREATE PUBLIC.
 PUBLIC SECTION.
 INTERFACES if_oo_adt_classrun.
 METHODS greet IMPORTING iv_name TYPE string RETURNING VALUE(rv_text) TYPE string.
 ENDCLASS.
-CLASS zcl_adtls_cand IMPLEMENTATION.
+CLASS ${NAME.toLowerCase()} IMPLEMENTATION.
 METHOD greet.
 rv_text = |Hello { iv_name }|.
 ENDMETHOD.
@@ -33,11 +33,11 @@ METHOD if_oo_adt_classrun~main.
 out->write( greet( 'World' ) ).
 ENDMETHOD.
 ENDCLASS.`;
-const BROKEN = `CLASS zcl_adtls_cand DEFINITION PUBLIC FINAL CREATE PUBLIC.
+const BROKEN = `CLASS ${NAME.toLowerCase()} DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS greet RETURNING VALUE(rv_text) TYPE string.
 ENDCLASS.
-CLASS zcl_adtls_cand IMPLEMENTATION.
+CLASS ${NAME.toLowerCase()} IMPLEMENTATION.
   METHOD greet.
     rv_text = this_variable_does_not_exist.
   ENDMETHOD.
@@ -45,13 +45,13 @@ ENDCLASS.`;
 
 describe('candidate capabilities (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
   let adt: AdtLsClient | undefined;
+  let createdByTest = false;
   afterAll(async () => {
     try {
-      await adt?.lifecycle.delete({ name: NAME, objectType: TYPE });
-    } catch {
-      /* already gone */
+      if (createdByTest) await adt?.lifecycle.delete({ name: NAME, objectType: TYPE });
+    } finally {
+      await adt?.dispose();
     }
-    await adt?.dispose();
   });
 
   it.skipIf(gated)(
@@ -59,21 +59,21 @@ describe('candidate capabilities (live — needs adt-ls + ADTLS_TEST_PASSWORD)',
     async () => {
       adt = await createAdtLs({
         connection: {
-          systemUrl: `https://${process.env.ADTLS_TEST_HOST ?? 'a4h.marianzeis.de'}:${process.env.ADTLS_TEST_PORT ?? '50001'}`,
-          selfSigned: true,
+          systemUrl: process.env.ADTLS_TEST_URL ?? 'https://a4h.marianzeis.de',
+          selfSigned: process.env.ADTLS_TEST_SELF_SIGNED === '1',
           client: '001',
         },
         auth: basic(process.env.ADTLS_TEST_USER ?? 'MARIAN', pw as string),
       });
       expect(adt.health().backendLive).toBe(true);
 
-      await adt.lifecycle.delete({ name: NAME, objectType: TYPE }).catch(() => {}); // clean slate
       await adt.lifecycle.create({
         objectType: TYPE,
         name: NAME,
         packageName: '$TMP',
-        description: 'adt-ls 0.4.0 candidates',
+        description: 'adt-ls 1.1.2 candidates',
       });
+      createdByTest = true;
       await adt.lifecycle.update({ name: NAME, objectType: TYPE, source: GOOD });
 
       // ── Native activate: rich per-phase result ──
@@ -147,6 +147,7 @@ describe('candidate capabilities (live — needs adt-ls + ADTLS_TEST_PASSWORD)',
       expect(bad.diagnostics.length).toBeGreaterThan(0);
 
       await adt.lifecycle.delete({ name: NAME, objectType: TYPE });
+      createdByTest = false;
     },
     200_000,
   );

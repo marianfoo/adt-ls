@@ -1,6 +1,6 @@
 # Interface: ActivateResult
 
-Defined in: [api/lifecycle.ts:30](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L30)
+Defined in: [api/lifecycle.ts:31](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L31)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [api/lifecycle.ts:30](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > **success**: `boolean`
 
-Defined in: [api/lifecycle.ts:31](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L31)
+Defined in: [api/lifecycle.ts:32](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L32)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [api/lifecycle.ts:31](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > **diagnostics**: `unknown`[]
 
-Defined in: [api/lifecycle.ts:32](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L32)
+Defined in: [api/lifecycle.ts:33](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L33)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [api/lifecycle.ts:32](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > `optional` **checkExecuted?**: `boolean`
 
-Defined in: [api/lifecycle.ts:34](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L34)
+Defined in: [api/lifecycle.ts:35](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L35)
 
 Whether the syntax/consistency check ran (native `activation/activate`).
 
@@ -34,7 +34,7 @@ Whether the syntax/consistency check ran (native `activation/activate`).
 
 > `optional` **activationExecuted?**: `boolean`
 
-Defined in: [api/lifecycle.ts:36](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L36)
+Defined in: [api/lifecycle.ts:37](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L37)
 
 Whether activation actually ran.
 
@@ -44,7 +44,7 @@ Whether activation actually ran.
 
 > `optional` **generationExecuted?**: `boolean`
 
-Defined in: [api/lifecycle.ts:38](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L38)
+Defined in: [api/lifecycle.ts:39](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L39)
 
 Whether downstream generation ran (e.g. RAP artifacts).
 
@@ -54,7 +54,7 @@ Whether downstream generation ran (e.g. RAP artifacts).
 
 > `optional` **forceSupported?**: `boolean`
 
-Defined in: [api/lifecycle.ts:40](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L40)
+Defined in: [api/lifecycle.ts:41](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L41)
 
 Whether the backend supports `forceActivation` for this object.
 
@@ -64,6 +64,6 @@ Whether the backend supports `forceActivation` for this object.
 
 > `optional` **refreshedUris?**: `string`[]
 
-Defined in: [api/lifecycle.ts:42](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L42)
+Defined in: [api/lifecycle.ts:43](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L43)
 
 LS URIs the backend marked for refresh after activation.

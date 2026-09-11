@@ -2,7 +2,7 @@
 
 > **ServerRequestHandler** = (`params`) => `unknown` \| `Promise`\<`unknown`\>
 
-Defined in: [driver.ts:45](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L45)
+Defined in: [driver.ts:46](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L46)
 
 Handler for a server→client LSP request (e.g. requestBrowserBasedLogon).
 

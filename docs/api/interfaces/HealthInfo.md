@@ -1,6 +1,6 @@
 # Interface: HealthInfo
 
-Defined in: [client.ts:90](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L90)
+Defined in: [client.ts:102](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L102)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [client.ts:90](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > **connected**: `boolean`
 
-Defined in: [client.ts:91](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L91)
+Defined in: [client.ts:103](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L103)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [client.ts:91](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > **backendLive**: `boolean`
 
-Defined in: [client.ts:92](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L92)
+Defined in: [client.ts:104](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L104)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [client.ts:92](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > **destination**: `string`
 
-Defined in: [client.ts:93](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L93)
+Defined in: [client.ts:105](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L105)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [client.ts:93](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > `optional` **adtLsName?**: `string`
 
-Defined in: [client.ts:94](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L94)
+Defined in: [client.ts:106](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L106)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [client.ts:94](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > `optional` **adtLsVersion?**: `string`
 
-Defined in: [client.ts:95](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L95)
+Defined in: [client.ts:107](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L107)
 
 ***
 
@@ -48,6 +48,6 @@ Defined in: [client.ts:95](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > **mcpPort**: `number`
 
-Defined in: [client.ts:97](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L97)
+Defined in: [client.ts:109](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L109)
 
 Port adt-ls's own MCP server bound (after any port-fallback).

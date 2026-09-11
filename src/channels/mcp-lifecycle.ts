@@ -9,13 +9,16 @@ import type { LspRequester } from '../driver.js';
 export interface StartMcpServerResult {
   port: number;
   token: string;
+  version?: string;
 }
 
 export function startMcpServer(
   driver: LspRequester,
   opts: { port: number; token: string },
 ): Promise<StartMcpServerResult> {
-  return driver.sendRequest<StartMcpServerResult>('adtLs/mcp/startMCPServer', opts);
+  // Since 1.1.2, omitting this mode silently hides create/activate/test/generator tools.
+  // VFS is the mode used by SAP's VS Code client (ABAP virtual file-system URIs).
+  return driver.sendRequest<StartMcpServerResult>('adtLs/mcp/startMCPServer', { ...opts, fileSystemMode: 'VFS' });
 }
 
 /**

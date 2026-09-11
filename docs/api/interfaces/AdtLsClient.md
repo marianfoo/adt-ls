@@ -1,6 +1,6 @@
 # Interface: AdtLsClient
 
-Defined in: [client.ts:371](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L371)
+Defined in: [client.ts:430](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L430)
 
 The unified adt-ls client returned by [createAdtLs](../functions/createAdtLs.md). One coherent surface over
 both adt-ls channels (LSP + adt-ls's own MCP) — the channel split is hidden. Always
@@ -12,7 +12,7 @@ call [dispose()](#dispose) when finished.
 
 > **repository**: `object`
 
-Defined in: [client.ts:373](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L373)
+Defined in: [client.ts:434](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L434)
 
 Repository queries + file operations + the name→URI resolver.
 
@@ -140,7 +140,7 @@ List inactive (draft) objects on the connected destination.
 
 > **source**: `object`
 
-Defined in: [client.ts:393](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L393)
+Defined in: [client.ts:454](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L454)
 
 Read object source by name.
 
@@ -166,9 +166,9 @@ Read an object's source (per include for classes, e.g. `include: 'testclasses'`)
 
 > **lifecycle**: `object`
 
-Defined in: [client.ts:398](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L398)
+Defined in: [client.ts:459](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L459)
 
-The authoring lifecycle (modern ABAP-Cloud / RAP types; classic types throw a clear error).
+The authoring lifecycle for object types served by the installed runtime/backend.
 
 #### resolveAffUri()
 
@@ -215,6 +215,12 @@ Create an object. `transportRequestNumber` is `''` for `$TMP`/local packages.
 ###### transportRequestNumber?
 
 `string`
+
+###### additionalFields?
+
+`Record`\<`string`, `unknown`\>
+
+Type-specific creation fields from getCreationForm; explicit name/package/description win.
 
 ##### Returns
 
@@ -349,6 +355,10 @@ Validate creation input before create (read-only verdict).
 
 `string`
 
+###### additionalFields?
+
+`Record`\<`string`, `unknown`\>
+
 ##### Returns
 
 `Promise`\<`unknown`\>
@@ -454,7 +464,7 @@ The JSON input schema a generator's `content` must satisfy.
 
 > **navigation**: [`Navigation`](Navigation.md)
 
-Defined in: [client.ts:448](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L448)
+Defined in: [client.ts:517](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L517)
 
 LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, completion, syntax check).
 
@@ -464,7 +474,7 @@ LSP code-intelligence (symbols, definition, references, type-hierarchy, hover, c
 
 > **quality**: [`Quality`](Quality.md)
 
-Defined in: [client.ts:450](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L450)
+Defined in: [client.ts:519](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L519)
 
 Quality: ATC static analysis + ABAP Unit code coverage.
 
@@ -474,7 +484,7 @@ Quality: ATC static analysis + ABAP Unit code coverage.
 
 > **services**: [`Services`](Services.md)
 
-Defined in: [client.ts:452](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L452)
+Defined in: [client.ts:521](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L521)
 
 Runtime + business services: run a console app, service-binding details/publish.
 
@@ -484,9 +494,35 @@ Runtime + business services: run a console app, service-binding details/publish.
 
 > **transport**: `object`
 
-Defined in: [client.ts:454](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L454)
+Defined in: [client.ts:523](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L523)
 
 CTS transport + lock operations.
+
+#### getDiff()
+
+> **getDiff**(`transportNumber`, `opts?`): `Promise`\<[`TransportDiffPage`](TransportDiffPage.md)\>
+
+One page of unified object differences in a transport (1.1.2+, backend-dependent).
+
+##### Parameters
+
+###### transportNumber
+
+`string`
+
+###### opts?
+
+###### cursor?
+
+`string`
+
+###### pageSize?
+
+`number`
+
+##### Returns
+
+`Promise`\<[`TransportDiffPage`](TransportDiffPage.md)\>
 
 #### find()
 
@@ -540,11 +576,11 @@ Create a CTS transport request (refuses local `$`-packages).
 
 `boolean`
 
-###### objectName?
+###### objectName
 
 `string`
 
-###### objectType?
+###### objectType
 
 `string`
 
@@ -629,7 +665,7 @@ Read an object's lock status.
 
 > **raw**: `object`
 
-Defined in: [client.ts:489](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L489)
+Defined in: [client.ts:560](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L560)
 
 Escape hatches for the long tail (ADR-0002).
 
@@ -681,11 +717,25 @@ Raw call to a tool on adt-ls's own MCP server (e.g. a backend-dynamic tool).
 
 ## Methods
 
+### capabilities()
+
+> **capabilities**(): `Promise`\<[`AdtLsCapabilities`](AdtLsCapabilities.md)\>
+
+Defined in: [client.ts:432](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L432)
+
+Inspect current LSP providers and all MCP tool schemas (fresh, paginated tools/list).
+
+#### Returns
+
+`Promise`\<[`AdtLsCapabilities`](AdtLsCapabilities.md)\>
+
+***
+
 ### listDestinations()
 
 > **listDestinations**(): `Promise`\<`unknown`\>
 
-Defined in: [client.ts:496](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L496)
+Defined in: [client.ts:567](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L567)
 
 List the ABAP destinations adt-ls knows (works without a connected destination).
 
@@ -699,7 +749,7 @@ List the ABAP destinations adt-ls knows (works without a connected destination).
 
 > **reconnect**(): `Promise`\<`boolean`\>
 
-Defined in: [client.ts:498](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L498)
+Defined in: [client.ts:569](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L569)
 
 Force a SAP re-logon; `true` when the session is live afterwards (also auto-heals on dead-session detection).
 
@@ -713,7 +763,7 @@ Force a SAP re-logon; `true` when the session is live afterwards (also auto-heal
 
 > **health**(): [`HealthInfo`](HealthInfo.md)
 
-Defined in: [client.ts:500](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L500)
+Defined in: [client.ts:571](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L571)
 
 Connection + liveness snapshot.
 
@@ -727,7 +777,7 @@ Connection + liveness snapshot.
 
 > **dispose**(): `Promise`\<`void`\>
 
-Defined in: [client.ts:502](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L502)
+Defined in: [client.ts:573](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L573)
 
 Shut down: stop the keep-alive, kill adt-ls, close the proxy, and clean temp dirs.
 

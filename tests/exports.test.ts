@@ -14,7 +14,11 @@ describe('public API exports (0.2.0)', () => {
   it('startMcpServer sends adtLs/mcp/startMCPServer with the caller port+token', async () => {
     const sendRequest = vi.fn().mockResolvedValue({ port: 2240, token: 'tok' });
     const res = await api.startMcpServer({ sendRequest }, { port: 2240, token: 'tok' });
-    expect(sendRequest).toHaveBeenCalledWith('adtLs/mcp/startMCPServer', { port: 2240, token: 'tok' });
+    expect(sendRequest).toHaveBeenCalledWith('adtLs/mcp/startMCPServer', {
+      port: 2240,
+      token: 'tok',
+      fileSystemMode: 'VFS',
+    });
     expect(res).toEqual({ port: 2240, token: 'tok' });
   });
 
@@ -39,8 +43,8 @@ describe('public API exports (0.4.0)', () => {
 
 describe('public API exports (compatibility baseline)', () => {
   it('exposes the supported adt-ls version helpers', () => {
-    expect(api.MINIMUM_ADT_LS_VERSION).toBe('1.0.1');
-    expect(api.VERIFIED_ADT_LS_VERSION).toBe('1.0.1.202606111342');
+    expect(api.MINIMUM_ADT_LS_VERSION).toBe('1.1.2');
+    expect(api.VERIFIED_ADT_LS_VERSION).toBe('1.1.2.202608131517');
     expect(typeof api.assertSupportedAdtLsVersion).toBe('function');
   });
 });

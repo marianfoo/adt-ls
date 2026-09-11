@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { platformSubPath, resolveAdtLsPath } from '../src/discovery.js';
 
 describe('platformSubPath', () => {
@@ -28,6 +28,7 @@ describe('platformSubPath', () => {
 });
 
 describe('resolveAdtLsPath', () => {
+  beforeEach(() => vi.stubEnv('ADT_LS_PATH', ''));
   const tmp: string[] = [];
   const mk = () => {
     const d = mkdtempSync(path.join(os.tmpdir(), 'adtls-disc-'));
@@ -35,6 +36,7 @@ describe('resolveAdtLsPath', () => {
     return d;
   };
   afterEach(() => {
+    vi.unstubAllEnvs();
     for (const d of tmp.splice(0)) rmSync(d, { recursive: true, force: true });
   });
 
@@ -75,6 +77,40 @@ describe('resolveAdtLsPath', () => {
     );
   });
 
+  it('selects the newest version across all editor roots, skipping incomplete installs', () => {
+    const editors = [mk(), mk(), mk()];
+    for (const [i, version] of ['1.0.1', '1.1.2', '1.10.0'].entries()) {
+      const binary = path.join(
+        editors[i],
+        `sapse.adt-vscode-${version}-linux-x64`,
+        'adt-ls',
+        ...platformSubPath('linux', 'x64'),
+      );
+      mkdirSync(path.dirname(binary), { recursive: true });
+      if (i < 2) writeFileSync(binary, 'x');
+    }
+    const opts = { repoRoot: mk(), extensionsDirs: editors, platform: 'linux' as const, arch: 'x64' };
+    expect(resolveAdtLsPath(opts)).toContain('1.1.2');
+    const newer = path.join(
+      editors[2],
+      'sapse.adt-vscode-1.10.0-linux-x64',
+      'adt-ls',
+      ...platformSubPath('linux', 'x64'),
+    );
+    writeFileSync(newer, 'x');
+    expect(resolveAdtLsPath(opts)).toBe(newer);
+  });
+
+  it('fails on an invalid explicit path instead of silently changing runtime', () => {
+    const dir = mk();
+    expect(() => resolveAdtLsPath({ explicitPath: dir })).toThrow(/not a file/);
+    vi.stubEnv('ADT_LS_PATH', '/missing/adt-ls');
+    expect(() => resolveAdtLsPath()).toThrow(/Explicit.*missing/);
+    const binary = path.join(dir, 'adt-ls');
+    writeFileSync(binary, 'x');
+    expect(resolveAdtLsPath({ explicitPath: binary })).toBe(binary);
+  });
+
   it('throws an error listing the tried paths when nothing is found', () => {
     expect(() =>
       resolveAdtLsPath({
@@ -82,8 +118,7 @@ describe('resolveAdtLsPath', () => {
         extensionsDir: mk(),
         platform: 'linux',
         arch: 'x64',
-        explicitPath: '/nope/adt-ls',
       }),
-    ).toThrow(/Tried:[\s\S]*\/nope\/adt-ls/);
+    ).toThrow(/Tried:/);
   });
 });

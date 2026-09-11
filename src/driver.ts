@@ -119,7 +119,8 @@ function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
 }
 
 export interface AdtLsDriverOptions {
-  /** Working/data dir for adt-ls (`-data`). Defaults to an isolated temp dir. */
+  /** Working/data dir for adt-ls (`-data`). Caller-provided directories are preserved;
+   * the default isolated temp directory is removed on disposal. */
   dataDir?: string;
   /** Extra env for the spawned JVM (e.g. JAVA_TOOL_OPTIONS truststore). */
   extraEnv?: Record<string, string>;
@@ -141,6 +142,9 @@ export class AdtLsDriver implements LspClient {
   private conn?: MessageConnection;
   private server?: net.Server;
   private pipeName?: string;
+  private socket?: net.Socket;
+  private starting = false;
+  private readonly ownsDataDir: boolean;
   private readonly dataDir: string;
   private readonly extraEnv: Record<string, string>;
   private readonly extraArgs: string[];
@@ -153,6 +157,7 @@ export class AdtLsDriver implements LspClient {
     opts: AdtLsDriverOptions = {},
   ) {
     const id = crypto.randomBytes(6).toString('hex');
+    this.ownsDataDir = opts.dataDir === undefined;
     this.dataDir = opts.dataDir ?? path.join(os.tmpdir(), `adt-ls-${id}`);
     this.extraEnv = opts.extraEnv ?? {};
     this.extraArgs = opts.extraArgs ?? [];
@@ -166,6 +171,19 @@ export class AdtLsDriver implements LspClient {
   }
 
   async start(timeoutMs = 60_000): Promise<AdtLsInitializeResult> {
+    if (this.starting || this.conn) throw new Error('AdtLsDriver already started');
+    this.starting = true;
+    try {
+      return await this.startOnce(timeoutMs);
+    } catch (error) {
+      await this.dispose().catch(() => {});
+      throw error;
+    } finally {
+      this.starting = false;
+    }
+  }
+
+  private async startOnce(timeoutMs: number): Promise<AdtLsInitializeResult> {
     await fsp.mkdir(this.dataDir, { recursive: true });
     const pipeName = makePipeName();
     this.pipeName = pipeName;
@@ -201,6 +219,7 @@ export class AdtLsDriver implements LspClient {
     });
 
     const exitP = new Promise<never>((_, reject) => {
+      child.once('error', reject);
       child.once('exit', (code) =>
         reject(new Error(`adt-ls exited (code ${code}) before LSP connect.\n${tail.slice(-12).join('')}`)),
       );
@@ -208,6 +227,7 @@ export class AdtLsDriver implements LspClient {
 
     const socket = await withTimeout(Promise.race([connected, exitP]), timeoutMs, 'adt-ls LSP connect');
     exitP.catch(() => {}); // a later exit must not become an unhandled rejection
+    this.socket = socket;
     socket.on('error', () => {}); // swallow ECONNRESET / ERR_STREAM_DESTROYED on teardown
 
     // REQUIRED for any backend HTTP: adt-ls's UserAgentUtil builds the User-Agent
@@ -236,14 +256,9 @@ export class AdtLsDriver implements LspClient {
       timeoutMs,
       'adt-ls initialize',
     )) as AdtLsInitializeResult;
-    conn.sendNotification('initialized', {});
+    await conn.sendNotification('initialized', {});
     this.initializeResult = result;
-    try {
-      assertSupportedAdtLsVersion(result.serverInfo?.version);
-    } catch (error) {
-      await this.dispose().catch(() => {});
-      throw error;
-    }
+    assertSupportedAdtLsVersion(result.serverInfo?.version);
     if (result.serverInfo?.version !== VERIFIED_ADT_LS_VERSION) {
       logger.warn(
         `adt-ls ${result.serverInfo?.version} is supported but not the verified build ${VERIFIED_ADT_LS_VERSION}.`,
@@ -269,17 +284,28 @@ export class AdtLsDriver implements LspClient {
     } catch {
       // best-effort
     }
+    this.conn = undefined;
+    this.initializeResult = undefined;
+    this.socket?.destroy();
+    this.socket = undefined;
     try {
       this.server?.close();
     } catch {
       // best-effort
     }
+    this.server = undefined;
     try {
-      this.child?.kill('SIGKILL');
+      const child = this.child;
+      if (child && child.exitCode === null && child.signalCode === null && child.pid) {
+        const exited = new Promise<void>((resolve) => child.once('exit', () => resolve()));
+        child.kill('SIGKILL');
+        await withTimeout(exited, 5_000, 'adt-ls exit');
+      }
     } catch {
       // best-effort
     }
-    await fsp.rm(this.dataDir, { recursive: true, force: true }).catch(() => {});
+    this.child = undefined;
+    if (this.ownsDataDir) await fsp.rm(this.dataDir, { recursive: true, force: true }).catch(() => {});
     if (this.pipeName && process.platform !== 'win32') {
       await fsp.rm(this.pipeName, { force: true }).catch(() => {});
     }

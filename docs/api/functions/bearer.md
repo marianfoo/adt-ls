@@ -2,7 +2,7 @@
 
 > **bearer**(`token`, `opts?`): [`LogonStrategy`](../interfaces/LogonStrategy.md)
 
-Defined in: [auth/strategy.ts:61](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L61)
+Defined in: [auth/strategy.ts:69](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L69)
 
 Bearer token — headless reentrance for BTP ABAP. `token` may be a value or an
  async provider resolved at logon time. The lib does NOT acquire OAuth tokens.

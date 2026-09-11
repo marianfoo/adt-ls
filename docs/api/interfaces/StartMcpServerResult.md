@@ -17,3 +17,11 @@ Defined in: [channels/mcp-lifecycle.ts:10](https://github.com/arc-mcp/adt-ls/blo
 > **token**: `string`
 
 Defined in: [channels/mcp-lifecycle.ts:11](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L11)
+
+***
+
+### version?
+
+> `optional` **version?**: `string`
+
+Defined in: [channels/mcp-lifecycle.ts:12](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L12)

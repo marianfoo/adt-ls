@@ -1,6 +1,6 @@
 # Interface: CreateAdtLsOptions
 
-Defined in: [client.ts:74](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L74)
+Defined in: [client.ts:80](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L80)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [client.ts:74](https://github.com/arc-mcp/adt-ls/blob/main/src/clien
 
 > `optional` **adtLs?**: `object`
 
-Defined in: [client.ts:77](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L77)
+Defined in: [client.ts:83](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L83)
 
 Explicit adt-ls binary path; otherwise discovered (sapse.adt-vscode / vendor / env).
  `extraArgs` are prepended to the adt-ls launch (e.g. SNC/JCo JVM flags, `-consoleLog`).
@@ -27,7 +27,7 @@ Explicit adt-ls binary path; otherwise discovered (sapse.adt-vscode / vendor / e
 
 > `optional` **connection?**: [`ConnectionOptions`](ConnectionOptions.md)
 
-Defined in: [client.ts:79](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L79)
+Defined in: [client.ts:85](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L85)
 
 Backend connection. Omit (with `auth`) for foundation mode (adt-ls up, no destination).
 
@@ -37,7 +37,7 @@ Backend connection. Omit (with `auth`) for foundation mode (adt-ls up, no destin
 
 > `optional` **auth?**: [`LogonStrategy`](LogonStrategy.md)
 
-Defined in: [client.ts:81](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L81)
+Defined in: [client.ts:87](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L87)
 
 Logon strategy. Omit (with `connection`) for foundation mode.
 
@@ -47,7 +47,7 @@ Logon strategy. Omit (with `connection`) for foundation mode.
 
 > `optional` **destinationId?**: `string`
 
-Defined in: [client.ts:83](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L83)
+Defined in: [client.ts:89](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L89)
 
 adt-ls destination id (callers don't usually need to set this). Default 'ADTLS'.
 
@@ -57,7 +57,7 @@ adt-ls destination id (callers don't usually need to set this). Default 'ADTLS'.
 
 > `optional` **mcpPort?**: `number`
 
-Defined in: [client.ts:85](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L85)
+Defined in: [client.ts:91](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L91)
 
 Port for adt-ls's own MCP server. Default 2240 (with bind-fallback).
 
@@ -67,6 +67,6 @@ Port for adt-ls's own MCP server. Default 2240 (with bind-fallback).
 
 > `optional` **keepAlive?**: `boolean`
 
-Defined in: [client.ts:87](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L87)
+Defined in: [client.ts:93](https://github.com/arc-mcp/adt-ls/blob/main/src/client.ts#L93)
 
 Enable the activity-gated keep-alive heartbeat. Default true.
