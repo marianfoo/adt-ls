@@ -24,3 +24,7 @@ on 2026-06-12; the original a4h end-to-end proof was recorded on 2026-06-07.
 | [0011](0011-license.md) | License: Apache-2.0 | Accepted |
 | [0012](0012-public-api-coverage.md) | Public API surface & capability coverage | Accepted |
 | [0013](0013-typing-strategy.md) | Typing strategy & abapify/adt-schemas reuse | Accepted |
+
+Current compatibility decisions were revisited for adt-ls 1.1.2 on 2026-09-11; see
+[ADR-0009](0009-version-pinning.md), [ADR-0012](0012-public-api-coverage.md), and the
+[research record](../research/2026-09-11-current-adt-compatibility.md).

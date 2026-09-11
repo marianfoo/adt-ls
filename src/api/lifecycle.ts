@@ -2,8 +2,8 @@ import { parseFederated } from '../channels/federated.js';
 /**
  * The ABAP object authoring lifecycle, pure adt-ls (ADR-0012): resolve an object by
  * name → repotree AFF URI, then read / create / update / activate / test / delete, plus
- * generators, validation, and CTS transport. Only the modern ABAP-Cloud object types
- * adt-ls serves headless work; classic types surface a clear error.
+ * generators, validation, and CTS transport. Supported object types depend on the installed
+ * runtime and backend; unsupported placeholders surface a clear error.
  *
  * The library does NOT gate writes or enforce package allowlists — that is the
  * consumer's policy layer (ADR-0012). The one guard kept here is a correctness guard
@@ -66,6 +66,21 @@ function hasErrorDiagnostics(diags: unknown[]): boolean {
     return isErrorDiagnostic(o);
   });
 }
+/** A single transport-diff page, as returned by the current SAP MCP tool. */
+export interface TransportDiffPage {
+  batchInfo?: {
+    currentBatchSize?: number;
+    totalObjects?: number;
+    processedCount?: number;
+    remainingCount?: number;
+    batchHasChanges?: boolean;
+    status?: 'processing' | 'completed';
+  };
+  message?: string;
+  nextCursor?: string;
+  diffResult?: string;
+}
+
 export interface CreateResult {
   message?: string;
   filePath?: string;
@@ -125,9 +140,7 @@ export function createLifecycle(deps: LifecycleDeps) {
     if (references.length === 0 && deps.reviveIfDead && (await deps.reviveIfDead())) {
       ({ references } = await doSearch());
     }
-    const hit =
-      references.find((r) => r.name?.toUpperCase() === ref.name.toUpperCase() && r.uri) ??
-      references.find((r) => r.uri);
+    const hit = references.find((r) => r.name?.toUpperCase() === ref.name.toUpperCase() && r.uri);
     if (!hit?.uri) {
       throw new Error(`Object ${ref.name} (${ref.objectType}) not found via search.`);
     }
@@ -143,7 +156,7 @@ export function createLifecycle(deps: LifecycleDeps) {
       const content = await readFile(driver, uri);
       if (isUnsupportedPlaceholder(content)) {
         throw new Error(
-          `Object type ${args.objectType} is not served by adt-ls headless (classic ABAP). Use Eclipse / a direct-REST tool for this type.`,
+          `Object type ${args.objectType} is not served by adt-ls headless on this runtime/backend. Use Eclipse for this type or update SAPSE.adt-vscode.`,
         );
       }
       return content;
@@ -156,13 +169,15 @@ export function createLifecycle(deps: LifecycleDeps) {
       description: string;
       /** CTS transport for non-$TMP packages; `''` (default) for local objects. */
       transportRequestNumber?: string;
+      additionalFields?: Record<string, unknown>;
     }): Promise<CreateResult> {
       const res = await callTool('abap_creation-create_object', {
         destination: dest(),
         objectType: args.objectType,
-        // objectContent stays {name,packageName,description}; the transport is a SEPARATE
+        // Type-specific fields augment the explicit identity; transport is a SEPARATE
         // top-level arg (adt-ls marks it required — '' means local/$TMP).
         objectContent: JSON.stringify({
+          ...args.additionalFields,
           name: args.name,
           packageName: args.packageName,
           description: args.description,
@@ -196,11 +211,11 @@ export function createLifecycle(deps: LifecycleDeps) {
             isActivationExecuted?: boolean;
             isGenerationExecuted?: boolean;
             isForceSupported?: boolean;
-            refreshLsUris?: string[];
+            refreshFileUris?: string[];
             objectDiagnostics?: unknown[];
           }>('adtLs/activation/activate', {
             destination: dest(),
-            lsUris: [uri],
+            fileUris: [uri],
             references: [],
             forceActivation: args.forceActivation ?? false,
           }),
@@ -214,14 +229,15 @@ export function createLifecycle(deps: LifecycleDeps) {
         activationExecuted: res?.isActivationExecuted,
         generationExecuted: res?.isGenerationExecuted,
         forceSupported: res?.isForceSupported,
-        refreshedUris: res?.refreshLsUris,
+        refreshedUris: res?.refreshFileUris,
       };
     },
 
     async runUnitTests(args: ObjectRef): Promise<unknown> {
       const uri = await resolveAffUri(args);
-      const res = await callTool('abap_run_unit_tests', { destination: dest(), uris: [uri] });
-      const data = parseFederated(res).data;
+      const res = await callTool('abap_run_unit_tests', { uris: [uri] });
+      const { ok, data, text } = parseFederated(res);
+      if (!ok) throw new Error(`run_unit_tests failed: ${text}`);
       // adt-ls returns a bare string ("No tests found") when there are no tests. Wrap it so
       // the result is always a JSON object — consistent with the rest of the toolset.
       return typeof data === 'string' ? { message: data } : data;
@@ -268,11 +284,13 @@ export function createLifecycle(deps: LifecycleDeps) {
       name: string;
       packageName: string;
       description: string;
+      additionalFields?: Record<string, unknown>;
     }): Promise<unknown> {
       const res = await callTool('abap_creation-run_validation', {
         destination: dest(),
         objectType: args.objectType,
         objectContent: JSON.stringify({
+          ...args.additionalFields,
           name: args.name,
           packageName: args.packageName,
           description: args.description,
@@ -380,13 +398,33 @@ export function createLifecycle(deps: LifecycleDeps) {
       return parseFederated(res).data;
     },
 
+    /** One page of unified diffs; return the server cursor verbatim for the next call. */
+    async getTransportDiff(
+      transportNumber: string,
+      opts: { cursor?: string; pageSize?: number } = {},
+    ): Promise<TransportDiffPage> {
+      const pageSize = opts.pageSize ?? 40;
+      if (!transportNumber.trim()) throw new Error('transportNumber must not be empty');
+      if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > 40)
+        throw new Error('pageSize must be an integer between 1 and 40');
+      const result = await callTool('abap_transport-unifiedDifference', {
+        destination: dest(),
+        transportNumber,
+        pageSize,
+        ...(opts.cursor === undefined ? {} : { cursor: opts.cursor }),
+      });
+      const { ok, data, text } = parseFederated(result);
+      if (!ok) throw new Error(`transport unifiedDifference failed: ${text}`);
+      return data as TransportDiffPage;
+    },
+
     /** Create a CTS transport request. */
     async createTransport(args: {
       developmentPackage: string;
       transportDescription: string;
       isCreation: boolean;
-      objectName?: string;
-      objectType?: string;
+      objectName: string;
+      objectType: string;
     }): Promise<unknown> {
       // Local ($-prefixed) packages are non-transportable — yet the backend would still
       // create a useless workbench TR (verified live), and there's no release/delete tool to
@@ -401,8 +439,8 @@ export function createLifecycle(deps: LifecycleDeps) {
         developmentPackage: args.developmentPackage,
         transportDescription: args.transportDescription,
         isCreation: args.isCreation,
-        ...(args.objectName ? { objectName: args.objectName } : {}),
-        ...(args.objectType ? { objectType: args.objectType } : {}),
+        objectName: args.objectName,
+        objectType: args.objectType,
       });
       const { ok, data, text } = parseFederated(res);
       if (!ok) throw new Error(`create_transport failed: ${text}`);

@@ -62,32 +62,40 @@ export function resolveAdtLsPath(opts: DiscoverOptions = {}): string {
 
   const explicit = opts.explicitPath ?? process.env.ADT_LS_PATH;
   if (explicit) {
-    tried.push(explicit);
-    if (fs.existsSync(explicit)) return explicit;
+    if (isFile(explicit)) return explicit;
+    throw new Error(`Explicit adt-ls binary is not a file: ${explicit}. Check adtLs.path / ADT_LS_PATH.`);
   }
 
   const repoRoot = opts.repoRoot ?? process.cwd();
   const vendor = path.join(repoRoot, 'vendor', 'adt-ls', ...sub);
   tried.push(vendor);
-  if (fs.existsSync(vendor)) return vendor;
+  if (isFile(vendor)) return vendor;
 
   const extDirs = opts.extensionsDirs ?? (opts.extensionsDir ? [opts.extensionsDir] : defaultExtensionDirs());
+  const candidates: Array<{ name: string; binary: string }> = [];
   for (const extDir of extDirs) {
     if (!fs.existsSync(extDir)) continue;
-    const candidates = fs
-      .readdirSync(extDir)
-      .filter((d) => d.startsWith('sapse.adt-vscode-'))
-      .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-      .reverse();
-    for (const c of candidates) {
-      const p = path.join(extDir, c, 'adt-ls', ...sub);
-      tried.push(p);
-      if (fs.existsSync(p)) return p;
+    for (const name of fs.readdirSync(extDir).filter((d) => /^sapse\.adt-vscode-\d+\.\d+\.\d+(?:-|$)/i.test(d))) {
+      candidates.push({ name, binary: path.join(extDir, name, 'adt-ls', ...sub) });
     }
+  }
+  // Sort across ALL editors; an older VS Code installation must not mask newer Cursor/Insiders.
+  candidates.sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: 'base' }));
+  for (const candidate of candidates) {
+    tried.push(candidate.binary);
+    if (isFile(candidate.binary)) return candidate.binary;
   }
 
   const triedList = tried.map((t) => `  - ${t}`).join('\n');
   throw new Error(
     `adt-ls binary not found. Set ADT_LS_PATH, drop it in vendor/adt-ls/, or install the 'sapse.adt-vscode' extension. Tried:\n${triedList}`,
   );
+}
+
+function isFile(file: string): boolean {
+  try {
+    return fs.statSync(file).isFile();
+  } catch {
+    return false;
+  }
 }

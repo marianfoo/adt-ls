@@ -1,6 +1,6 @@
 # Interface: CreationField
 
-Defined in: [api/lifecycle.ts:76](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L76)
+Defined in: [api/lifecycle.ts:92](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L92)
 
 One field of an object type's creation form (from the native UI model). Unlike the MCP
 `getObjectTypeDetails` (just field names + required), this carries the **legal values**:
@@ -12,7 +12,7 @@ the value-help target object types, the name regex, and labels.
 
 > **path**: `string`
 
-Defined in: [api/lifecycle.ts:78](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L78)
+Defined in: [api/lifecycle.ts:94](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L94)
 
 Field key (the bindingPath, e.g. `packageName`, `superclass`, `referencedObject`).
 
@@ -22,7 +22,7 @@ Field key (the bindingPath, e.g. `packageName`, `superclass`, `referencedObject`
 
 > `optional` **label?**: `string`
 
-Defined in: [api/lifecycle.ts:79](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L79)
+Defined in: [api/lifecycle.ts:95](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L95)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [api/lifecycle.ts:79](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > **required**: `boolean`
 
-Defined in: [api/lifecycle.ts:80](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L80)
+Defined in: [api/lifecycle.ts:96](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L96)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [api/lifecycle.ts:80](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > `optional` **maxLength?**: `number`
 
-Defined in: [api/lifecycle.ts:81](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L81)
+Defined in: [api/lifecycle.ts:97](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L97)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [api/lifecycle.ts:81](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > `optional` **pattern?**: `string`
 
-Defined in: [api/lifecycle.ts:83](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L83)
+Defined in: [api/lifecycle.ts:99](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L99)
 
 Validation regex (e.g. `^[A-Z0-9_/]*$` for `name`).
 
@@ -56,7 +56,7 @@ Validation regex (e.g. `^[A-Z0-9_/]*$` for `name`).
 
 > `optional` **valueHelpTypes?**: `string`[]
 
-Defined in: [api/lifecycle.ts:86](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L86)
+Defined in: [api/lifecycle.ts:102](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L102)
 
 ADT object types this field accepts (e.g. `superclass` → `["CLAS/OC"]`,
 `referencedObject` → `["TABL/DT","STOB"]`).

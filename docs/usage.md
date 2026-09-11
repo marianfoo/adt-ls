@@ -116,14 +116,15 @@ custom((driver, ctx) => {                  // full escape hatch
 });
 ```
 
-SNC / Kerberos / X.509 are out of scope (they need native SAP crypto; not headless-feasible
-in pure TS). See [ADR-0003](adr/0003-auth-logon-strategies.md).
+For passwordless X.509 logon, use the exported `clientCert` strategy and its TLS proxy
+(see the README). Native SNC/Kerberos integration remains the consumer's responsibility.
 
 ## The API
 
 One client; the LSP-vs-MCP channel split is hidden. Escape hatches: `adt.raw.lsp()` /
-`adt.raw.tool()`. Object-type coverage = adt-ls's boundary (modern ABAP-Cloud / RAP types;
-classic types throw a clear error — see the [capability matrix](capability-matrix.md)).
+`adt.raw.tool()`. Call `await adt.capabilities()` to inspect the current LSP providers and
+MCP tool schemas. Object support depends on the installed runtime and backend; see the
+[capability matrix](capability-matrix.md).
 
 ### repository — search, files, name→URI
 
@@ -140,7 +141,7 @@ const inactive = await adt.repository.listInactive();
 const src = await adt.source.read({ name: 'ZCL_FOO', objectType: 'CLAS/OC' });
 const tests = await adt.source.read({ name: 'ZCL_FOO', objectType: 'CLAS/OC', include: 'testclasses' });
 
-// create → edit → activate → test → delete (modern types only)
+// create → edit → activate → test → delete (supported object types)
 await adt.lifecycle.create({ objectType: 'CLAS/OC', name: 'ZCL_BAR', packageName: '$TMP', description: 'demo' });
 await adt.lifecycle.update({ name: 'ZCL_BAR', objectType: 'CLAS/OC', source: abapSource });
 const act = await adt.lifecycle.activate({ name: 'ZCL_BAR', objectType: 'CLAS/OC' });
@@ -199,7 +200,7 @@ await adt.transport.list({ limit: 50, query: 'me' });
 await adt.transport.getLockStatus(ref);
 // decision oracle: needs a transport? which are assignable? already locked? ($TMP → isRecordingRequired:false)
 await adt.transport.check({ name: 'ZCL_FOO', objectType: 'CLAS/OC' }); // { operation: 'CREATE' | 'MODIFY' | 'DELETE' }
-const tr = await adt.transport.create({ developmentPackage: 'ZPKG', transportDescription: 'feat', isCreation: true });
+const tr = await adt.transport.create({ developmentPackage: 'ZPKG', transportDescription: 'feat', isCreation: true, objectName: 'ZCL_FOO', objectType: 'CLAS/OC' });
 await adt.transport.assign({ name: 'ZCL_FOO', objectType: 'CLAS/OC', transport: 'DEVK900123' });
 ```
 
@@ -237,8 +238,8 @@ setLogger(stderrLogger('[adt-ls]'));   // or pass your own { debug, info, warn, 
 ## Errors & the object-type boundary
 
 - Calling a destination-scoped method with no connection throws `No ABAP destination is connected.`
-- Reading a **classic** object type (PROG, TABL, FUGR, DOMA, DTEL, MSAG, …) throws — adt-ls
-  serves only modern ABAP-Cloud / RAP types headless. See the [capability matrix](capability-matrix.md).
+- Reading a type that the runtime/backend returns as an unsupported placeholder throws.
+  Current runtimes also serve some classic types; consult the [capability matrix](capability-matrix.md).
 - `create`/`generate`/`activate` reject with the backend message on failure; `activate`
   returns `success:false` + `diagnostics` for syntax errors (it does not throw).
 
@@ -259,3 +260,48 @@ Each `createAdtLs()` is **one** adt-ls process bound to **one** destination
 ([ADR-0010](adr/0010-process-isolation-model.md)). For several systems or per-user
 identity, create several clients (and pick distinct `mcpPort`s, or rely on the automatic
 port-fallback) — pooling is the consumer's concern.
+
+## Runtime contracts and current ADT features
+
+```ts
+const { lsp, tools } = await adt.capabilities();
+const diffTool = tools.find(t => t.name === 'abap_transport-unifiedDifference');
+console.log(diffTool?.inputSchema, diffTool?.outputSchema, diffTool?.annotations);
+
+// One page; pass the returned cursor according to the runtime's result schema.
+const page = await adt.transport.getDiff('DEVK900001', { pageSize: 40 });
+```
+
+`capabilities()` queries all pages each time, so a changed destination/tool set is not
+hidden by a stale cache. It returns a copy of the LSP initialization providers and the
+complete MCP descriptors; dynamic LSP registrations (e.g. per-document formatting) are
+not part of that initialization snapshot. New ATC fix/result tools are discoverable and
+callable through `raw.tool`; availability alone does not establish backend support or
+license entitlement.
+
+Creation and validation now accept `additionalFields`, using the field names and legal
+values returned by `getCreationForm` for the chosen type:
+
+```ts
+const form = await adt.lifecycle.getCreationForm('CLAS/OC');
+const input = {
+  objectType: 'CLAS/OC', name: 'ZCL_CHILD', packageName: '$TMP', description: 'Child class',
+  additionalFields: { superclass: 'ZCL_PARENT' }, // must exist and permit inheritance
+};
+await adt.lifecycle.validate(input);
+await adt.lifecycle.create(input);
+```
+
+The explicit name, package and description take precedence over matching keys in
+`additionalFields`; transport stays a separate `transportRequestNumber` argument.
+`lifecycle.delete` and `repository.delete` delete the enclosing object, including its
+includes; the SDK supplies the confirmation required by the current file-system protocol.
+
+MCP HTTP/RPC errors throw instead of becoming empty successful results. Raw tool-level
+`isError` remains available to consumers. MCP requests time out after 120 seconds. An
+expired MCP session is re-established, but the failed tool is **not automatically
+replayed**; assess the operation before retrying. SAP logon recovery is a separate layer.
+
+Dispose the client after use. Failed initialization now cleans up owned resources too.
+A caller-supplied low-level `AdtLsDriver.dataDir` is preserved on disposal; temporary
+SDK-created directories are removed.

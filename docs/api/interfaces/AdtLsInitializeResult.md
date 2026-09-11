@@ -1,6 +1,6 @@
 # Interface: AdtLsInitializeResult
 
-Defined in: [driver.ts:39](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L39)
+Defined in: [driver.ts:40](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L40)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [driver.ts:39](https://github.com/arc-mcp/adt-ls/blob/main/src/drive
 
 > `optional` **serverInfo?**: `object`
 
-Defined in: [driver.ts:40](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L40)
+Defined in: [driver.ts:41](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L41)
 
 #### name
 
@@ -24,4 +24,4 @@ Defined in: [driver.ts:40](https://github.com/arc-mcp/adt-ls/blob/main/src/drive
 
 > **capabilities**: `Record`\<`string`, `unknown`\>
 
-Defined in: [driver.ts:41](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L41)
+Defined in: [driver.ts:42](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L42)

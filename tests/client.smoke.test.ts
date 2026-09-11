@@ -16,13 +16,13 @@ try {
 const pw = process.env.ADTLS_TEST_PASSWORD;
 const gated = !binPath || !pw;
 
-const NAME = 'ZCL_ADTLS_LCTEST';
+const NAME = `ZCL_ADTLS_LCTEST_${Math.random().toString(36).slice(2, 9).toUpperCase()}`;
 const TYPE = 'CLAS/OC';
-const SOURCE = `CLASS zcl_adtls_lctest DEFINITION PUBLIC FINAL CREATE PUBLIC.
+const SOURCE = `CLASS ${NAME.toLowerCase()} DEFINITION PUBLIC FINAL CREATE PUBLIC.
   PUBLIC SECTION.
     METHODS hello RETURNING VALUE(rv) TYPE string.
 ENDCLASS.
-CLASS zcl_adtls_lctest IMPLEMENTATION.
+CLASS ${NAME.toLowerCase()} IMPLEMENTATION.
   METHOD hello.
     rv = 'hi'.
   ENDMETHOD.
@@ -30,13 +30,13 @@ ENDCLASS.`;
 
 describe('createAdtLs (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
   let adt: AdtLsClient | undefined;
+  let createdByTest = false;
   afterAll(async () => {
     try {
-      await adt?.lifecycle.delete({ name: NAME, objectType: TYPE });
-    } catch {
-      /* already gone */
+      if (createdByTest) await adt?.lifecycle.delete({ name: NAME, objectType: TYPE });
+    } finally {
+      await adt?.dispose();
     }
-    await adt?.dispose();
   });
 
   it.skipIf(gated)(
@@ -44,28 +44,28 @@ describe('createAdtLs (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
     async () => {
       adt = await createAdtLs({
         connection: {
-          systemUrl: `https://${process.env.ADTLS_TEST_HOST ?? 'a4h.marianzeis.de'}:${process.env.ADTLS_TEST_PORT ?? '50001'}`,
-          selfSigned: true,
+          systemUrl: process.env.ADTLS_TEST_URL ?? 'https://a4h.marianzeis.de',
+          selfSigned: process.env.ADTLS_TEST_SELF_SIGNED === '1',
           client: '001',
         },
         auth: basic(process.env.ADTLS_TEST_USER ?? 'MARIAN', pw as string),
       });
 
       expect(adt.health().connected).toBe(true);
-      expect(adt.health().adtLsVersion).toMatch(/1\.0\.1/);
+      expect(adt.health().adtLsVersion).toMatch(/^1\./);
       expect(adt.health().backendLive).toBe(true);
 
       const hits = await adt.repository.search('CL_ABAP_TYPEDESCR', { types: ['CLAS/OC'], cold: true });
       expect(hits.references.length).toBeGreaterThan(0);
 
-      await adt.lifecycle.delete({ name: NAME, objectType: TYPE }).catch(() => {}); // clean slate
       const created = await adt.lifecycle.create({
         objectType: TYPE,
         name: NAME,
         packageName: '$TMP',
         description: '@arc-mcp/adt-ls live test',
       });
-      expect(created.filePath).toMatch(/zcl_adtls_lctest\.clas\.abap$/i);
+      createdByTest = true;
+      expect(created.filePath).toMatch(new RegExp(`${NAME}\\.clas\\.abap$`, 'i'));
 
       await adt.lifecycle.update({ name: NAME, objectType: TYPE, source: SOURCE });
       const src = await adt.source.read({ name: NAME, objectType: TYPE });
@@ -76,9 +76,10 @@ describe('createAdtLs (live — needs adt-ls + ADTLS_TEST_PASSWORD)', () => {
       expect(act.diagnostics).toEqual([]);
 
       const tests = await adt.lifecycle.runUnitTests({ name: NAME, objectType: TYPE });
-      expect(JSON.stringify(tests)).toMatch(/no tests found|testClasses|durationCategory/i);
+      expect(JSON.stringify(tests)).toMatch(/no (?:executable )?tests found|testClasses|durationCategory/i);
 
       await adt.lifecycle.delete({ name: NAME, objectType: TYPE });
+      createdByTest = false;
       await expect(adt.source.read({ name: NAME, objectType: TYPE })).rejects.toBeTruthy();
     },
     200_000,

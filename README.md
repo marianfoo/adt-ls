@@ -8,11 +8,11 @@
 > the painful setup (discovery, JVM, named-pipe + LSP handshake, reentrance logon,
 > TLS/truststore, session resilience) so that *driving adt-ls is a few lines of code*.
 
-**Status: published on npm — functionally complete & live-proven.** The full SAP authoring
+**Status: published on npm; current runtime compatibility verified on macOS arm64.** The full SAP authoring
 lifecycle (search → create → update → read → activate → run-tests → delete), plus code
 intelligence, quality gates, ABAP formatting, transport, and OData service info, all run
 end-to-end through `createAdtLs()` against a real S/4HANA system (adt-ls
-`1.0.1.202606111342`). Runs under **Node ≥ 20 and Bun** (both verified live).
+`1.1.2.202608131517`). Runs under **Node ≥ 20 and Bun** (both verified live).
 
 ## Install
 
@@ -24,7 +24,11 @@ You **bring adt-ls** (SAP Developer License — not redistributable): install th
 `sapse.adt-vscode` extension (VS Code / Cursor) and the library auto-discovers it, or
 vendor the per-platform VSIX for CI. **New here → [docs/setup.md](https://github.com/arc-mcp/adt-ls/blob/main/docs/setup.md)**:
 which platform build to download, CI vendoring, and connecting with auth.
-This release requires `adt-ls >= 1.0.1` and is verified against `1.0.1.202606111342`.
+**Eclipse users:** Eclipse ADT and the headless runtime have separate versions.
+Your Eclipse installation does not supply this SDK's runtime; install/update
+`SAPSE.adt-vscode` as described above. [Current compatibility research and migration notes](docs/research/2026-09-11-current-adt-compatibility.md).
+
+This release requires `adt-ls >= 1.1.2` and is verified against `1.1.2.202608131517`.
 
 ## Quickstart
 
@@ -96,12 +100,13 @@ await driver.dispose();
 
 One namespaced client over both adt-ls channels (LSP + its own MCP) — the split is hidden:
 
+- **`capabilities()`** — fresh LSP providers and all MCP tool contracts, including schemas and annotations.
 - **`repository`** — object search, file read/write/delete, inactive-object list, name→URI resolver.
-- **`source` / `lifecycle`** — read; create, update, **activate** (native — per-phase diagnostics, `forceActivation`), run unit tests, delete; RAP generators; creatable-type catalog + **creation-form** (legal values per field) + validation.
+- **`source` / `lifecycle`** — read; create, update, **activate** (native — per-phase diagnostics, `forceActivation`), run unit tests, delete; RAP generators; creatable-type catalog + **creation-form** (legal values per field), type-specific creation fields + validation.
 - **`navigation`** — document symbols, definition/declaration, references, type hierarchy, hover, completion (with **resolve** → method signatures + ABAP-Doc), syntax check, **semantic tokens**, and **ABAP Pretty-Printer formatting**.
 - **`quality`** — ATC static analysis + ABAP Unit code coverage.
 - **`services`** — run a console app, service-binding details/publish, and live **OData service info** (URL + entity sets).
-- **`transport`** — find / create / assign / list, lock status, and the **transport decision oracle** (`check`).
+- **`transport`** — find / create / assign / list, lock status, and the **transport decision oracle** (`check`), and paged **transport diffs** (`getDiff`, backend-dependent).
 - **`raw`** — escape hatches to any adt-ls MCP tool or LSP method.
 
 What maps to which adt-ls call: the **[capability matrix](https://github.com/arc-mcp/adt-ls/blob/main/docs/capability-matrix.md)**. What's reachable headless vs. not (with live evidence): the **[capability survey](https://github.com/arc-mcp/adt-ls/blob/main/docs/adt-ls-capabilities.md)**.
@@ -139,16 +144,20 @@ also the right one.
 Cloud-Connector/BTP bridge *inside* the library. What adt-ls can't do headless is out
 of scope. See [ADR-0001](docs/adr/0001-scope-adt-ls-only.md).
 
-## Verified feasibility (baseline refreshed 2026-06-12, macOS arm64, adt-ls `1.0.1.202606111342`)
+## Current verification (2026-09-11)
 
-Proven hands-on against the freshly-downloaded 1.0.1 VSIX and the live a4h system:
+Target: adt-ls **1.1.2.202608131517**, bundled SAP Machine **21.12.0**, macOS arm64,
+A4H over HTTPS port 443. The library's minimum runtime is **1.1.2** because activation,
+ABAP Unit, inactive-object listing and deletion contracts changed after the old baseline.
 
-- Per-platform binary paths confirmed across **all four** VSIX (darwin-arm64, darwin-x64, linux-x64, win32-x64).
-- Spawn + LSP `initialize` (with the `userAgentInfos` workaround) → `ADTLS 1.0.1.202606111342`.
-- Truststore build with the **bundled** SAP Machine JRE 21 `keytool`.
-- **Full `create → update → read → activate → run-tests → delete` GREEN against a4h** — exercising auth (reentrance + TLS proxy), the LSP channel, the MCP channel, and the resilience layer end-to-end.
+The test suite checks the real LSP handshake and presence of the MCP authoring tools;
+backend tests cover create/update/read/activate/test/delete, code intelligence, creation
+forms, service info, dictionary source and ABAP Unit coverage. Failure-path tests cover
+startup cleanup and MCP JSON/SSE, pagination, errors and timeouts.
 
-→ **No design or protocol blockers remain.**
+See [research and validation](docs/research/2026-09-11-current-adt-compatibility.md) for
+measured results and the remaining platform/backend boundaries. This is not a claim of
+full Eclipse feature parity.
 
 ## Consumers
 

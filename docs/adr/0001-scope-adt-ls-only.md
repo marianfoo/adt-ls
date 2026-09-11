@@ -21,7 +21,7 @@ The library targets **adt-ls exclusively**. It will **never**:
 - host its own MCP server,
 - contain a Cloud-Connector / BTP connectivity bridge.
 
-What adt-ls cannot do headless (e.g. classic object types) is **out of scope**, not a
+What adt-ls cannot do headless is **out of scope**, not a
 gap to patch. Consumers needing direct-REST coverage use a different tool.
 
 ## Consequences

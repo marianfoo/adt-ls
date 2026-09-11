@@ -1,0 +1,1468 @@
+{
+  "capturedAt": "2026-09-11T06:25:20.799Z",
+  "mode": "foundation (no backend destination)",
+  "adtLs": {
+    "name": "ADTLS",
+    "version": "1.1.2.202608131517"
+  },
+  "minimumVersion": "1.1.2",
+  "verifiedVersion": "1.1.2.202608131517",
+  "lsp": {
+    "textDocumentSync": {
+      "openClose": true,
+      "change": 1,
+      "willSave": true,
+      "save": true
+    },
+    "hoverProvider": {
+      "workDoneProgress": true
+    },
+    "completionProvider": {
+      "resolveProvider": true,
+      "completionItem": {
+        "labelDetailsSupport": true
+      }
+    },
+    "definitionProvider": {
+      "workDoneProgress": true
+    },
+    "referencesProvider": {
+      "workDoneProgress": false
+    },
+    "documentHighlightProvider": {},
+    "documentSymbolProvider": {},
+    "codeLensProvider": {
+      "workDoneProgress": true
+    },
+    "documentFormattingProvider": false,
+    "documentRangeFormattingProvider": false,
+    "declarationProvider": {
+      "workDoneProgress": true,
+      "documentSelector": [
+        {
+          "language": "abap",
+          "scheme": "abap"
+        }
+      ]
+    },
+    "typeHierarchyProvider": {
+      "workDoneProgress": true,
+      "documentSelector": [
+        {
+          "language": "abap",
+          "scheme": "abap"
+        }
+      ]
+    },
+    "semanticTokensProvider": {
+      "legend": {
+        "tokenTypes": [
+          "namespace",
+          "class",
+          "enum",
+          "interface",
+          "struct",
+          "typeparameter",
+          "type",
+          "parameter",
+          "variable",
+          "property",
+          "enummember",
+          "decorator",
+          "event",
+          "function",
+          "method",
+          "macro",
+          "label",
+          "comment",
+          "string",
+          "keyword",
+          "number",
+          "regexp",
+          "operator"
+        ],
+        "tokenModifiers": [
+          "declaration",
+          "definition",
+          "readonly",
+          "static",
+          "deprecated",
+          "abstract",
+          "async",
+          "modification",
+          "documentation",
+          "defaultlibrary"
+        ]
+      },
+      "full": true
+    },
+    "diagnosticProvider": {
+      "interFileDependencies": false,
+      "workspaceDiagnostics": false
+    }
+  },
+  "tools": [
+    {
+      "name": "abap_atc_execute_deterministic_quickfixes",
+      "title": "abap_atc_execute_deterministic_quickfixes",
+      "description": "Executes the deterministic quick fixes for specific objects. Usually for the execution of quickfixes a transport is necessary, so the user has to set a transportId. But in some cases this is not the case. Please clarify this first, before starting this execution. After the execution, the affected objects are inactive and must be activated manually. Recommend to either open the affected objects or activate them.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "worklistId": {
+            "type": "string",
+            "description": "The Id of the worklist that has been created for the ATC check run."
+          },
+          "destination": {
+            "type": "string",
+            "description": "The ABAP destination."
+          },
+          "useComments": {
+            "type": "boolean",
+            "description": "Add comments about the specific executed quickfix in the source code. By default set this value to false."
+          },
+          "useAuthor": {
+            "type": "boolean",
+            "description": "Add information about the author who executed the quickfix in the source code comments. By default set this value to false."
+          },
+          "transportId": {
+            "type": "string",
+            "description": "The transport request ID (not a task number). If provided, the changes will be assigned to this transport request. The quickfixes can't create a transport, so if a transport is necessary for the changes and there is none, the quickfix execution will fail."
+          },
+          "activateAfterFix": {
+            "type": "boolean",
+            "description": "Whether to activate the changed objects after applying the quickfixes. Defaults to false."
+          }
+        },
+        "required": ["worklistId", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "description": "List of messages that occurred during quickfix execution. Includes activation errors if activation failed."
+          },
+          "affectedObjects": {
+            "type": "array",
+            "description": "List of affected objects during quickfix execution.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Object name."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Object type."
+                },
+                "state": {
+                  "type": "string",
+                  "description": "Activation state: 'active' if activated successfully, 'inactive' otherwise."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_atc_get_result",
+      "title": "abap_atc_get_result",
+      "description": "Gets the result of an ABAP Test Cockpit (ATC) run by its corresponding worklistId. Returns the number of checked objects and the total number of findings, summed up by their priority. The run might not be finished yet. If that is the case, check again later or keep polling the result.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "worklistId": {
+            "type": "string",
+            "description": "WorklistId of the check run to get the result for."
+          },
+          "destination": {
+            "type": "string",
+            "description": "ABAP destination the ATC run was started from."
+          }
+        },
+        "required": ["worklistId", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "objects": {
+            "type": "array",
+            "description": "List of ABAP objects with ATC findings.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Object name."
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Object type, e.g. CLAS, PROG."
+                },
+                "packageName": {
+                  "type": "string",
+                  "description": "Package of the object."
+                },
+                "findings": {
+                  "type": "array",
+                  "description": "ATC findings for the object. Empty if no findings were found.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "priority": {
+                        "type": "integer",
+                        "description": "Finding priority (1=error, 2=warning, 3=info)."
+                      },
+                      "checkClass": {
+                        "type": "string",
+                        "description": "Check class that analyzed the object."
+                      },
+                      "checkTitle": {
+                        "type": "string",
+                        "description": "Check title."
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "description": "Message ID."
+                      },
+                      "messageTitle": {
+                        "type": "string",
+                        "description": "Message title."
+                      },
+                      "aiQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when an AI-based quickfix is available."
+                      },
+                      "deterministicQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when a deterministic quickfix is available."
+                      },
+                      "tags": {
+                        "type": "array",
+                        "description": "Tags of the finding. Might be empty.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "description": "Tag name."
+                            },
+                            "value": {
+                              "type": "string",
+                              "description": "Tag value."
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_atc_run",
+      "title": "abap_atc_run",
+      "description": "Starts an ABAP Test Cockpit (ATC) run for specific objects in the system. Returns the corresponding worklistId. A Check Variant can be specified. Make sure that no syntax errors are present as they will prevent the ATC to run.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "objects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              },
+              "required": ["name", "type"]
+            },
+            "description": "List of objects to check with ATC.",
+            "minItems": 1
+          },
+          "checkVariant": {
+            "type": "string",
+            "description": "Check Variant to start the ATC check run with. Uses default variant of the system if not specified."
+          },
+          "destination": {
+            "type": "string",
+            "description": "The ABAP project destination."
+          }
+        },
+        "required": ["objects", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "worklistId": {
+            "type": "string",
+            "description": "WorklistId of the check run."
+          },
+          "destination": {
+            "type": "string",
+            "description": "ABAP destination the ATC run was started from."
+          }
+        },
+        "required": ["worklistId", "destination"]
+      }
+    },
+    {
+      "name": "abap_atc_apply_ai_fix",
+      "title": "abap_atc_apply_ai_fix",
+      "description": "Starts applying AI fixes for every eligible finding in an ATC worklist result. For each finding the Joule AI fix agent is invoked to propose a code fix. The fixes are applied in the background. Use abap_atc_get_ai_fix_result to check the status and retrieve the result.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "worklistId": {
+            "type": "string",
+            "description": "The Id of the worklist that has been created for the ATC check run."
+          },
+          "destination": {
+            "type": "string",
+            "description": "The ABAP destination."
+          },
+          "transportId": {
+            "type": "string",
+            "description": "The transport request ID (not a task number). If provided, the changes will be assigned to this transport request. If a transport is necessary for the changes and there is none, the fix execution will fail."
+          },
+          "activateAfterFix": {
+            "type": "boolean",
+            "description": "Whether to activate the changed objects after applying the fixes. Defaults to false."
+          }
+        },
+        "required": ["worklistId", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Job status: 'running' if the fix is still in progress, 'done' when complete, 'cancelled' if the job was interrupted."
+          },
+          "processedFindings": {
+            "type": "integer",
+            "description": "Number of findings for which the /fix chat command was invoked and a fix was produced."
+          },
+          "skippedFindings": {
+            "type": "integer",
+            "description": "Number of findings that were eligible for AI fix but for which no fix could be produced."
+          },
+          "totalEligibleFindings": {
+            "type": "integer",
+            "description": "Total number of findings eligible for AI fix in the worklist."
+          },
+          "syntaxErrorCount": {
+            "type": "integer",
+            "description": "Number of objects where AI fixes produced syntax errors and were only applied as comments."
+          },
+          "appliedChangesByConfidenceScore": {
+            "type": "object",
+            "description": "Breakdown of how many applied changes had each confidence score (e.g. {\"high\": 5, \"medium\": 2}). Only present when the job is done or cancelled.",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "changedObjects": {
+            "type": "array",
+            "description": "List of objects that were modified by the AI fix.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "objectName": {
+                  "type": "string",
+                  "description": "The name of the changed ABAP object."
+                },
+                "objectType": {
+                  "type": "string",
+                  "description": "The type of the changed ABAP object."
+                },
+                "state": {
+                  "type": "string",
+                  "description": "Version state after the change, e.g. \"inactive\" or \"active\"."
+                },
+                "findings": {
+                  "type": "array",
+                  "description": "ATC findings for which AI fixes were applied within this object.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "priority": {
+                        "type": "integer",
+                        "description": "Finding priority (1=error, 2=warning, 3=info)."
+                      },
+                      "checkClass": {
+                        "type": "string",
+                        "description": "Check class that raised the finding."
+                      },
+                      "checkTitle": {
+                        "type": "string",
+                        "description": "Check title."
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "description": "Message ID."
+                      },
+                      "messageTitle": {
+                        "type": "string",
+                        "description": "Message title."
+                      },
+                      "aiQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when an AI-based quickfix is available."
+                      },
+                      "deterministicQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when a deterministic quickfix is available."
+                      },
+                      "tags": {
+                        "type": "array",
+                        "description": "Tags of the finding.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "appliedChanges": {
+                        "type": "array",
+                        "description": "Code changes applied for this finding.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "locationUri": {
+                              "type": "string",
+                              "description": "ADT link URI of the source location where the change was applied (e.g. adt://SID/sap/bc/adt/...#start=L,C;end=L,C)."
+                            },
+                            "confidenceScore": {
+                              "type": "string",
+                              "description": "AI confidence score (e.g. \"High\", \"Medium\", \"Low\")."
+                            },
+                            "commentedOut": {
+                              "type": "boolean",
+                              "description": "True if the fix was inserted as a comment because it would have caused a syntax error."
+                            }
+                          }
+                        }
+                      },
+                      "errorMessage": {
+                        "type": "string",
+                        "description": "Set when applying the fix for this finding failed (e.g. the backend rejected the written content). The fix was not applied."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_atc_get_ai_fix_result",
+      "title": "abap_atc_get_ai_fix_result",
+      "description": "Checks the status of an AI fix job started by abap_atc_apply_ai_fix. Returns the result once the job is complete. If status is 'running', call again later.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "worklistId": {
+            "type": "string",
+            "description": "The worklist ID that was passed to abap_atc_apply_ai_fix when starting the fix job."
+          },
+          "destination": {
+            "type": "string",
+            "description": "The ABAP destination."
+          }
+        },
+        "required": ["worklistId", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Job status: 'running' if the fix is still in progress, 'done' when complete, 'cancelled' if the job was interrupted."
+          },
+          "processedFindings": {
+            "type": "integer",
+            "description": "Number of findings for which the /fix chat command was invoked and a fix was produced."
+          },
+          "skippedFindings": {
+            "type": "integer",
+            "description": "Number of findings that were eligible for AI fix but for which no fix could be produced."
+          },
+          "totalEligibleFindings": {
+            "type": "integer",
+            "description": "Total number of findings eligible for AI fix in the worklist."
+          },
+          "syntaxErrorCount": {
+            "type": "integer",
+            "description": "Number of objects where AI fixes produced syntax errors and were only applied as comments."
+          },
+          "appliedChangesByConfidenceScore": {
+            "type": "object",
+            "description": "Breakdown of how many applied changes had each confidence score (e.g. {\"high\": 5, \"medium\": 2}). Only present when the job is done or cancelled.",
+            "additionalProperties": {
+              "type": "integer"
+            }
+          },
+          "changedObjects": {
+            "type": "array",
+            "description": "List of objects that were modified by the AI fix.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "objectName": {
+                  "type": "string",
+                  "description": "The name of the changed ABAP object."
+                },
+                "objectType": {
+                  "type": "string",
+                  "description": "The type of the changed ABAP object."
+                },
+                "state": {
+                  "type": "string",
+                  "description": "Version state after the change, e.g. \"inactive\" or \"active\"."
+                },
+                "findings": {
+                  "type": "array",
+                  "description": "ATC findings for which AI fixes were applied within this object.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "priority": {
+                        "type": "integer",
+                        "description": "Finding priority (1=error, 2=warning, 3=info)."
+                      },
+                      "checkClass": {
+                        "type": "string",
+                        "description": "Check class that raised the finding."
+                      },
+                      "checkTitle": {
+                        "type": "string",
+                        "description": "Check title."
+                      },
+                      "messageId": {
+                        "type": "string",
+                        "description": "Message ID."
+                      },
+                      "messageTitle": {
+                        "type": "string",
+                        "description": "Message title."
+                      },
+                      "aiQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when an AI-based quickfix is available."
+                      },
+                      "deterministicQuickfixAvailable": {
+                        "type": "boolean",
+                        "description": "True when a deterministic quickfix is available."
+                      },
+                      "tags": {
+                        "type": "array",
+                        "description": "Tags of the finding.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "value": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "appliedChanges": {
+                        "type": "array",
+                        "description": "Code changes applied for this finding.",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "locationUri": {
+                              "type": "string",
+                              "description": "ADT link URI of the source location where the change was applied (e.g. adt://SID/sap/bc/adt/...#start=L,C;end=L,C)."
+                            },
+                            "confidenceScore": {
+                              "type": "string",
+                              "description": "AI confidence score (e.g. \"High\", \"Medium\", \"Low\")."
+                            },
+                            "commentedOut": {
+                              "type": "boolean",
+                              "description": "True if the fix was inserted as a comment because it would have caused a syntax error."
+                            }
+                          }
+                        }
+                      },
+                      "errorMessage": {
+                        "type": "string",
+                        "description": "Set when applying the fix for this finding failed (e.g. the backend rejected the written content). The fix was not applied."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_business_services-fetch_services",
+      "title": "abap_business_services-fetch_services",
+      "description": "Retrieves OData services from a service binding (metadata, links, versions). For Odata V4 versions, check isPublished field - if false, STOP and MUST tell user to publish the service binding. If true, present services to user and wait for their selection before calling fetch_service_information.USE WHEN: After ABAP generator creates service binding, or before Fiori app generation to get required service information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "serviceBindingName": {
+            "description": "Name of the service binding to fetch OData service information for.",
+            "type": "string"
+          },
+          "destination": {
+            "description": "ABAP system destination ID (e.g., ABC_000_USER_EN). Must match an active connection from list-destinations tool.",
+            "type": "string",
+            "examples": ["ABC_000_USER_EN"]
+          }
+        },
+        "required": ["serviceBindingName", "destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "bindingType": {
+            "type": "string",
+            "description": "Service Binding type (e.g., ODATA)"
+          },
+          "bindingCategory": {
+            "type": "string",
+            "description": "Category of the binding"
+          },
+          "isPublished": {
+            "type": "boolean",
+            "description": "Whether the service binding is published (V4 only)"
+          },
+          "odataVersion": {
+            "type": "string",
+            "description": "OData version (V2 or V4)"
+          },
+          "odataInfoUri": {
+            "type": "array",
+            "description": "List of OData metadata URIs",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URI path to OData metadata"
+                }
+              },
+              "required": ["href"]
+            }
+          },
+          "services": {
+            "type": "array",
+            "description": "List of available services",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Service name"
+                },
+                "content": {
+                  "type": "array",
+                  "description": "Service content with versions",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "serviceDefinition": {
+                        "type": "string",
+                        "description": "Service definition name"
+                      },
+                      "serviceVersion": {
+                        "type": "string",
+                        "description": "Service version"
+                      }
+                    },
+                    "required": ["serviceDefinition", "serviceVersion"]
+                  }
+                }
+              },
+              "required": ["name", "content"]
+            }
+          }
+        },
+        "required": ["bindingType", "bindingCategory", "odataVersion", "odataInfoUri", "services"]
+      }
+    },
+    {
+      "name": "abap_business_services-fetch_service_information",
+      "title": "abap_business_services-fetch_service_information",
+      "description": "Fetches OData service information (URL, entity sets, navigations) for a user-selected service. MUST only be called after user explicitly selects a specific service version from fetch_services output.USE WHEN: After ABAP generator creates service binding, or before Fiori app generation to get required service information.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "serviceBindingName": {
+            "description": "Name of the service binding to fetch OData service information for.",
+            "type": "string"
+          },
+          "serviceName": {
+            "description": "Name of the OData service.",
+            "type": "string"
+          },
+          "serviceDefinition": {
+            "description": "Service definition identifier for the OData service.",
+            "type": "string"
+          },
+          "serviceVersion": {
+            "description": "Version number of the OData service.",
+            "type": "string"
+          },
+          "odataInfoUri": {
+            "description": "URI for fetching OData service metadata",
+            "type": "string",
+            "format": "uri"
+          },
+          "odataVersion": {
+            "description": "OData version of the service (e.g., V2, V4).",
+            "type": "string",
+            "enum": ["V2", "V4"]
+          },
+          "destination": {
+            "description": "ABAP system destination ID (e.g., ABC_000_USER_EN). Must match an active connection from list-destinations tool.",
+            "type": "string",
+            "examples": ["ABC_000_USER_EN"]
+          },
+          "isPublished": {
+            "description": "Indicates whether the service binding is published. (V4 only, ignored for V2.)",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "serviceBindingName",
+          "serviceName",
+          "serviceDefinition",
+          "serviceVersion",
+          "odataInfoUri",
+          "odataVersion",
+          "destination"
+        ]
+      },
+      "outputSchema": {
+        "description": "OData service information including runtime URL, entity sets, and navigations.",
+        "type": "object",
+        "properties": {
+          "serviceUrl": {
+            "type": "string",
+            "description": "Runtime URL of the OData service."
+          },
+          "entitySets": {
+            "type": "array",
+            "description": "List of entity sets exposed by the OData service.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Name of the entity set."
+                },
+                "navigations": {
+                  "type": "array",
+                  "description": "List of navigation properties for the entity set.",
+                  "items": {
+                    "type": "string",
+                    "description": "Name of the navigation property."
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_activate_objects",
+      "title": "abap_activate_objects",
+      "description": "Activates ABAP objects in the system. This includes checking the development objects, copying inactive versions to active versions, and generating the load. Make sure all files are saved before running this tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of the properly encoded file URIs (e.g. replace space with %20) of objects to activate. Do NOT use ADT URI (e.g. \"adt://\", \"/sap/bc/\").",
+            "minItems": 1,
+            "maxItems": 100
+          }
+        },
+        "required": ["uris"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "abap_run_unit_tests",
+      "title": "abap_run_unit_tests",
+      "description": "Runs ABAP Unit Tests for a given set of ABAP objects.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "uris": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of properly encoded file URIs (e.g. replace space with %20) to run tests for. Do NOT use ADT URI (e.g. \"adt://\", \"/sap/bc/\")."
+          }
+        },
+        "required": ["uris"],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "abap_creation-create_object",
+      "title": "abap_creation-create_object",
+      "description": "Executes the creation of the specific ABAP object.TYPICAL WORKFLOW: get_all_creatable_objects -> get_object_type_details -> run_validation -> create_object. CRITICAL: If transport is required then run the ABAP transport tools, especially when the previous validation call mentions that transport is required for the package.Skip transport for $TMP objects.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "The target destination for the object creation"
+          },
+          "objectType": {
+            "type": "string",
+            "description": "The type/category of the object being created"
+          },
+          "objectContent": {
+            "type": "string",
+            "description": "The content of the object to create. This should not have the source content of object."
+          },
+          "transportRequestNumber": {
+            "type": "string",
+            "description": "The transport request number for the creation. REQUIRED: The transport request number to use for the generated objects. You MUST call abap_transport-get tool and ask the user for this before calling the tool. Use empty string for local objects, or provide transport number like UIAK900123."
+          }
+        },
+        "required": ["destination", "objectType", "objectContent", "transportRequestNumber"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Creation result message indicating success or failure"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error details if creation failed (only present on creation errors)"
+          },
+          "filePath": {
+            "type": "string",
+            "description": "URI/file path of the created object (only present on successful creation)"
+          }
+        },
+        "required": ["message"]
+      }
+    },
+    {
+      "name": "abap_generators-generate_objects",
+      "title": "abap_generators-generate_objects",
+      "description": "Validates and generates ABAP RAP objects (tables, CDS views, behavior definitions, service definitions/bindings). Uses abap_transport-get MCP tool to get TRANSPORT number. Creates complete RAP service for Fiori apps and OData clients.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination (e.g., ABC_000_USER_EN). Must match an active connection from list-destinations tool.",
+            "type": "string",
+            "examples": ["ABC_000_USER_EN"]
+          },
+          "generatorId": {
+            "description": "Generator ID from list-generators (e.g., 'x-ui-service', 'webapi-service')",
+            "type": "string",
+            "examples": ["x-ui-service"]
+          },
+          "content": {
+            "description": "JSON content matching get-schema structure",
+            "type": "string",
+            "contentType": "application/json"
+          },
+          "packageName": {
+            "description": "The package in which the generated objects should be created. $TMP if local.",
+            "type": "string",
+            "examples": ["TEST_PACKAGE", "RAP_OBJECTS", "$TMP", "/DMO/EXAMPLE_PKG", "/NAMESPACE/PKG"]
+          },
+          "transportRequestNumber": {
+            "description": "Use abap_transport-get MCP tool to get the transport number.",
+            "type": "string",
+            "examples": ["", "UIAK900123"]
+          },
+          "referencedObjectType": {
+            "description": "Reference object type ('TABL', 'DDLS', 'BDEF', etc.) or empty",
+            "type": "string",
+            "examples": ["TABL", ""]
+          },
+          "referencedObjectName": {
+            "description": "Referenced object name or empty",
+            "type": "string",
+            "examples": ["SCARR", "TADIR", ""]
+          }
+        },
+        "required": [
+          "destination",
+          "generatorId",
+          "content",
+          "packageName",
+          "transportRequestNumber",
+          "referencedObjectType",
+          "referencedObjectName"
+        ]
+      },
+      "outputSchema": {
+        "description": "Result of RAP object generation with separate fields for validation errors, generated objects, and error messages",
+        "type": "object",
+        "properties": {
+          "validationMessages": {
+            "type": "array",
+            "description": "List of validation error messages. Populated when content validation fails.",
+            "items": {
+              "type": "object",
+              "description": "Validation error message",
+              "properties": {
+                "longText": {
+                  "type": "string",
+                  "description": "Detailed error message"
+                },
+                "shortText": {
+                  "type": "string",
+                  "description": "Brief error message"
+                },
+                "severity": {
+                  "type": "string",
+                  "description": "Error severity level (e.g., ERROR, WARNING, INFO)"
+                }
+              }
+            }
+          },
+          "generatedObjects": {
+            "type": "array",
+            "description": "List of successfully generated ABAP objects. Populated when generation succeeds.",
+            "items": {
+              "type": "object",
+              "description": "Generated ABAP object",
+              "properties": {
+                "objectName": {
+                  "type": "string",
+                  "description": "Name of the generated ABAP object"
+                },
+                "objectType": {
+                  "type": "string",
+                  "description": "Type of the generated object (e.g., TABL, DDLS, BDEF, SRVD, SRVB)"
+                }
+              },
+              "required": ["objectName", "objectType"]
+            }
+          },
+          "filePath": {
+            "type": "string",
+            "description": "Filepath for leading object from the list of generated objects (only present on successful generation)"
+          }
+        },
+        "required": ["validationMessages", "generatedObjects"]
+      }
+    },
+    {
+      "name": "abap_list_destinations",
+      "title": "abap_list_destinations",
+      "description": "Get list of available ABAP system destinations",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "abap_generators-list_generators",
+      "title": "abap_generators-list_generators",
+      "description": "Lists available ABAP RAP generators. Read 'description' field to understand what each generator creates. Common: 'x-ui-service' (full RAP + Fiori UI), 'webapi-service' (APIs only). USE WHEN: User requests creating applications, building apps, or developing business solutions (e.g., 'Create [X] management app', 'Build system for [domain]'). CRITICAL: Use generator 'title' field in user communication, not technical IDs. WORKFLOW: list-generators → get-schema → generate-objects",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination ID (e.g., ABC_000_USER_EN). Must match an active connection from list-destinations tool.",
+            "type": "string",
+            "examples": ["ABC_000_USER_EN"]
+          }
+        },
+        "required": ["destination"]
+      },
+      "outputSchema": {
+        "description": "Root object containing list of available ABAP RAP generators",
+        "type": "object",
+        "properties": {
+          "generators": {
+            "type": "array",
+            "description": "List of available ABAP RAP generators",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Human-readable name of the generator"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "Detailed description of what the generator creates"
+                },
+                "id": {
+                  "type": "string",
+                  "description": "Unique identifier for the generator (e.g., 'x-ui-service', 'webapi-service')"
+                },
+                "referencedObjectTypes": {
+                  "type": "string",
+                  "description": "Semicolon-separated list of supported reference object types (e.g., 'TABL;DDLS;BDEF')"
+                }
+              },
+              "required": ["title", "description", "id"]
+            }
+          }
+        },
+        "required": ["generators"]
+      }
+    },
+    {
+      "name": "abap_generators-get_schema",
+      "title": "abap_generators-get_schema",
+      "description": "Retrieves JSON schema for a RAP generator. CRITICAL: Prompt user for package name before calling. If generator has referenceObjectTypes, also prompt for referenced object name and type. CRITICAL NEXT STEP: After getting schema, call abap_transport-get with objectName=<packageName>, objectType='DEVC/K'(skip only if package is '$TMP').",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination (e.g., ABC_000_USER_EN). Must match an active connection from list-destinations tool.",
+            "type": "string",
+            "examples": ["ABC_000_USER_EN"]
+          },
+          "generatorId": {
+            "description": "Generator ID from list-generators (e.g., 'x-ui-service', 'webapi-service')",
+            "type": "string",
+            "examples": ["x-ui-service"]
+          },
+          "packageName": {
+            "description": "Package name ('$TMP' for local, or 'Z_PACKAGE')",
+            "type": "string",
+            "examples": ["$TMP", "Z_MY_PKG", "/DMO/EXAMPLE_PKG", "/NAMESPACE/PKG"]
+          },
+          "referencedObjectType": {
+            "description": "Reference object type ('TABL', 'DDLS', 'BDEF', etc.) or empty",
+            "type": "string",
+            "examples": ["TABL", ""]
+          },
+          "referencedObjectName": {
+            "description": "Referenced object name or empty",
+            "type": "string",
+            "example": ["SCARR", "TADIR", ""]
+          }
+        },
+        "required": ["destination", "generatorId", "packageName", "referencedObjectType", "referencedObjectName"]
+      },
+      "outputSchema": {
+        "description": "Generator schema and reference content for RAP object creation",
+        "type": "object",
+        "properties": {
+          "schema": {
+            "type": "object",
+            "description": "JSON schema object defining the structure and validation rules for generator input content"
+          },
+          "referenceContent": {
+            "type": "object",
+            "description": "Pre-populated content object derived from the referenced object, if provided"
+          }
+        },
+        "required": ["schema", "referenceContent"]
+      }
+    },
+    {
+      "name": "abap_transport-create",
+      "title": "abap_transport-create",
+      "description": "Creates a new Transport Request relevant for given ABAP object. NEVER call this tool directly, always call abap_transport-get before to run validations.This is a tool for Transport Management (version control) in ABAP.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination ID (e.g., ABC_000_USER_EN). Must match an active connection from abap_list_destinations tool.",
+            "type": "string"
+          },
+          "objectName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "objectType": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 8,
+            "examples": ["SRVB/SVB", "CLAS/OC", "INTF/OI"]
+          },
+          "parentObject": {
+            "description": "Parent of a subobject, required for creation of subobjects like funtion includes. Empty most of the times.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "developmentPackage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "transportDescription": {
+            "description": "Short Description for the Transport Request to be created. Should be concise and meaningful similar to first line in a git commit message.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "isCreation": {
+            "description": "Indicates if the ABAP object is being created (true) or modified (false).",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "destination",
+          "objectName",
+          "objectType",
+          "developmentPackage",
+          "transportDescription",
+          "isCreation"
+        ]
+      }
+    },
+    {
+      "name": "abap_transport-get",
+      "title": "abap_transport-get",
+      "description": "Does validations and displays relevant Transport Requests(TR) for the given ABAP object. Should ALWAYS be called for creation of ABAP objects. ALWAYS wait for user to choose either from listed TRs or to create a new TR. NEVER auto select one.This is a tool for Transport Management (version control) in ABAP.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination ID (e.g., ABC_000_USER_EN). Must match an active connection from abap_list_destinations tool.",
+            "type": "string"
+          },
+          "objectName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "objectType": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 8,
+            "examples": ["SRVB/SVB", "CLAS/OC", "INTF/OI"]
+          },
+          "parentObject": {
+            "description": "Parent of a subobject, required for creation of subobjects like funtion includes. Empty most of the times.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "developmentPackage": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "isCreation": {
+            "description": "Indicates if the ABAP object is being created (true) or modified/deleted (false).",
+            "type": "boolean"
+          }
+        },
+        "required": ["destination", "objectName", "objectType", "developmentPackage", "isCreation"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "transportRequests": {
+            "description": "List of relevant Transport Requests (for the ABAP object) where the user is involved.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "transportRequestNumber": {
+                  "description": "Unique Transport Request Number. eg: ABCK012345 where ABC is the ABAP system destination id",
+                  "type": "string"
+                },
+                "shortDescription": {
+                  "description": "Short description for the transport request.",
+                  "type": "string"
+                },
+                "owner": {
+                  "description": "Owner of the transport request.",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "informationMessages": {
+            "description": "Indicates if there is an information or a warning message. Both should be displayed to the user.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "isRecordingRequired": {
+            "description": "Indicates if the ABAP object requires transport recording. Eg: Local objects do not need recording under a transport request.",
+            "type": "boolean"
+          }
+        },
+        "required": ["transportRequests", "informationMessages", "isRecordingRequired"]
+      }
+    },
+    {
+      "name": "abap_transport-unifiedDifference",
+      "title": "abap_transport-unifiedDifference",
+      "description": "Generates a unified diff for all objects in a given transport request.Shows the differences between the current and previous versions of each object in the transport.PAGINATION: This tool processes objects in batches. Use 'next_cursor' from the responseto fetch subsequent batches. Continue until 'status' is 'completed'.Empty batches no changes are normal continue to next_cursor.This is a tool for Transport Management (version control) in ABAP.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "description": "ABAP system destination ID. Must match an active connection from list-destinations tool.",
+            "type": "string"
+          },
+          "transportNumber": {
+            "description": "Transport request number (e.g., UIAK123456).",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20
+          },
+          "cursor": {
+            "description": "Pagination cursor for fetching subsequent batches. Null or empty for the first request. Use next_cursor from previous response to get next batch.",
+            "type": "string"
+          },
+          "pageSize": {
+            "description": "Number of objects to process per batch.",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 40,
+            "default": 40
+          }
+        },
+        "required": ["destination", "transportNumber", "pageSize"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "batchInfo": {
+            "description": "Metadata about the current batch of objects processed.",
+            "type": "object",
+            "properties": {
+              "currentBatchSize": {
+                "description": "Number of objects processed in the current batch.",
+                "type": "integer"
+              },
+              "totalObjects": {
+                "description": "Total number of objects in the transport request.",
+                "type": "integer"
+              },
+              "processedCount": {
+                "description": "Total number of objects processed so far across all batches.",
+                "type": "integer"
+              },
+              "remainingCount": {
+                "description": "Number of objects remaining to be processed in subsequent batches.",
+                "type": "integer"
+              },
+              "batchHasChanges": {
+                "description": "Indicates whether the current batch contained any changes (i.e., non-empty diff).",
+                "type": "boolean"
+              },
+              "status": {
+                "description": "'processing' if more batches remain, 'completed' if this was the last batch.",
+                "type": "string",
+                "enum": ["processing", "completed"]
+              }
+            }
+          },
+          "message": {
+            "description": "Informational message about the batch processing result.",
+            "type": "string"
+          },
+          "nextCursor": {
+            "description": "Cursor value to use for fetching the next batch.",
+            "type": "string"
+          },
+          "diffResult": {
+            "description": "The unified diff string for the current batch of objects. Empty if no changes or if batch is empty.",
+            "type": "string"
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_creation-get_all_creatable_objects",
+      "title": "abap_creation-get_all_creatable_objects",
+      "description": "Get a list of all ABAP creatable objects supported by the destination.USE WHEN & TRIGGER PATTERNS: User requests creating new ABAP objects or RAP objects or listing all creatable ABAP object types. EXAMPLES: 'Create a Service Binding', 'Create an ABAP object', 'Create a RAP object', 'Create a Business Object', 'Create an ABAP Class'. TYPICAL WORKFLOW: get_all_creatable_objects -> get_object_type_details -> run_validation -> create_object.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "Destination ID of the ABAP system"
+          }
+        },
+        "required": ["destination"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "creatableObjects": {
+            "type": "array",
+            "description": "List of all ABAP creatable object types supported by the destination (only present on success)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "The name of the object type"
+                },
+                "objectType": {
+                  "type": "string",
+                  "description": "The object type identifier"
+                }
+              },
+              "required": ["name", "objectType"]
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "User-facing message describing the error (only present on error)"
+          },
+          "error": {
+            "type": "string",
+            "description": "Detailed error message (only present on error)"
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_creation-get_object_type_details",
+      "title": "abap_creation-get_object_type_details",
+      "description": "ALWAYS call get_all_creatable_objects before calling this tool. Get the list of details required for creating a single ABAP object. Call this to decide what more details are required from user. CRITICAL: This MUST be run before validation and creation",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the object to be created"
+          },
+          "description": {
+            "type": "string",
+            "description": "A description of the object"
+          },
+          "objectType": {
+            "type": "string",
+            "description": "The type/category of the object being created"
+          },
+          "destination": {
+            "type": "string",
+            "description": "The target destination for the object creation"
+          }
+        },
+        "required": ["objectType", "destination"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "description": "Array of field definitions required for object creation (only present on success)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "string",
+                  "description": "Field tag/name extracted from bindingPath (e.g., 'packageName', 'name', 'description')"
+                },
+                "required": {
+                  "type": "boolean",
+                  "description": "Whether the field is required (only present if true)"
+                },
+                "maxLength": {
+                  "type": "integer",
+                  "description": "Maximum length constraint for the field (only present if defined)"
+                },
+                "fieldGroup": {
+                  "type": "integer",
+                  "description": "The field group identifier for this field"
+                }
+              },
+              "required": ["tag"]
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "User-facing message describing the error (only present on error)"
+          },
+          "error": {
+            "type": "string",
+            "description": "Detailed error message (only present on error)"
+          }
+        }
+      }
+    },
+    {
+      "name": "abap_creation-run_validation",
+      "title": "abap_creation-run_validation",
+      "description": "ALWAYS call get_object_type_details before calling this tool. Validate input details before create. Errors in this can be corrected by re-entering the details.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "destination": {
+            "type": "string",
+            "description": "The target destination for the object validation"
+          },
+          "objectType": {
+            "type": "string",
+            "description": "The type/category of the object being validated"
+          },
+          "objectContent": {
+            "type": "string",
+            "description": "The content of the object to validate. This should not have the source content of object."
+          }
+        },
+        "required": ["destination", "objectType", "objectContent"],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Validation result message indicating success or failure"
+          },
+          "objectContent": {
+            "type": "string",
+            "description": "The content of the object post validation."
+          },
+          "error": {
+            "type": "string",
+            "description": "Error details if validation failed (only present on validation errors)"
+          }
+        },
+        "required": ["message"]
+      }
+    }
+  ]
+}

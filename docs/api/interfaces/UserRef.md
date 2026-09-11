@@ -1,6 +1,6 @@
 # Interface: UserRef
 
-Defined in: [api/repository.ts:100](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L100)
+Defined in: [api/repository.ts:119](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L119)
 
 A repository/system user.
 
@@ -10,7 +10,7 @@ A repository/system user.
 
 > **id**: `string`
 
-Defined in: [api/repository.ts:101](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L101)
+Defined in: [api/repository.ts:120](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L120)
 
 ***
 
@@ -18,4 +18,4 @@ Defined in: [api/repository.ts:101](https://github.com/arc-mcp/adt-ls/blob/main/
 
 > `optional` **text?**: `string`
 
-Defined in: [api/repository.ts:102](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L102)
+Defined in: [api/repository.ts:121](https://github.com/arc-mcp/adt-ls/blob/main/src/api/repository.ts#L121)

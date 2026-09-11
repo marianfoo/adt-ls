@@ -1,6 +1,6 @@
 # Class: AdtLsDriver
 
-Defined in: [driver.ts:138](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L138)
+Defined in: [driver.ts:140](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L140)
 
 Request + notification channel. LSP document features (didOpen → query →
 didClose) need fire-and-forget notifications, so the navigation layer depends
@@ -16,7 +16,7 @@ on this fuller surface.
 
 > **new AdtLsDriver**(`binPath`, `opts?`): `AdtLsDriver`
 
-Defined in: [driver.ts:150](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L150)
+Defined in: [driver.ts:155](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L155)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [driver.ts:150](https://github.com/arc-mcp/adt-ls/blob/main/src/driv
 
 > `optional` **initializeResult?**: [`AdtLsInitializeResult`](../interfaces/AdtLsInitializeResult.md)
 
-Defined in: [driver.ts:148](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L148)
+Defined in: [driver.ts:153](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L153)
 
 ## Methods
 
@@ -46,7 +46,7 @@ Defined in: [driver.ts:148](https://github.com/arc-mcp/adt-ls/blob/main/src/driv
 
 > **setRequestHandler**(`method`, `handler`): `void`
 
-Defined in: [driver.ts:163](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L163)
+Defined in: [driver.ts:169](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L169)
 
 Register/replace a server→client request handler (before or after start).
 
@@ -70,7 +70,7 @@ Register/replace a server→client request handler (before or after start).
 
 > **start**(`timeoutMs?`): `Promise`\<[`AdtLsInitializeResult`](../interfaces/AdtLsInitializeResult.md)\>
 
-Defined in: [driver.ts:167](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L167)
+Defined in: [driver.ts:173](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L173)
 
 #### Parameters
 
@@ -88,7 +88,7 @@ Defined in: [driver.ts:167](https://github.com/arc-mcp/adt-ls/blob/main/src/driv
 
 > **sendRequest**\<`T`\>(`method`, `params?`): `Promise`\<`T`\>
 
-Defined in: [driver.ts:244](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L244)
+Defined in: [driver.ts:271](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L271)
 
 #### Type Parameters
 
@@ -120,7 +120,7 @@ Defined in: [driver.ts:244](https://github.com/arc-mcp/adt-ls/blob/main/src/driv
 
 > **sendNotification**(`method`, `params?`): `Promise`\<`void`\>
 
-Defined in: [driver.ts:249](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L249)
+Defined in: [driver.ts:276](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L276)
 
 #### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [driver.ts:249](https://github.com/arc-mcp/adt-ls/blob/main/src/driv
 
 > **dispose**(): `Promise`\<`void`\>
 
-Defined in: [driver.ts:254](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L254)
+Defined in: [driver.ts:281](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L281)
 
 #### Returns
 

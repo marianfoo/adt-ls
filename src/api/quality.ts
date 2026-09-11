@@ -83,7 +83,7 @@ export function createQuality(deps: QualityDeps): Quality {
       const lsUri = await lifecycle.resolveAffUri(ref);
       const run = (await withTimeout(
         'runUnitTestsWithCoverage',
-        lsp.sendRequest('adtLs/abapUnit/runTests', { lsUris: [lsUri], measurement: 'COVERAGE' }),
+        lsp.sendRequest('adtLs/abapUnit/runTests', { uris: [lsUri], measurement: 'COVERAGE' }),
         opts.timeoutMs ?? 120_000,
         'the unit-test run did not finish.',
       )) as { result?: unknown; status?: unknown; coverageParams?: unknown };

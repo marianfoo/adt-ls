@@ -6,10 +6,10 @@
 ## Context
 
 The goal is to cover **everything adt-ls offers**, at a **high level**, hiding the
-channel split (ADR-0002), while staying within adt-ls's headless object-type boundary:
-modern ABAP-Cloud / RAP types are served (CLAS, INTF, DDLS, DCLS, SRVB, BDEF, SRVD,
-DDLX, DRAS…); classic types (PROG, TABL, FUGR, DOMA, DTEL, MSAG…) return a placeholder
-("use Eclipse") and are out of scope.
+channel split (ADR-0002), while staying within adt-ls's runtime/backend object-type
+boundary. The original 1.0.1 survey found classic-object placeholders. The 2026-09-11
+1.1.2 survey supersedes that blanket limit: table/program source is now served and the
+creation catalog includes several classic types. Unsupported placeholders remain errors.
 
 ## Decision
 
@@ -24,8 +24,9 @@ createAdtLs({ adtLs?, connection, auth }) → AdtLsClient
                 hover · documentHighlight · checkSyntax · completion
   .quality      runAtc · listAtcVariants · runUnitTestsWithCoverage
   .services     runApplication · serviceBindingDetails · publishServiceBinding
-  .transport    find · create · assign · list · getLockStatus
+  .transport    find · create · assign · list · getLockStatus · getDiff
   .raw          lsp(method, params) · tool(name, args)        // ADR-0002 escape hatches
+  .capabilities()  LSP providers and all current MCP tool schemas
   .health()     { connected, backendLive, adtLsVersion }
   .dispose()
 ```

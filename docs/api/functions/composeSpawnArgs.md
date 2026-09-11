@@ -2,7 +2,7 @@
 
 > **composeSpawnArgs**(`opts`): `string`[]
 
-Defined in: [driver.ts:92](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L92)
+Defined in: [driver.ts:93](https://github.com/arc-mcp/adt-ls/blob/main/src/driver.ts#L93)
 
 Build adt-ls's spawn argv. `extraArgs` (e.g. SNC/JCo JVM flags like
 `-Djco.middleware.snc_lib=…`, or `-consoleLog`) are prepended ahead of adt-ls's own

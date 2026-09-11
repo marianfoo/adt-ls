@@ -31,7 +31,7 @@ describe('lifecycle.activate (native activation/activate)', () => {
       isActivationExecuted: true,
       isGenerationExecuted: true,
       isForceSupported: false,
-      refreshLsUris: ['abap:/x'],
+      refreshFileUris: ['abap:/x'],
       objectDiagnostics: [],
     });
     const res = await lc.activate({ name: 'ZCL_X', objectType: 'CLAS/OC' });
@@ -45,7 +45,12 @@ describe('lifecycle.activate (native activation/activate)', () => {
       refreshedUris: ['abap:/x'],
     });
     // sends the native shape with forceActivation defaulted false
-    expect(getActivateParams()).toMatchObject({ destination: 'ADTLS', references: [], forceActivation: false });
+    expect(getActivateParams()).toEqual({
+      destination: 'ADTLS',
+      fileUris: ['abap:/repotree-v1/ADTLS/x/zcl_x.clas.abap'],
+      references: [],
+      forceActivation: false,
+    });
   });
 
   it('treats nested error-severity diagnostics as failure even if activation "executed"', async () => {

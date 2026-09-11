@@ -1,6 +1,6 @@
 # Interface: InteractiveCallbacks
 
-Defined in: [auth/strategy.ts:82](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L82)
+Defined in: [auth/strategy.ts:115](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L115)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [auth/strategy.ts:82](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > `optional` **user?**: `string`
 
-Defined in: [auth/strategy.ts:88](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L88)
+Defined in: [auth/strategy.ts:121](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L121)
 
 Record the destination user.
 
@@ -18,7 +18,7 @@ Record the destination user.
 
 > **openUrl**(`url`): `void` \| `Promise`\<`void`\>
 
-Defined in: [auth/strategy.ts:84](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L84)
+Defined in: [auth/strategy.ts:117](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L117)
 
 Open the SSO URL (browser). The user completes sign-in there.
 
@@ -38,7 +38,7 @@ Open the SSO URL (browser). The user completes sign-in there.
 
 > `optional` **promptField**(`field`): `Promise`\<`string` \| `undefined`\>
 
-Defined in: [auth/strategy.ts:86](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L86)
+Defined in: [auth/strategy.ts:119](https://github.com/arc-mcp/adt-ls/blob/main/src/auth/strategy.ts#L119)
 
 Prompt for a logon field (e.g. password) when adt-ls asks. Optional.
 

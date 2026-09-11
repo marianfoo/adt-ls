@@ -2,7 +2,7 @@
 
 > **startMcpServer**(`driver`, `opts`): `Promise`\<[`StartMcpServerResult`](../interfaces/StartMcpServerResult.md)\>
 
-Defined in: [channels/mcp-lifecycle.ts:14](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L14)
+Defined in: [channels/mcp-lifecycle.ts:15](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L15)
 
 ## Parameters
 

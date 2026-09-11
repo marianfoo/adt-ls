@@ -2,7 +2,7 @@
 
 > **startMcpServerWithFallback**(`start`, `startPort`, `attempts?`, `onRetry?`): `Promise`\<[`StartMcpServerResult`](../interfaces/StartMcpServerResult.md)\>
 
-Defined in: [channels/mcp-lifecycle.ts:27](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L27)
+Defined in: [channels/mcp-lifecycle.ts:30](https://github.com/arc-mcp/adt-ls/blob/main/src/channels/mcp-lifecycle.ts#L30)
 
 Start adt-ls's MCP server, advancing to the next port when the requested one is bound
 — concurrent instances / leftover binds / parallel tests all contend for the default

@@ -1,6 +1,6 @@
 # Interface: ObjectRef
 
-Defined in: [api/lifecycle.ts:25](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L25)
+Defined in: [api/lifecycle.ts:26](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L26)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [api/lifecycle.ts:25](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > **name**: `string`
 
-Defined in: [api/lifecycle.ts:26](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L26)
+Defined in: [api/lifecycle.ts:27](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L27)
 
 ***
 
@@ -16,6 +16,6 @@ Defined in: [api/lifecycle.ts:26](https://github.com/arc-mcp/adt-ls/blob/main/sr
 
 > **objectType**: `string`
 
-Defined in: [api/lifecycle.ts:28](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L28)
+Defined in: [api/lifecycle.ts:29](https://github.com/arc-mcp/adt-ls/blob/main/src/api/lifecycle.ts#L29)
 
 ADT type code, e.g. "CLAS/OC", "INTF/OI", "DDLS/DF".

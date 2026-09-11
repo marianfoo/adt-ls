@@ -17,7 +17,7 @@
  * Full guide: {@link https://github.com/arc-mcp/adt-ls/blob/main/docs/usage.md | docs/usage.md}.
  */
 export { createAdtLs } from './client.js';
-export type { AdtLsClient, ConnectionOptions, CreateAdtLsOptions, HealthInfo } from './client.js';
+export type { AdtLsCapabilities, AdtLsClient, ConnectionOptions, CreateAdtLsOptions, HealthInfo } from './client.js';
 
 // Auth strategies (ADR-0003)
 export { basic, bearer, clientCert, custom, interactive } from './auth/strategy.js';
@@ -41,12 +41,15 @@ export {
   parseAdtLsVersion,
 } from './version.js';
 
+export type { ParsedAdtLsVersion } from './version.js';
+
 // Federated MCP result unwrap (for consumers calling raw.tool directly)
 export { parseFederated } from './channels/federated.js';
+export type { McpTool } from './channels/mcp-federation.js';
 export type { FederatedResult } from './channels/federated.js';
 
 // Result / argument types + the per-namespace surfaces
-export type { ActivateResult, CreateResult, CreationField, ObjectRef } from './api/lifecycle.js';
+export type { ActivateResult, CreateResult, CreationField, ObjectRef, TransportDiffPage } from './api/lifecycle.js';
 export {
   applyTextEdits,
   decodeSemanticTokens,
